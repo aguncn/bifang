@@ -15,9 +15,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.urls import re_path
 from django.urls import include
 from account import jwt_views
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 from .views import index
+
+schema_view = get_schema_view(
+   openapi.Info(
+      title="毕方(Bifang)自动化部署平台 API",
+      default_version='v1',
+      description="毕方(Bifang)自动化部署平台，引导你进入devops开发的领域。",
+      terms_of_service="https://github.com/aguncn/bifang",
+      contact=openapi.Contact(email="aguncn@163.com"),
+      license=openapi.License(name="BSD License"),
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
     path('', index, name='index'),
@@ -26,6 +43,12 @@ urlpatterns = [
     path('jwt_auth/', jwt_views.obtain_jwt_token),
     path('refresh_jwt_auth/', jwt_views.refresh_jwt_token),
     path('verify_jwt_auth/', jwt_views.verity_jwt_token),
+]
+
+urlpatterns += [
+   re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+   path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+   path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 
 urlpatterns += [
