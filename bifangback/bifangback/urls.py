@@ -54,6 +54,7 @@ urlpatterns += [
 urlpatterns += [
     path('account/', include('account.urls')),
     path('app/', include('app.urls')),
+    path('cmdb/', include('cmdb.urls')),
     path('deploy/', include('deploy.urls')),
     path('env/', include('env.urls')),
     path('log/', include('log.urls')),
