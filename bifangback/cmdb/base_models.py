@@ -1,4 +1,5 @@
 from django.db import models
+from simple_history.models import HistoricalRecords
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -20,6 +21,7 @@ class BaseModel(models.Model):
     update_date = models.DateTimeField(auto_now=True)
     create_date = models.DateTimeField(auto_now_add=True)
     base_status = models.BooleanField(default=True)
+    history = HistoricalRecords(inherit=True)
 
     @property
     def username(self):

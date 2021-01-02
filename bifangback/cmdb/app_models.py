@@ -9,9 +9,10 @@ User = get_user_model()
 
 # 应用服务，相当于一个可独立部署的微服务
 class App(BaseModel):
+    cn_name = models.CharField(max_length=255, verbose_name="中文名")
     app_id = models.IntegerField(default=0, verbose_name="应用编号")
     git = models.ForeignKey(GitTb,
-                            related_name="ra_deploy_app",
+                            related_name="ra_app",
                             blank=True,
                             null=True,
                             on_delete=models.SET_NULL,

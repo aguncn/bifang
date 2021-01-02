@@ -4,10 +4,12 @@ from .base_models import BaseModel
 
 # Sat Api地址，不同环境，可能需要不同的Salt Master隔离
 class SaltTb(BaseModel):
-    salt_url = models.URLField(verbose_name="Git API地址")
-    username = models.CharField(max_length=64, verbose_name="Git API用户")
-    password = models.CharField(max_length=64, verbose_name="Git API密码")
-    token = models.CharField(max_length=64, verbose_name="Git API认证token")
+    salt_url = models.URLField(verbose_name="Salt API地址")
+    salt_user = models.CharField(max_length=64, verbose_name="Salt API用户")
+    salt_pwd = models.CharField(max_length=64, verbose_name="Salt API密码")
+    salt_token = models.CharField(max_length=64, default='no_token', verbose_name="Salt API认证token")
+    is_secure = models.BooleanField(default=True, verbose_name="Salt启用安全")
+    salt_ver = models.CharField(max_length=12, default='2019.3010', verbose_name="Salt版本")
 
     class Meta:
         db_table = 'SaltTb'
