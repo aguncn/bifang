@@ -1,7 +1,6 @@
 from django.urls import path
-
-app_name = "release"
+from . import views
 
 urlpatterns = [
-
+    path('list/', views.ReleaseListView.as_view(), name='list'),
 ]
