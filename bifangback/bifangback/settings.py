@@ -149,4 +149,25 @@ JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
 }
 
-SIMPLE_HISTORY_REVERT_DISABLED=True
+# Django的redis缓存配置，性能要求高和有持久化要求时，可开启
+# CACHES = {
+#    "default": {
+#        "BACKEND": "django_redis.cache.RedisCache",
+#        "LOCATION": "redis://127.0.0.1:6379/1",
+#        "OPTIONS": {
+#            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#        }
+#    }
+# }
+
+# 邮件发送到控制台，而不发送到实际的邮箱
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# 正式使用时的邮箱设置
+# EMAIL_USE_SSL = True
+# EMAIL_HOST = 'smtp.163.com'
+# EMAIL_PORT = 465
+# EMAIL_HOST_USER = 'aguncn@163.com'
+# EMAIL_HOST_PASSWORD = 'xxxxxxx'
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+SIMPLE_HISTORY_REVERT_DISABLED = True

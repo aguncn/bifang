@@ -9,6 +9,7 @@ from rest_framework_jwt.views import ObtainJSONWebToken
 from rest_framework_jwt.views import RefreshJSONWebToken
 from rest_framework_jwt.views import VerifyJSONWebToken
 from django.contrib.auth import get_user_model
+from drf_yasg.utils import swagger_auto_schema
 
 User = get_user_model()
 
@@ -63,6 +64,17 @@ def jwt_response_payload_error_handler(serializer, requst=None):
 
 # jwt的返回，由JSONWebTokenAPIView，自定义它的调用和返回即可
 class CustomWebTokenAPIView(JSONWebTokenAPIView):
+    """
+    用户token验证登陆
+
+    参数:
+    username
+    password
+    """
+
+    @swagger_auto_schema(
+        tags=['Users']
+    )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
