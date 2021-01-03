@@ -8,3 +8,4 @@ from .project_models import Project
 from .release_models import ReleaseStatus, Release
 from .salt_models import SaltTb
 from .server_models import Server
+from .permission_models import Action, Permission

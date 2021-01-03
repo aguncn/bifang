@@ -6,18 +6,6 @@ from .env_models import Env
 
 User = get_user_model()
 
-IS_INC_TOT_CHOICES = (
-    ('TOT', r'增量'),
-    ('INC', r'全量'),
-)
-
-DEPLOY_TYPE_CHOICES = (
-    ('deployall', r'发布所有'),
-    ('deploypkg', r'发布程序'),
-    ('deploycfg', r'发布配置'),
-    ('rollback', r'回滚'),
-)
-
 
 class ReleaseStatus(BaseModel):
     # Create, Build, Ready, Ongoing,  Success, Failed
@@ -53,11 +41,11 @@ class Release(BaseModel):
                                   blank=True,
                                   null=True)
     salt_path = models.CharField(max_length=255,
-                                 verbose_name="Salt APP路径")
+                                 verbose_name="执行脚本路径")
     nginx_url = models.URLField(default=None,
                                 blank=True,
                                 null=True,
-                                verbose_name="Nginx路径")
+                                verbose_name="制品库路径")
     deploy_status = models.ForeignKey(ReleaseStatus,
                                       related_name='ra_release',
                                       blank=True,

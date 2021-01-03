@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+# 基础虚类，所有Model的共同字段，其它model由此继承，包括记录orm操作历史的history字段。
 class BaseModel(models.Model):
     name = models.CharField(max_length=100,
                             unique=True,

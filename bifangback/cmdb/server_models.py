@@ -38,5 +38,6 @@ class Server(BaseModel):
 
     class Meta:
         db_table = 'Server'
+        unique_together = ('ip', 'port')  # 一个服务器上，部署多个应用，保证Ip加port的唯一性。
         verbose_name = 'Server服务器'
         verbose_name_plural = 'Server服务器'
