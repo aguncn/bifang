@@ -54,10 +54,12 @@ urlpatterns += [
 urlpatterns += [
     path('account/', include('account.urls')),
     path('app/', include('app.urls')),
+    path('project/', include('project.urls')),
     path('cmdb/', include('cmdb.urls')),
     path('deploy/', include('deploy.urls')),
     path('env/', include('env.urls')),
     path('log/', include('log.urls')),
     path('release/', include('release.urls')),
     path('server/', include('server.urls')),
+    path('permission/', include('permission.urls')),
 ]

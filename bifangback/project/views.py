@@ -1,18 +1,18 @@
-from cmdb.models import App
-from .serializers import AppSerializer
+from cmdb.models import Project
+from .serializers import ProjectSerializer
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import CreateAPIView
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.generics import UpdateAPIView
 from rest_framework.generics import DestroyAPIView
 from utils.ret_code import *
-from .filters import AppFilter
+from .filters import ProjectFilter
 
 
-class AppListView(ListAPIView):
-    queryset = App.objects.all()
-    serializer_class = AppSerializer
-    filter_class = AppFilter
+class ProjectListView(ListAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    filter_class = ProjectFilter
 
     def get(self, request, *args, **kwargs):
         res = super().get(self, request, *args, **kwargs)
@@ -20,8 +20,8 @@ class AppListView(ListAPIView):
         return render_json(return_dict)
 
 
-class AppCreateView(CreateAPIView):
-    serializer_class = AppSerializer
+class ProjectCreateView(CreateAPIView):
+    serializer_class = ProjectSerializer
 
     def post(self, request):
         req_data = request.data
@@ -29,22 +29,22 @@ class AppCreateView(CreateAPIView):
         data['name'] = req_data['name']
         data['description'] = req_data['description']
         data['cn_name'] = req_data['cn_name']
-        data['app_id'] = req_data['app_id']
+        data['project_id'] = req_data['project_id']
         # 从drf的request中获取用户(对django的request作了扩展的)
         data['create_user'] = request.user.id
-        serializer = AppSerializer(data=data)
+        serializer = ProjectSerializer(data=data)
         if serializer.is_valid() is False:
             return_dict = build_ret_data(THROW_EXP, str(serializer.errors))
             return render_json(return_dict)
         data = serializer.validated_data
-        App.objects.create(**data)
+        Project.objects.create(**data)
         return_dict = build_ret_data(OP_SUCCESS, serializer.data)
         return render_json(return_dict)
 
 
-class AppRetrieveView(RetrieveAPIView):
-    queryset = App.objects.all()
-    serializer_class = AppSerializer
+class ProjectRetrieveView(RetrieveAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
 
     def get(self, request, *args, **kwargs):
         res = super().get(self, request, *args, **kwargs)
@@ -52,12 +52,12 @@ class AppRetrieveView(RetrieveAPIView):
         return render_json(return_dict)
 
 
-class AppUpdateView(UpdateAPIView):
+class ProjectUpdateView(UpdateAPIView):
     """
     url获取pk,修改时指定序列化类和query_set
     """
-    serializer_class = AppSerializer
-    queryset = App.objects.all()
+    serializer_class = ProjectSerializer
+    queryset = Project.objects.all()
 
     # 前端使用patch方法，到达这里
     def patch(self, request, *args, **kwargs):
@@ -66,15 +66,15 @@ class AppUpdateView(UpdateAPIView):
         name = req_data['name']
         cn_name = req_data['cn_name']
         description = req_data['description']
-        app_id = req_data['app_id']
+        project_id = req_data['project_id']
         # 这样更新，可以把那些update_date字段自动更新，而使用filter().update()则是不会
         try:
-            _a = App.objects.get(id=pid)
-            _a.name = name
-            _a.cn_name = cn_name
-            _a.description = description
-            _a.app_id = app_id
-            _a.save()
+            _p = Project.objects.get(id=pid)
+            _p.name = name
+            _p.cn_name = cn_name
+            _p.description = description
+            _p.project_id = project_id
+            _p.save()
             return_dict = build_ret_data(OP_SUCCESS, str(req_data))
             return render_json(return_dict)
         except Exception as e:
@@ -83,8 +83,8 @@ class AppUpdateView(UpdateAPIView):
             return render_json(return_dict)
 
 
-class AppDestroyView(DestroyAPIView):
-    queryset = App.objects.all()
+class ProjectDestroyView(DestroyAPIView):
+    queryset = Project.objects.all()
 
     def destroy(self, request, *args, **kwargs):
         try:
