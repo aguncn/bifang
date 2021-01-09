@@ -1,7 +1,10 @@
 import request from '@/utils/request'
 
+const BASE_URL = process.env.VUE_APP_API_BASE_URL
+const REAL_URL = process.env.VUE_APP_API_REAL_URL
+
 const userApi = {
-  Login: '/auth/login',
+  Login: `${REAL_URL}/jwt_auth/`,
   Logout: '/auth/logout',
   ForgePassword: '/auth/forge-password',
   Register: '/auth/register',
