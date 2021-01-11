@@ -1,9 +1,7 @@
 from django.db import models
 from .base_models import BaseModel
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from .app_models import App
-
-User = get_user_model()
 
 
 # 创建编译发布单， 部署发布单两个大的权限

@@ -7,8 +7,8 @@ class SaltTb(BaseModel):
     salt_url = models.URLField(verbose_name="Salt API地址")
     salt_user = models.CharField(max_length=64, verbose_name="Salt API用户")
     salt_pwd = models.CharField(max_length=64, verbose_name="Salt API密码")
-    salt_token = models.CharField(max_length=64, default='no_token', verbose_name="Salt API认证token")
-    is_secure = models.BooleanField(default=True, verbose_name="Salt启用安全")
+    eauth = models.CharField(max_length=64, default='pam', verbose_name="Salt API用户认证")
+    trust_host = models.BooleanField(default=True, verbose_name="Salt API安全认证")
     salt_ver = models.CharField(max_length=12, default='2019.3010', verbose_name="Salt版本")
 
     class Meta:

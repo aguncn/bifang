@@ -1,21 +1,30 @@
-import gitlab
-import time
+import os
+import django
 
-git_url = 'http://192.168.1.211:8180'
-git_access_token = 'RbCcuLssPekyVgy24Nui'
-gl = gitlab.Gitlab(git_url, private_token=git_access_token)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bifangback.settings")
+django.setup()
 
-project_id = 1
-project = gl.projects.get(project_id)
+from cmdb.models import App
+from utils.gitlab import gitlab_trigger
 
-app_name = 'go-demo'
-release = '202101090345XF'
+app = App.objects.get(name='go-demo')
 
-pipeline = project.trigger_pipeline('master',
-                                    '559fbd3381bc39100811bd00e499a7',
-                                    variables={"RELEASE": release,
-                                               'APP_NAME': app_name})
-while pipeline.finished_at is None:
-    pipeline.refresh()
-    print(pipeline)
-    time.sleep(1)
+git_url = app.git.git_url
+git_access_token = app.git.git_token
+git_trigger_token = app.git_trigger_token
+project_id = app.git_app_id
+
+app_name = app.name
+release = '202101090245XF'
+git_branch = 'master'
+
+
+job_pipeline = gitlab_trigger(git_url, git_access_token,
+                              project_id, app_name, release,
+                              git_branch, git_trigger_token)
+print(job_pipeline)
+print(job_pipeline.id)
+print(job_pipeline.status)
+print(job_pipeline.ref)
+print(job_pipeline.web_url)
+print(job_pipeline.duration)

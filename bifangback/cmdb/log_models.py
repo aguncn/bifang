@@ -1,11 +1,8 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 from .base_models import BaseModel
 from .env_models import Env
 from .release_models import Release, ReleaseStatus
 from .server_models import Server
-
-User = get_user_model()
 
 OP_CHOICES = (
     ('deploy', '部署'),

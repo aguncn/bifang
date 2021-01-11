@@ -5,8 +5,6 @@ from .base_models import BaseModel
 # Git代码仓库地址，有的公司可能有多个Git仓库
 class GitTb(BaseModel):
     git_url = models.URLField(verbose_name="Git API地址")
-    git_user = models.CharField(max_length=64, verbose_name="Git API用户")
-    git_pwd = models.CharField(max_length=64, verbose_name="Git API密码")
     git_token = models.CharField(max_length=64, default='no_token', verbose_name="Git API认证token")
     git_ver = models.CharField(max_length=16, default='12.10', verbose_name="Git版本")
 

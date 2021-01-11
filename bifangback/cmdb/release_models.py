@@ -1,10 +1,7 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 from .base_models import BaseModel
 from .app_models import App
 from .env_models import Env
-
-User = get_user_model()
 
 
 class ReleaseStatus(BaseModel):

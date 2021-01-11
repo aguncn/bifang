@@ -1,8 +1,6 @@
 from django.db import models
 from simple_history.models import HistoricalRecords
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from django.contrib.auth.models import User
 
 
 # 基础虚类，所有Model的共同字段，其它model由此继承，包括记录orm操作历史的history字段。

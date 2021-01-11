@@ -50,9 +50,8 @@ class Command(BaseCommand):
         GitTb.objects.create(name='MainGit',
                              description='主要git库',
                              create_user=create_user,
-                             git_url='http://192.168.1.211:8090/',
-                             git_user='git_user',
-                             git_pwd='git_pwd')
+                             git_url='http://192.168.1.211:8180',
+                             git_token='RbCcuLssPekyVgy24Nui')
         self.stdout.write('GitTb重建完成。')
 
     # 新建一个SaltApi
@@ -63,8 +62,10 @@ class Command(BaseCommand):
                               description='主要SaltApi',
                               create_user=create_user,
                               salt_url='http://192.168.1.211:8080/',
-                              salt_user='git_user',
-                              salt_pwd='git_pwd')
+                              salt_user='saltapi',
+                              salt_pwd='saltapipwd',
+                              eauth='pam',
+                              trust_host=True)
         self.stdout.write('SaltTb重建完成。')
 
     # 新建一个环境
@@ -99,8 +100,8 @@ class Command(BaseCommand):
     def add_app(self):
         App.objects.all().delete()
         create_user = User.objects.get(username=username)
-        app_name_list = ['User-Login', 'Service-724', 'Store-Address', 'Card-Adjust', 'Support-Admin']
-        app_cn_name_list = ['用户登陆', '全天服务', '库存地址', '购物车调配', '客服后管']
+        app_name_list = ['User-Login', 'Service-724', 'Store-Address', 'Card-Adjust', 'Support-Admin', 'go-demo']
+        app_cn_name_list = ['用户登陆', '全天服务', '库存地址', '购物车调配', '客服后管', '毕方演示go示例']
         for app_name, app_cn_name in zip(app_name_list, app_cn_name_list):
             git = GitTb.objects.order_by('?').first()
             project = Project.objects.order_by('?').first()
@@ -110,8 +111,11 @@ class Command(BaseCommand):
                                create_user=create_user,
                                app_id=random.randint(10000, 100000),
                                git=git,
-                               git_repo=app_name,
+                               git_app_id=1,
+                               git_trigger_token='559fbd3381bc39100811bd00e499a7',
                                project=project,
+                               build_script='build.sh',
+                               deploy_script='bifang.sh',
                                service_username='sky',
                                service_group='operate')
         self.stdout.write('App重建完成。')
