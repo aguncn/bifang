@@ -61,7 +61,7 @@ class Command(BaseCommand):
         SaltTb.objects.create(name='MainSalt',
                               description='主要SaltApi',
                               create_user=create_user,
-                              salt_url='http://192.168.1.211:8080/',
+                              salt_url='https://192.168.1.211:8000',
                               salt_user='saltapi',
                               salt_pwd='saltapipwd',
                               eauth='pam',
@@ -114,8 +114,8 @@ class Command(BaseCommand):
                                git_app_id=1,
                                git_trigger_token='559fbd3381bc39100811bd00e499a7',
                                project=project,
-                               build_script='build.sh',
-                               deploy_script='bifang.sh',
+                               build_script='script/build.sh',
+                               deploy_script='script/bifang.sh',
                                service_username='sky',
                                service_group='operate')
         self.stdout.write('App重建完成。')
