@@ -34,9 +34,8 @@ class Release(BaseModel):
     git_branch = models.CharField(max_length=255,
                                   blank=True,
                                   null=True)
-    git_commit = models.CharField(max_length=255,
-                                  blank=True,
-                                  null=True)
+    pipeline_id = models.IntegerField(default=0)
+    pipeline_url = models.URLField(default='http://www.demo.com')
     salt_path = models.CharField(max_length=255,
                                  verbose_name="执行脚本路径")
     nginx_url = models.URLField(default=None,

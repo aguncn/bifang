@@ -19,8 +19,17 @@ def gitlab_trigger(git_url, git_access_token,
                                                    'BUILD_SCRIPT': build_script,
                                                    'DEPLOY_SCRIPT': deploy_script,
                                                    'FILE_UP_SERVER': file_up_server})
-    while pipeline.finished_at is None:
-        pipeline.refresh()
-        time.sleep(1)
+    return pipeline
+
+
+def pipeline_status(git_url, git_access_token, project_id, pipeline_id):
+    git_url = git_url
+    git_access_token = git_access_token
+    gl = gitlab.Gitlab(git_url, private_token=git_access_token)
+
+    project = gl.projects.get(project_id)
+    pipeline = project.pipelines.get(pipeline_id)
+    time.sleep(1)
+    pipeline.refresh()
     return pipeline
 

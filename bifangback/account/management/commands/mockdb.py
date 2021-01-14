@@ -140,7 +140,7 @@ class Command(BaseCommand):
     def add_release_status(self):
         ReleaseStatus.objects.all().delete()
         create_user = User.objects.get(username=username)
-        status_list = ['Create', 'Build', 'Ready', 'Ongoing', 'Success', 'Failed']
+        status_list = ['Create', 'Building', 'Build', 'Ready', 'Ongoing', 'Success', 'Failed']
         status_value_list = ['创建', '编译', '就绪', '部署中', '成功', '失败']
         for status_name, status_value_name in zip(status_list, status_value_list):
             ReleaseStatus.objects.create(name=status_name,
@@ -166,7 +166,8 @@ class Command(BaseCommand):
                                    app=app,
                                    env=env,
                                    git_branch='master',
-                                   git_commit='449df93bb',
+                                   pipeline_id=0,
+                                   pipeline_url='http://www.demo.com',
                                    salt_path='salt://a/b/c',
                                    nginx_url='http://192.168.1.213:8080/a/b/c',
                                    deploy_status=deploy_status)
