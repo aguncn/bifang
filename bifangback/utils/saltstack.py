@@ -2,7 +2,9 @@ from saltypie import Salt
 
 
 def salt_cmd(salt_url, salt_user, salt_pwd, eauth,
-             target_list, script_url, release, env, cmd):
+             target_list, script_url,
+             app, release, env, action,
+             zip_package_name, zip_package_url, service_port):
 
     salt = Salt(
         url=salt_url,
@@ -12,7 +14,10 @@ def salt_cmd(salt_url, salt_user, salt_pwd, eauth,
         eauth=eauth
     )
 
-    arg_list = [script_url, '{} {} {}'.format(release, env, cmd)]
+    arg_list = [script_url, '{} {} {} {} {} {} {}'.format(app, release, env, action,
+                                                          zip_package_name, zip_package_url,
+                                                          service_port)]
+    # print(arg_list)
     exe_return = salt.execute(
         client=Salt.CLIENT_LOCAL,
         target=target_list,

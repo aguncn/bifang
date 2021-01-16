@@ -6,3 +6,18 @@ class ReleaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Release
         fields = '__all__'
+
+
+class DeploySerializer(serializers.Serializer):
+    app_name = serializers.CharField(max_length=100)
+    release_name = serializers.CharField(max_length=64)
+    env_name = serializers.CharField(max_length=16)
+    deploy_type = serializers.CharField(max_length=64)
+    op_type = serializers.CharField(max_length=64)
+    target_list = serializers.ListField(required=True, child=serializers.CharField(),)
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass

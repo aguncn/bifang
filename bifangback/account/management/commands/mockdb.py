@@ -170,7 +170,8 @@ class Command(BaseCommand):
                                    git_branch='master',
                                    pipeline_id=0,
                                    pipeline_url='http://www.demo.com',
-                                   zip_package_url='http://192.168.1.213:8080/a/b/c',
+                                   deploy_script_url='http://192.168.1.213:8080/a/b/bifang.sh',
+                                   zip_package_url='http://192.168.1.213:8080/a/b/go-demo.zip',
                                    deploy_status=deploy_status)
         self.stdout.write('Release重建完成。')
 

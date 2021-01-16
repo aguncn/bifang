@@ -36,6 +36,10 @@ class Release(BaseModel):
                                   null=True)
     pipeline_id = models.IntegerField(default=0)
     pipeline_url = models.URLField(default='http://www.demo.com')
+    deploy_script_url = models.URLField(default=None,
+                                        blank=True,
+                                        null=True,
+                                        verbose_name="部署脚本路径")
     zip_package_url = models.URLField(default=None,
                                       blank=True,
                                       null=True,
