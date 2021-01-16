@@ -36,12 +36,10 @@ class Release(BaseModel):
                                   null=True)
     pipeline_id = models.IntegerField(default=0)
     pipeline_url = models.URLField(default='http://www.demo.com')
-    salt_path = models.CharField(max_length=255,
-                                 verbose_name="执行脚本路径")
-    nginx_url = models.URLField(default=None,
-                                blank=True,
-                                null=True,
-                                verbose_name="制品库路径")
+    zip_package_url = models.URLField(default=None,
+                                      blank=True,
+                                      null=True,
+                                      verbose_name="压缩制品库路径")
     deploy_status = models.ForeignKey(ReleaseStatus,
                                       related_name='ra_release',
                                       blank=True,

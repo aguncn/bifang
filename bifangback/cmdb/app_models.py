@@ -14,7 +14,7 @@ class App(BaseModel):
                             null=True,
                             on_delete=models.SET_NULL,
                             verbose_name="Git实例")
-    git_app_id = models.IntegerField(verbose_name="Git应用ID")
+    git_app_id = models.IntegerField(default=0, verbose_name="Git应用ID")
     git_trigger_token = models.CharField(max_length=64,
                                          blank=True,
                                          null=True,
@@ -27,6 +27,8 @@ class App(BaseModel):
                                 verbose_name='项目')
     build_script = models.CharField(max_length=255,default='build.sh', verbose_name="编译脚本名")
     deploy_script = models.CharField(max_length=255, default='bifang.sh', verbose_name="部署脚本名")
+    zip_package_name = models.CharField(max_length=255, default='demo.zio', verbose_name="应用压缩包")
+    service_port = models.IntegerField(default=0, verbose_name="服务端口")
     service_username = models.CharField(max_length=24,
                                         blank=True,
                                         null=True,

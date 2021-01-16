@@ -116,6 +116,8 @@ class Command(BaseCommand):
                                project=project,
                                build_script='script/build.sh',
                                deploy_script='script/bifang.sh',
+                               zip_package_name='go-demo.tar.gz',
+                               service_port=9090,
                                service_username='sky',
                                service_group='operate')
         self.stdout.write('App重建完成。')
@@ -168,8 +170,7 @@ class Command(BaseCommand):
                                    git_branch='master',
                                    pipeline_id=0,
                                    pipeline_url='http://www.demo.com',
-                                   salt_path='salt://a/b/c',
-                                   nginx_url='http://192.168.1.213:8080/a/b/c',
+                                   zip_package_url='http://192.168.1.213:8080/a/b/c',
                                    deploy_status=deploy_status)
         self.stdout.write('Release重建完成。')
 

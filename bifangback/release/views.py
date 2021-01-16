@@ -6,6 +6,7 @@ from cmdb.models import Release
 from cmdb.models import ReleaseStatus
 from .serializers import ReleaseSerializer
 from .serializers import ReleaseBuildSerializer
+from .serializers import ReleaseBuildStatusSerializer
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from utils.ret_code import *
@@ -33,17 +34,18 @@ class ReleaseBuildView(APIView):
     git_branch
     """
     def post(self, request):
-        req_data = request.data
-        ser_data = ReleaseBuildSerializer(req_data)
-        if ser_data.is_valid():
+        # 序列化前端数据，并判断是否有效
+        serializer = ReleaseBuildSerializer(data=request.data)
+        if serializer.is_valid():
+            ser_data = serializer.validated_data
             app_name = ser_data['app_name']
+            release = ser_data['release_name']
+            git_branch = ser_data['git_branch']
             app = App.objects.get(name=app_name)
             git_url = app.git.git_url
             git_access_token = app.git.git_token
             git_trigger_token = app.git_trigger_token
             project_id = app.git_app_id
-            release = ser_data['release_name']
-            git_branch = ser_data['git_branch']
             build_script = app.build_script
             deploy_script = app.deploy_script
             file_up_server = settings.FILE_UP_SERVER
@@ -58,7 +60,7 @@ class ReleaseBuildView(APIView):
                                                         pipeline_url=pipeline.web_url,
                                                         deploy_status=deploy_status)
 
-            return_dict = build_ret_data(OP_SUCCESS, pipeline.id)
+            return_dict = build_ret_data(OP_SUCCESS, 'gitlab ci pipeline id: {}'.format(pipeline.id))
             return render_json(return_dict)
         else:
             return_dict = build_ret_data(THROW_EXP, '序列化条件不满足')
@@ -74,11 +76,14 @@ class ReleaseBuildStatusView(APIView):
     release_name
     """
     def post(self, request):
-        req_data = request.data
-        ser_data = ReleaseBuildSerializer(req_data)
-        if ser_data.is_valid():
+        # 序列化前端数据，并判断是否有效
+        # 在获取状态时，前端可以不传pipeline id过来，因为这个id可以通过数据库获取
+        serializer = ReleaseBuildStatusSerializer(data=request.data)
+        if serializer.is_valid():
+            ser_data = serializer.validated_data
             app_name = ser_data['app_name']
             app = App.objects.get(name=app_name)
+            zip_package_name = app.zip_package_name
             git_url = app.git.git_url
             git_access_token = app.git.git_token
             project_id = app.git_app_id
@@ -93,6 +98,11 @@ class ReleaseBuildStatusView(APIView):
                 return_dict = build_ret_data(OP_SUCCESS, 'error')
                 return render_json(return_dict)
             else:
+                file_down_server = settings.FILE_DOWN_SERVER
+                zip_package_url = '{}/{}/{}/{}'.format(file_down_server, app_name, release, zip_package_name)
+                deploy_status = ReleaseStatus.objects.get(name='Build')
+                Release.objects.filter(name=release).update(deploy_status=deploy_status,
+                                                            zip_package_url=zip_package_url)
                 return_dict = build_ret_data(OP_SUCCESS, 'success')
                 return render_json(return_dict)
         else:
