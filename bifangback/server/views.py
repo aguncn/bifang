@@ -24,11 +24,24 @@ class ServerCreateView(CreateAPIView):
     serializer_class = ServerSerializer
 
     def post(self, request):
+        """
+        {
+            "name": "192.168.1.159-8080",
+            "description": "这是一个服务器",
+            "ip": "192.168.1.159",
+            "port": 8080,
+            "app_id": 1,
+            "system_type": "LINUX"
+        }
+        """
         req_data = request.data
         data = dict()
-        name = req_data['name']
-        ip = req_data['ip']
-        port = req_data['port']
+        data['name'] = req_data['name']
+        data['description'] = req_data['description']
+        data['ip'] = req_data['ip']
+        data['port'] = req_data['port']
+        data['app'] = req_data['app_id']
+        data['system_type'] = req_data['system_type']
         # 从drf的request中获取用户(对django的request作了扩展的)
         data['create_user'] = request.user.id
         serializer = ServerSerializer(data=data)

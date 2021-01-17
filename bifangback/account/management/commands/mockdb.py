@@ -183,10 +183,14 @@ class Command(BaseCommand):
                               description='创建编译权限',
                               create_user=create_user,
                               action_id=100)
-        Action.objects.create(name='Deploy',
-                              description='环境部署权限',
+        Action.objects.create(name='Env',
+                              description='环境权限',
                               create_user=create_user,
                               action_id=1000)
+        Action.objects.create(name='Deploy',
+                              description='部署权限',
+                              create_user=create_user,
+                              action_id=10000)
         self.stdout.write('Action重建完成。')
 
     # 新建demo应用权限用户表

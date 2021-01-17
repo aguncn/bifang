@@ -28,10 +28,12 @@ class UserRegisterView(APIView):
     用户注册
 
     参数:
-    username
-    password
-    passwordConfirm
-    email
+    {
+        "username": "first",
+        "password": "passwd",
+        "passwordConfirm": "passwd",
+        "email": "dem@sa.com"
+    }
     """
     authentication_classes = []
     permission_classes = []

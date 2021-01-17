@@ -10,6 +10,13 @@ class ReleaseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ReleaseCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Release
+        # fields = '__all__'
+        fields = ['name', 'description', 'git_branch', 'app', 'deploy_status', 'create_user']
+
+
 class ReleaseBuildSerializer(serializers.Serializer):
     app_name = serializers.CharField(max_length=100)
     release_name = serializers.CharField(max_length=64)

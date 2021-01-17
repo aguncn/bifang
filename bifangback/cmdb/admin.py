@@ -8,16 +8,16 @@ admin.site.site_title = '登录毕方(BiFang)系统后台'
 admin.site.index_title = '毕方(BiFang)后台管理'
 
 
-class EnvHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ["id", "name"]
+class GitTbHistoryAdmin(SimpleHistoryAdmin):
+    list_display = ['id', 'name', 'git_url', 'git_ver']
     history_list_display = ["status"]
-    search_fields = ['name', 'user__username']
+    search_fields = ['name', 'git_url']
 
 
-admin.site.register(GitTb, SimpleHistoryAdmin)
+admin.site.register(GitTb, GitTbHistoryAdmin)
 admin.site.register(SaltTb, SimpleHistoryAdmin)
 admin.site.register(Env, SimpleHistoryAdmin)
-admin.site.register(Project)
+admin.site.register(Project, SimpleHistoryAdmin)
 admin.site.register(App)
 admin.site.register(Server)
 admin.site.register(ReleaseStatus)

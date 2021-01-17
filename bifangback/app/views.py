@@ -1,4 +1,6 @@
 from cmdb.models import App
+from cmdb.models import Project
+from cmdb.models import GitTb
 from .serializers import AppSerializer
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import CreateAPIView
@@ -24,12 +26,42 @@ class AppCreateView(CreateAPIView):
     serializer_class = AppSerializer
 
     def post(self, request):
+        """
+        {
+            "name": "appA",
+            "cn_name":"A应用",
+            "description": "这是一个A应用",
+            "app_id": 4325,
+            "git_app_id": 2,
+            "git_id": 1,
+            "project_id": 6,
+            "git_trigger_token": "i98sdfasdf935345",
+            "build_script": "script/build.sh",
+            "deploy_script": "script/bifang.sh",
+            "zip_package_name": "go-demo.zip",
+            "service_port": 8080,
+            "service_username": "root",
+            "service_group": "root"
+        }
+        """
         req_data = request.data
         data = dict()
         data['name'] = req_data['name']
         data['description'] = req_data['description']
         data['cn_name'] = req_data['cn_name']
         data['app_id'] = req_data['app_id']
+        data['git_app_id'] = req_data['git_app_id']
+        # 外键关联
+        data['git'] = req_data['git_id']
+        data['project'] = req_data['project_id']
+        # 普通字段
+        data['git_trigger_token'] = req_data['git_trigger_token']
+        data['build_script'] = req_data['build_script']
+        data['deploy_script'] = req_data['deploy_script']
+        data['zip_package_name'] = req_data['zip_package_name']
+        data['service_port'] = req_data['service_port']
+        data['service_username'] = req_data['service_username']
+        data['service_group'] = req_data['service_group']
         # 从drf的request中获取用户(对django的request作了扩展的)
         data['create_user'] = request.user.id
         serializer = AppSerializer(data=data)

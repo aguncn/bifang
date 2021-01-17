@@ -1,16 +1,16 @@
-
-import os
-from django.conf import settings
+import datetime
+import random
+import string
 from cmdb.models import App
-from utils.gitlab import gitlab_trigger
-from utils.gitlab import pipeline_status
 from cmdb.models import Release
 from cmdb.models import ReleaseStatus
 from .serializers import ReleaseSerializer
-from .serializers import ReleaseBuildSerializer
-from .serializers import ReleaseBuildStatusSerializer
-from rest_framework.views import APIView
+from .serializers import ReleaseCreateSerializer
 from rest_framework.generics import ListAPIView
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.generics import CreateAPIView
+from rest_framework.generics import UpdateAPIView
+from rest_framework.generics import DestroyAPIView
 from utils.ret_code import *
 from .filters import ReleaseFilter
 
@@ -26,97 +26,90 @@ class ReleaseListView(ListAPIView):
         return render_json(return_dict)
 
 
-class ReleaseBuildView(APIView):
-    """
-    编译软件
+class ReleaseCreateView(CreateAPIView):
+    serializer_class = ReleaseCreateSerializer
 
-    参数:
-    app_name
-    release_name
-    git_branch
-    """
     def post(self, request):
-        # 序列化前端数据，并判断是否有效
-        serializer = ReleaseBuildSerializer(data=request.data)
-        if serializer.is_valid():
-            ser_data = serializer.validated_data
-            app_name = ser_data['app_name']
-            release_name = ser_data['release_name']
-            git_branch = ser_data['git_branch']
-            app = App.objects.get(name=app_name)
-            git_url = app.git.git_url
-            git_access_token = app.git.git_token
-            git_trigger_token = app.git_trigger_token
-            project_id = app.git_app_id
-            build_script = app.build_script
-            deploy_script = app.deploy_script
-            file_up_server = settings.FILE_UP_SERVER
-            # 先触发编译，但由于编译时间较长，为防连接过期，异步一下，先返回id，再获取编译状态
-            pipeline = gitlab_trigger(git_url, git_access_token,
-                                      project_id, app_name, release_name,
-                                      git_branch, git_trigger_token,
-                                      build_script, deploy_script, file_up_server)
-            # 在编译前，更新一下发布单的状态，待写编译历史库记录
-            deploy_status = ReleaseStatus.objects.get(name='Building')
-            Release.objects.filter(name=release_name).update(pipeline_id=pipeline.id,
-                                                             pipeline_url=pipeline.web_url,
-                                                             deploy_status=deploy_status)
+        """
+        {
+            "description": "这是一个测试发布单",
+            "app_id": 1,
+            "git_branch": "master"
+        }
+        """
+        req_data = request.data
+        data = dict()
+        random_letter = ''.join(random.sample(string.ascii_letters, 2))
+        name = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f") + random_letter.upper()
+        deploy_status = ReleaseStatus.objects.get(name='Create')
+        data['name'] = name
+        data['description'] = req_data['description']
+        data['git_branch'] = req_data['git_branch']
+        data['app'] = req_data['app_id']
+        data['deploy_status'] = deploy_status.id
 
-            return_dict = build_ret_data(OP_SUCCESS, 'gitlab ci pipeline id: {}'.format(pipeline.id))
+        # 从drf的request中获取用户(对django的request作了扩展的)
+        data['create_user'] = request.user.id
+        serializer = ReleaseCreateSerializer(data=data)
+        if serializer.is_valid() is False:
+            return_dict = build_ret_data(THROW_EXP, str(serializer.errors))
             return render_json(return_dict)
-        else:
-            return_dict = build_ret_data(THROW_EXP, '序列化条件不满足')
-            return render_json(return_dict)
+        data = serializer.validated_data
+        Release.objects.create(**data)
+        return_dict = build_ret_data(OP_SUCCESS, serializer.data)
+        return render_json(return_dict)
 
 
-class ReleaseBuildStatusView(APIView):
+class ReleaseRetrieveView(RetrieveAPIView):
+    queryset = Release.objects.all()
+    serializer_class = ReleaseSerializer
+
+    def get(self, request, *args, **kwargs):
+        res = super().get(self, request, *args, **kwargs)
+        return_dict = build_ret_data(OP_SUCCESS, res.data)
+        return render_json(return_dict)
+
+
+class ReleaseUpdateView(UpdateAPIView):
     """
-    获取编译软件状态
-
-    参数:
-    app_name
-    release_name
+    url获取pk,修改时指定序列化类和query_set
     """
-    def post(self, request):
-        # 序列化前端数据，并判断是否有效
-        # 在获取状态时，前端可以不传pipeline id过来，因为这个id可以通过数据库获取
-        serializer = ReleaseBuildStatusSerializer(data=request.data)
-        if serializer.is_valid():
-            ser_data = serializer.validated_data
-            app_name = ser_data['app_name']
-            release_name = ser_data['release_name']
-            app = App.objects.get(name=app_name)
-            zip_package_name = app.zip_package_name
-            deploy_script = app.deploy_script
-            # 部署脚本在上传时，只取了最后的文件名，目录名被忽略，这里也要作转换
-            deploy_script = os.path.basename(deploy_script)
-            git_url = app.git.git_url
-            git_access_token = app.git.git_token
-            project_id = app.git_app_id
-            release = Release.objects.get(name=release_name)
-            pipeline_id = release.pipeline_id
+    serializer_class = ReleaseSerializer
+    queryset = Release.objects.all()
 
-            pipeline = pipeline_status(git_url, git_access_token, project_id, pipeline_id)
-            if pipeline.finished_at is None:
-                return_dict = build_ret_data(OP_SUCCESS, 'ing')
-                return render_json(return_dict)
-            elif pipeline.status != 'success':
-                return_dict = build_ret_data(OP_SUCCESS, 'error')
-                return render_json(return_dict)
-            else:
-                file_down_server = settings.FILE_DOWN_SERVER
-                deploy_script_url = '{}/{}/{}/{}'.format(file_down_server, app_name, release_name, deploy_script)
-                zip_package_url = '{}/{}/{}/{}'.format(file_down_server, app_name, release_name, zip_package_name)
-                deploy_status = ReleaseStatus.objects.get(name='Build')
-                Release.objects.filter(name=release_name).update(deploy_status=deploy_status,
-                                                                 deploy_script_url=deploy_script_url,
-                                                                 zip_package_url=zip_package_url)
-                return_dict = build_ret_data(OP_SUCCESS, 'success')
-                return render_json(return_dict)
-        else:
-            return_dict = build_ret_data(THROW_EXP, '序列化条件不满足')
+    # 前端使用patch方法，到达这里
+    def patch(self, request, *args, **kwargs):
+        req_data = request.data
+        pid = req_data['id']
+        name = req_data['name']
+        cn_name = req_data['cn_name']
+        description = req_data['description']
+        app_id = req_data['app_id']
+        # 这样更新，可以把那些update_date字段自动更新，而使用filter().update()则是不会
+        try:
+            _a = App.objects.get(id=pid)
+            _a.name = name
+            _a.cn_name = cn_name
+            _a.description = description
+            _a.app_id = app_id
+            _a.save()
+            return_dict = build_ret_data(OP_SUCCESS, str(req_data))
+            return render_json(return_dict)
+        except Exception as e:
+            print(e)
+            return_dict = build_ret_data(THROW_EXP, str(e))
             return render_json(return_dict)
 
 
+class ReleaseDestroyView(DestroyAPIView):
+    queryset = Release.objects.all()
 
-
+    def destroy(self, request, *args, **kwargs):
+        try:
+            res = super().destroy(self, request, *args, **kwargs)
+            return_dict = build_ret_data(OP_SUCCESS, str(res))
+            return render_json(return_dict)
+        except Exception as e:
+            print(e)
+            return_dict = build_ret_data(THROW_EXP, str(e))
+            return render_json(return_dict)

@@ -24,6 +24,14 @@ class ProjectCreateView(CreateAPIView):
     serializer_class = ProjectSerializer
 
     def post(self, request):
+        """
+        {
+            "name": "projectA",
+            "cn_name":"A项目",
+            "description": "这是一个A项目",
+            "project_id": 4325
+        }
+        """
         req_data = request.data
         data = dict()
         data['name'] = req_data['name']
