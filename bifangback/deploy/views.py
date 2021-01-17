@@ -59,18 +59,24 @@ async def deploy(request):
 
 # 异步任务
 async def thread_async(action_list, env_name, app_name, release_name, target_list):
-    await asyncio.sleep(1)
-    for action in action_list:
-        print('action: ', action)
-        # 多线程版本，应用为IO密集型，适合threading模式
-        executor = ThreadPoolExecutor()
-        for data in executor.map(cmd_run, [env_name], [app_name], [release_name], [target_list], [action]):
-            if not data:
-                print('data_false: ', data)
-                return_dict = build_ret_data(THROW_EXP, action)
-                return render_json(return_dict)
-            print('data_true: ', data)
-    print("finish: ", action_list, env_name, app_name, release_name, target_list)
+
+    try:
+        await asyncio.sleep(1)
+        for action in action_list:
+            print('action: ', action)
+            # 多线程版本，应用为IO密集型，适合threading模式
+            executor = ThreadPoolExecutor()
+            for data in executor.map(cmd_run, [env_name], [app_name], [release_name], [target_list], [action]):
+                if not data:
+                    print('data_false: ', data)
+                    return_dict = build_ret_data(THROW_EXP, action)
+                    return render_json(return_dict)
+                print('data_true: ', data)
+        print("finish: ", action_list, env_name, app_name, release_name, target_list)
+    except asyncio.CancelledError:
+        print('Cancel the future.')
+    except Exception as e:
+        print(e)
 
 
 # cmd_run函数是在每一个线程当中运行的
