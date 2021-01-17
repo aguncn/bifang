@@ -1,28 +1,29 @@
 import time
+import json
+from queue import Queue
+import asyncio
+import httpx
 from concurrent.futures import ThreadPoolExecutor
+from django.views.decorators.csrf import csrf_exempt
+from asgiref.sync import async_to_sync, sync_to_async
 from cmdb.models import App
 from utils.saltstack import salt_cmd
 from cmdb.models import Env
 from cmdb.models import Release
 from .serializers import DeploySerializer
+from django.views.generic import View
 from rest_framework.views import APIView
 from utils.ret_code import *
 
 
-class DeployView(APIView):
-    """
-    编译软件
+@async_to_sync
+# django异步视图
+async def deploy(request):
+    if request.method == 'POST':
 
-    参数:
-    app_name
-    release_name
-    op_type
-    deploy_type
-    target_list
-    """
-    def post(self, request):
+        req_data = json.loads(request.body.decode('utf-8'))
         # 序列化前端数据，并判断是否有效
-        serializer = DeploySerializer(data=request.data)
+        serializer = DeploySerializer(data=req_data)
         if serializer.is_valid():
             ser_data = serializer.validated_data
             app_name = ser_data['app_name']
@@ -45,18 +46,31 @@ class DeployView(APIView):
                 action_list = ['stop', 'stop_status', 'start', 'start_status']
             else:
                 pass
-            for action in action_list:
-                # 多线程版本，应用为IO密集型，适合threading模式
-                executor = ThreadPoolExecutor()
-                for data in executor.map(cmd_run, [env_name], [app_name], [release_name], [target_list], [action]):
-                    if not data:
-                        return_dict = build_ret_data(THROW_EXP, action)
-                        return render_json(return_dict)
+
+            loop = asyncio.get_event_loop()
+            loop.create_task(thread_async(action_list, env_name, app_name, release_name, target_list))
+
             return_dict = build_ret_data(OP_SUCCESS, 'success')
             return render_json(return_dict)
         else:
             return_dict = build_ret_data(THROW_EXP, '序列化条件不满足')
             return render_json(return_dict)
+
+
+# 异步任务
+async def thread_async(action_list, env_name, app_name, release_name, target_list):
+    await asyncio.sleep(1)
+    for action in action_list:
+        print('action: ', action)
+        # 多线程版本，应用为IO密集型，适合threading模式
+        executor = ThreadPoolExecutor()
+        for data in executor.map(cmd_run, [env_name], [app_name], [release_name], [target_list], [action]):
+            if not data:
+                print('data_false: ', data)
+                return_dict = build_ret_data(THROW_EXP, action)
+                return render_json(return_dict)
+            print('data_true: ', data)
+    print("finish: ", action_list, env_name, app_name, release_name, target_list)
 
 
 # cmd_run函数是在每一个线程当中运行的
