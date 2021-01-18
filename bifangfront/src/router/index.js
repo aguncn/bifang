@@ -1,17 +1,62 @@
 import Vue from 'vue'
-import Router from 'vue-router'
-import { constantRouterMap } from '@/config/router.config'
+import VueRouter from 'vue-router'
+import MainLayout from '@/layouts/MainLayout.vue'
 
-// hack router push callback
-const originalPush = Router.prototype.push
-Router.prototype.push = function push (location, onResolve, onReject) {
-  if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
-  return originalPush.call(this, location).catch(err => err)
-}
+Vue.use(VueRouter)
 
-Vue.use(Router)
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: MainLayout,
+    redirect: '/releaseList',
+    children:[
+      {
+        path: 'releaseList',
+        name: '发布单列表',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/release/list')
+      },
+      {
+        path: 'createRelease',
+        name: '新建发布单',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/release/create')
+      },
+      {
+        path: 'transfer',
+        name: '流转列表',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/environment/transfer')
+      },
+      {
+        path: 'history',
+        name: '历史记录',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/environment/history')
+      },
+    ]
+  },
+  {
+    path: '/about',
+    name: 'About',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+  }
+]
 
-export default new Router({
-  mode: 'history',
-  routes: constantRouterMap
+const router = new VueRouter({
+  routes
 })
+
+export default router
