@@ -28,28 +28,28 @@
         <a-sub-menu key="sub3">
           <span slot="title"><a-icon type="cloud-upload" /><span>部署</span></span>
           <a-menu-item key="5">
-            服务部署
+            <router-link to="/deploy">服务部署</router-link>
           </a-menu-item>
           <a-menu-item key="6">
-            服务启停
+            <router-link to="/startup">服务启停</router-link>
           </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="sub4">
           <span slot="title"><a-icon type="appstore" /><span>项目应用</span></span>
           <a-menu-item key="7">
-            项目
+            <router-link to="/subject">项目</router-link>
           </a-menu-item>
           <a-menu-item key="8">
-            组件
+            <router-link to="/module">组件</router-link>
           </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="sub5">
           <span slot="title"><a-icon type="cluster" /><span>服务器</span></span>
           <a-menu-item key="9">
-            列表
+            <router-link to="/serverlist">列表</router-link>
           </a-menu-item>
           <a-menu-item key="10">
-            新增
+            <router-link to="/addserver">新增</router-link>
           </a-menu-item>
         </a-sub-menu>
     </a-menu>

@@ -43,6 +43,54 @@ const routes = [
         },
         component: () => import('@/views/environment/history')
       },
+      {
+        path: 'deploy',
+        name: '服务部署',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/deployment/deploy')
+      },
+      {
+        path: 'startup',
+        name: '服务启停',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/deployment/startup')
+      },
+      {
+        path: 'subject',
+        name: '项目',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/application/subject')
+      },
+      {
+        path: 'module',
+        name: '组件',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/application/module')
+      },
+      {
+        path: 'serverlist',
+        name: '服务器列表',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/server/list')
+      },
+      {
+        path: 'addserver',
+        name: '新增服务器',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/server/add')
+      },
     ]
   },
   {
