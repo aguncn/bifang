@@ -5,11 +5,13 @@ import store from './store'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.less'
 import './theme/index.less'
+import {request,initInterceptor} from '@/service/request'
+
 Vue.config.productionTip = false;
 
 Vue.use(Antd);
-
-Vue.config.productionTip = false
+Vue.prototype.$request = request;
+initInterceptor(Vue.prototype.$message)
 
 new Vue({
   router,
