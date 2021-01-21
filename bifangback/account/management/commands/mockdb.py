@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.contrib.auth.models import Group
 from cmdb.models import *
 import string
 import random
@@ -9,6 +10,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 username = 'admin'
+group_name = 'admin'
 
 
 # 自定义命令，用于建立测试数据，很多ORM语句会使用
@@ -36,16 +38,34 @@ class Command(BaseCommand):
     # 新建一个用户
     def add_user(self):
         User.objects.all().delete()
-        User.objects.create_user(username=username,
-                                 password='password',
-                                 is_staff=True,
-                                 is_active=True,
-                                 is_superuser=True)
-        self.stdout.write('用户{}重建完成。'.format(username))
+        Group.objects.all().delete()
+        print('delete all user and group data')
+        User.objects.create_user(username='Dylan', email='user@demo.com', password="password")
+        User.objects.create_user(username='Tyler', email='user@demo.com', password="password")
+        User.objects.create_user(username='Kyle', email='user@demo.com', password="password")
+        User.objects.create_user(username='Dakota', email='user@demo.com', password="password")
+        User.objects.create_user(username='Marcus', email='user@demo.com', password="password")
+        User.objects.create_user(username='Samantha', email='user@demo.com', password="password")
+        User.objects.create_user(username='Kayla', email='user@demo.com', password="password")
+        User.objects.create_user(username='Sydney', email='user@demo.com', password="password")
+        User.objects.create_user(username='Courtney', email='user@demo.com', password="password")
+        User.objects.create_user(username='Mariah', email='user@demo.com', password="password")
+        User.objects.create_user(username='tom', email='user@demo.com', password="password")
+        User.objects.create_user(username='mary', email='user@demo.com', password="password")
+        admin = User.objects.create_superuser(username, 'admin@demon.com', 'password')
+        root = User.objects.create_superuser('root', 'root@demon.com', 'password')
+        admin_group = Group.objects.create(name=group_name)
+        Group.objects.create(name='test')
+        Group.objects.create(name='dev')
+        Group.objects.create(name='operate')
+        admin_users = [admin, root]
+        admin_group.user_set.set(admin_users)
+        self.stdout.write('用户和用户组重建完成。')
 
     # 新建一个Git仓库
     def add_git(self):
         GitTb.objects.all().delete()
+        print('delete all GitTb data')
         create_user = User.objects.get(username=username)
         GitTb.objects.create(name='MainGit',
                              description='主要git库',
@@ -57,6 +77,7 @@ class Command(BaseCommand):
     # 新建一个SaltApi
     def add_salt(self):
         SaltTb.objects.all().delete()
+        print('delete all SaltTb data')
         create_user = User.objects.get(username=username)
         SaltTb.objects.create(name='MainSalt',
                               description='主要SaltApi',
@@ -71,6 +92,7 @@ class Command(BaseCommand):
     # 新建一个环境
     def add_env(self):
         Env.objects.all().delete()
+        print('delete all Env data')
         create_user = User.objects.get(username=username)
         salt = SaltTb.objects.order_by('?').first()
         env_list = ['dev', 'prd']
@@ -85,6 +107,7 @@ class Command(BaseCommand):
     # 新建demo项目
     def add_project(self):
         Project.objects.all().delete()
+        print('delete all Project data')
         create_user = User.objects.get(username=username)
         project_name_list = ['User', 'Service', 'Store', 'Card', 'Support']
         project_cn_name_list = ['用户管理', '服务', '库存', '购物车', '客服']
@@ -99,6 +122,7 @@ class Command(BaseCommand):
     # 新建demo应用
     def add_app(self):
         App.objects.all().delete()
+        print('delete all App data')
         create_user = User.objects.get(username=username)
         app_name_list = ['User-Login', 'Service-724', 'Store-Address', 'Card-Adjust', 'Support-Admin', 'go-demo']
         app_cn_name_list = ['用户登陆', '全天服务', '库存地址', '购物车调配', '客服后管', '毕方演示go示例']
@@ -125,6 +149,7 @@ class Command(BaseCommand):
     # 新建server服务器
     def add_server(self):
         Server.objects.all().delete()
+        print('delete all Server data')
         create_user = User.objects.get(username=username)
         for number in range(100):
             ip = '192.168.1.{}'.format(number)
@@ -141,6 +166,7 @@ class Command(BaseCommand):
     # 新建发布单状态
     def add_release_status(self):
         ReleaseStatus.objects.all().delete()
+        print('delete all ReleaseStatus data')
         create_user = User.objects.get(username=username)
         status_list = ['Create', 'Building', 'Build', 'Ready', 'Ongoing', 'Success', 'Failed']
         status_value_list = ['创建', '编译', '就绪', '部署中', '成功', '失败']
@@ -154,6 +180,7 @@ class Command(BaseCommand):
     # 新建demo发布单
     def add_release(self):
         Release.objects.all().delete()
+        print('delete all Release data')
         create_user = User.objects.get(username=username)
         for number in range(100):
             app = App.objects.order_by('?').first()
@@ -178,6 +205,7 @@ class Command(BaseCommand):
     # 新建权限
     def add_action(self):
         Action.objects.all().delete()
+        print('delete all Action data')
         create_user = User.objects.get(username=username)
         Action.objects.create(name='Create',
                               description='创建编译权限',
@@ -196,6 +224,7 @@ class Command(BaseCommand):
     # 新建demo应用权限用户表
     def add_permission(self):
         Permission.objects.all().delete()
+        print('delete all Permission data')
         create_user = User.objects.get(username=username)
         for number in range(2):
             app = App.objects.order_by('?').first()
