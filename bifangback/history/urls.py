@@ -1,6 +1,6 @@
 from django.urls import path
 
-app_name = "log"
+app_name = "history"
 
 urlpatterns = [
 
