@@ -168,8 +168,8 @@ class Command(BaseCommand):
         ReleaseStatus.objects.all().delete()
         print('delete all ReleaseStatus data')
         create_user = User.objects.get(username=username)
-        status_list = ['Create', 'Building', 'Build', 'Ready', 'Ongoing', 'Success', 'Failed']
-        status_value_list = ['创建', '编译', '就绪', '部署中', '成功', '失败']
+        status_list = ['Create', 'Building', 'BuildFailed', 'Build', 'Ready', 'Ongoing', 'Success', 'Failed']
+        status_value_list = ['创建', '编译', '编译失败', '就绪', '部署中', '成功', '失败']
         for status_name, status_value_name in zip(status_list, status_value_list):
             ReleaseStatus.objects.create(name=status_name,
                                          description=status_name,
@@ -226,7 +226,7 @@ class Command(BaseCommand):
         Permission.objects.all().delete()
         print('delete all Permission data')
         create_user = User.objects.get(username=username)
-        for number in range(2):
+        for number in range(5):
             app = App.objects.order_by('?').first()
             action = Action.objects.order_by('?').first()
             pm_user = User.objects.order_by('?').first()

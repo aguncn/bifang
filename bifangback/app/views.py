@@ -9,10 +9,11 @@ from rest_framework.generics import UpdateAPIView
 from rest_framework.generics import DestroyAPIView
 from utils.ret_code import *
 from .filters import AppFilter
+from utils.permission import is_project_admin
 
 
 class AppListView(ListAPIView):
-    queryset = App.objects.all()
+    queryset = App.objects.all().order_by('-id')
     serializer_class = AppSerializer
     filter_class = AppFilter
 
@@ -45,6 +46,15 @@ class AppCreateView(CreateAPIView):
         }
         """
         req_data = request.data
+        user = request.user
+        project_id = req_data['project_id']
+        """
+        # 前端开发完成后开启权限测试
+        if not is_project_admin(project_id, user):
+            return_dict = build_ret_data(THROW_EXP, '你不是项目创建者，不能在此项目下创建app应用！')
+            return render_json(return_dict)
+        """
+
         data = dict()
         data['name'] = req_data['name']
         data['description'] = req_data['description']
@@ -53,7 +63,7 @@ class AppCreateView(CreateAPIView):
         data['git_app_id'] = req_data['git_app_id']
         # 外键关联
         data['git'] = req_data['git_id']
-        data['project'] = req_data['project_id']
+        data['project'] = project_id
         # 普通字段
         data['git_trigger_token'] = req_data['git_trigger_token']
         data['build_script'] = req_data['build_script']
@@ -63,7 +73,7 @@ class AppCreateView(CreateAPIView):
         data['service_username'] = req_data['service_username']
         data['service_group'] = req_data['service_group']
         # 从drf的request中获取用户(对django的request作了扩展的)
-        data['create_user'] = request.user.id
+        data['create_user'] = user.id
         serializer = AppSerializer(data=data)
         if serializer.is_valid() is False:
             return_dict = build_ret_data(THROW_EXP, str(serializer.errors))

@@ -37,10 +37,15 @@ class ReleaseBuildView(APIView):
             deploy_script = app.deploy_script
             file_up_server = settings.FILE_UP_SERVER
             # 先触发编译，但由于编译时间较长，为防连接过期，异步一下，先返回id，再获取编译状态
-            pipeline = gitlab_trigger(git_url, git_access_token,
-                                      project_id, app_name, release_name,
-                                      git_branch, git_trigger_token,
-                                      build_script, deploy_script, file_up_server)
+            try:
+                pipeline = gitlab_trigger(git_url, git_access_token,
+                                          project_id, app_name, release_name,
+                                          git_branch, git_trigger_token,
+                                          build_script, deploy_script, file_up_server)
+            except Exception as e:
+                print(e)
+                return_dict = build_ret_data(THROW_EXP, 'gitlab触发错误，请确认gitlab连接，运行及配置正确')
+                return render_json(return_dict)
             # 在编译前，更新一下发布单的状态，待写编译历史库记录
             deploy_status = ReleaseStatus.objects.get(name='Building')
             Release.objects.filter(name=release_name).update(pipeline_id=pipeline.id,
@@ -86,6 +91,8 @@ class ReleaseBuildStatusView(APIView):
                 return_dict = build_ret_data(OP_SUCCESS, 'ing')
                 return render_json(return_dict)
             elif pipeline.status != 'success':
+                deploy_status = ReleaseStatus.objects.get(name='BuildFailed')
+                Release.objects.filter(name=release_name).update(deploy_status=deploy_status)
                 return_dict = build_ret_data(OP_SUCCESS, 'error')
                 return render_json(return_dict)
             else:

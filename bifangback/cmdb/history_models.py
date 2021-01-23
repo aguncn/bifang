@@ -4,16 +4,25 @@ from .env_models import Env
 from .release_models import Release, ReleaseStatus
 from .server_models import Server
 
-OP_CHOICES = (
+DEPLOY_CHOICES = (
     ('deploy', '部署'),
     ('rollback', '回滚'),
+)
+
+OP_CHOICES = (
+    ('deploy', '部署'),
     ('maintenance', '启停维护'),
 )
 
 ACTION_CHOICES = (
+    ('fetch', '获取软件'),
     ('stop', '停止'),
+    ('stop_status', '停止状态检测'),
+    ('deploy', '部署'),
+    ('rollback', '回滚'),
     ('start', '启动'),
-    ('restart', '重启'),
+    ('start_status', '启动状态检测'),
+    ('health_check', '服务健康检测'),
 )
 
 
@@ -37,11 +46,11 @@ class ReleaseHistory(BaseModel):
                                       null=True,
                                       on_delete=models.SET_NULL,
                                       verbose_name="发布单状态")
-    op_type = models.CharField(max_length=255,
-                               choices=OP_CHOICES,
-                               blank=True,
-                               null=True,
-                               verbose_name="操作类型")
+    deploy_type = models.CharField(max_length=255,
+                                   choices=DEPLOY_CHOICES,
+                                   blank=True,
+                                   null=True,
+                                   verbose_name="部署类型")
     log = models.TextField(verbose_name="日志内容")
 
     class Meta:

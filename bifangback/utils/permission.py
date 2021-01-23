@@ -1,60 +1,69 @@
 from django.contrib.auth.models import Group
+from django.core.exceptions import ObjectDoesNotExist
+from cmdb.models import Project
 from cmdb.models import App
 from cmdb.models import Permission
 
 
-# 判断是否前台管理员组
+# 判断是否为管理员组
 def is_admin_group(user):
     try:
         user_group = Group.objects.get(user=user)
-    except Exception as e:
+    except ObjectDoesNotExist as e:
+        print(e)
         return False
-    if "admin" == user_group:
-        return False
-    else:
+    if user_group == 'admin':
         return True
+    else:
+        return False
+
+
+# 判断是否为Project管理员
+def is_project_admin(project_id, user):
+    project = Project.objects.get(id=project_id)
+    if user == project.create_user or is_admin_group(user):
+        return True
+    return False
 
 
 # 判断是否为APP管理员
 def is_app_admin(app_id, user):
     app = App.objects.get(id=app_id)
-    if user == app.manage_user or is_admin_group(user):
+    if user == app.create_user or is_admin_group(user):
         return True
     return False
 
 
 # 获取APP管理员
 def get_app_admin(app_id):
-    return App.objects.get(id=app_id).manage_user
+    return App.objects.get(id=app_id).create_user
 
 
 # 获取APP的各个权限的相关成员
-def get_app_user(app_id, action_id, env_id):
+def get_app_user(app_id, action_id):
     filter_dict = dict()
-    filter_dict['app_name__id'] = app_id
-    filter_dict['action_name__id'] = action_id
-    if env_id != '0':
-        filter_dict['env_name__id'] = env_id
+    filter_dict['app__id'] = app_id
+    filter_dict['action__id'] = action_id
     permission_set = Permission.objects.get(**filter_dict)
-    user_set = permission_set.main_user.all()
+    user_set = permission_set.pm_user.all()
     return user_set
 
 
 # 判断是否具有APP的相关环境的相关权限
-def is_right(app_id, action_id, env_id, user):
+def is_right(app_id, action_id, user):
     # 是管理员，可直接具有相关权限
     if is_app_admin(app_id, user):
         return True
     filter_dict = dict()
-    filter_dict['app_name__id'] = app_id
-    filter_dict['action_name__id'] = action_id
-    if env_id != '0':
-        filter_dict['env_name__id'] = env_id
+    filter_dict['app__id'] = app_id
+    filter_dict['action__id'] = action_id
     try:
         permission_set = Permission.objects.get(**filter_dict)
-        user_set = permission_set.main_user.all()
+        user_set = permission_set.pm_user.all()
         if user in user_set:
             return True
-    except Permission.DoesNotExist:
-        pass
-    return False
+        else:
+            return False
+    except Permission.DoesNotExist as e:
+        print(e)
+        return False

@@ -6,8 +6,10 @@ from cmdb.models import App
 from utils.saltstack import salt_cmd
 from cmdb.models import Env
 from cmdb.models import Release
+from cmdb.models import Action
 from .serializers import DeploySerializer
 from utils.ret_code import *
+from utils.permission import is_right
 
 
 @async_to_sync
@@ -36,7 +38,15 @@ async def deploy(request):
             op_type = ser_data['op_type']
             deploy_type = ser_data['deploy_type']
             target_list = ser_data['target_list']
-
+            """
+            # 前端开发完成后开启权限测试
+            app = App.objects.get(name=app_name)
+            user = request.user
+            action = Action.objects.get(name='Deploy')
+            if not is_right(app.id, action.id, user):
+                return_dict = build_ret_data(THROW_EXP, '你无权限部署此应用！')
+                return render_json(return_dict)
+            """
             if deploy_type == 'deploy' and op_type == 'deploy':
                 action_list = ['fetch', 'stop', 'stop_status', 'deploy', 'start', 'start_status', 'health_check']
             elif deploy_type == 'rollback' and op_type == 'deploy':

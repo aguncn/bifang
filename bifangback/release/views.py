@@ -4,6 +4,7 @@ import string
 from cmdb.models import App
 from cmdb.models import Release
 from cmdb.models import ReleaseStatus
+from cmdb.models import Action
 from .serializers import ReleaseSerializer
 from .serializers import ReleaseCreateSerializer
 from rest_framework.generics import ListAPIView
@@ -13,6 +14,8 @@ from rest_framework.generics import UpdateAPIView
 from rest_framework.generics import DestroyAPIView
 from utils.ret_code import *
 from .filters import ReleaseFilter
+from utils.permission import is_right
+from utils.write_history import write_release_history
 
 
 class ReleaseListView(ListAPIView):
@@ -38,6 +41,17 @@ class ReleaseCreateView(CreateAPIView):
         }
         """
         req_data = request.data
+        user = request.user
+        app_id = req_data['app_id']
+
+        """
+        # 前端开发完成后开启权限测试
+        action = Action.objects.get(name='Create')
+        if not is_right(app_id, action.id, user):
+            return_dict = build_ret_data(THROW_EXP, '你无权在此应用下新建发布单！')
+            return render_json(return_dict)
+        """
+
         data = dict()
         random_letter = ''.join(random.sample(string.ascii_letters, 2))
         name = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f") + random_letter.upper()
@@ -45,17 +59,23 @@ class ReleaseCreateView(CreateAPIView):
         data['name'] = name
         data['description'] = req_data['description']
         data['git_branch'] = req_data['git_branch']
-        data['app'] = req_data['app_id']
+        data['app'] = app_id
         data['deploy_status'] = deploy_status.id
 
         # 从drf的request中获取用户(对django的request作了扩展的)
-        data['create_user'] = request.user.id
+        data['create_user'] = user.id
         serializer = ReleaseCreateSerializer(data=data)
         if serializer.is_valid() is False:
             return_dict = build_ret_data(THROW_EXP, str(serializer.errors))
             return render_json(return_dict)
         data = serializer.validated_data
-        Release.objects.create(**data)
+        release = Release.objects.create(**data)
+        write_release_history(release=release,
+                              env=None,
+                              deploy_status=deploy_status,
+                              deploy_type=None,
+                              log='Create',
+                              create_user=user)
         return_dict = build_ret_data(OP_SUCCESS, serializer.data)
         return render_json(return_dict)
 
