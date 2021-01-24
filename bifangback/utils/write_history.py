@@ -12,7 +12,9 @@ def write_release_history(release_name=None, env_name=None, deploy_status_name=N
     name = uuid.uuid1()
     deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
     release = Release.objects.get(name=release_name)
-    env = Env.objects.get(name=env_name)
+    env = None
+    if env_name is not None:
+        env = Env.objects.get(name=env_name)
     ReleaseHistory.objects.create(name=name,
                                   release=release,
                                   env=env,
