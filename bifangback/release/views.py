@@ -55,7 +55,8 @@ class ReleaseCreateView(CreateAPIView):
         data = dict()
         random_letter = ''.join(random.sample(string.ascii_letters, 2))
         name = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f") + random_letter.upper()
-        deploy_status = ReleaseStatus.objects.get(name='Create')
+        deploy_status_name = 'Create'
+        deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
         data['name'] = name
         data['description'] = req_data['description']
         data['git_branch'] = req_data['git_branch']
@@ -70,9 +71,9 @@ class ReleaseCreateView(CreateAPIView):
             return render_json(return_dict)
         data = serializer.validated_data
         release = Release.objects.create(**data)
-        write_release_history(release=release,
-                              env=None,
-                              deploy_status=deploy_status,
+        write_release_history(release_name=release.name,
+                              env_name=None,
+                              deploy_status_name=deploy_status_name,
                               deploy_type=None,
                               log='Create',
                               create_user=user)

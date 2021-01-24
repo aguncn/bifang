@@ -18,11 +18,28 @@ admin.site.register(GitTb, GitTbHistoryAdmin)
 admin.site.register(SaltTb, SimpleHistoryAdmin)
 admin.site.register(Env, SimpleHistoryAdmin)
 admin.site.register(Project, SimpleHistoryAdmin)
-admin.site.register(App)
+
+
+class AppHistoryAdmin(SimpleHistoryAdmin):
+    list_display = ['id', 'name', 'app_id', 'cn_name', 'git_app_id', 'zip_package_name', 'service_port']
+    history_list_display = ["status"]
+    search_fields = ['name', 'cn_name']
+
+
+admin.site.register(App, AppHistoryAdmin)
 admin.site.register(Server)
 admin.site.register(ReleaseStatus)
 admin.site.register(Release)
-admin.site.register(ReleaseHistory)
+
+
+class ReleaseHistoryHistoryAdmin(SimpleHistoryAdmin):
+    list_display = ['id', 'name', 'release', 'env', 'deploy_status', 'deploy_type', 'log']
+    history_list_display = ["status"]
+    search_fields = ['name', 'release', 'log']
+    readonly_fields = ('create_date', 'update_date')
+
+
+admin.site.register(ReleaseHistory, ReleaseHistoryHistoryAdmin)
 admin.site.register(ServerHistory)
 admin.site.register(Action)
 admin.site.register(Permission, SimpleHistoryAdmin)

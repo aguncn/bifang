@@ -6,3 +6,15 @@ class EnvSerializer(serializers.ModelSerializer):
     class Meta:
         model = Env
         fields = '__all__'
+
+
+class EnvExchangeSerializer(serializers.Serializer):
+    release_name = serializers.CharField(max_length=100)
+    env_name = serializers.CharField(max_length=64)
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+

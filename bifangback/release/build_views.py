@@ -9,6 +9,7 @@ from .serializers import ReleaseBuildSerializer
 from .serializers import ReleaseBuildStatusSerializer
 from rest_framework.views import APIView
 from utils.ret_code import *
+from utils.write_history import write_release_history
 
 
 class ReleaseBuildView(APIView):
@@ -25,6 +26,7 @@ class ReleaseBuildView(APIView):
         serializer = ReleaseBuildSerializer(data=request.data)
         if serializer.is_valid():
             ser_data = serializer.validated_data
+            user = request.user
             app_name = ser_data['app_name']
             release_name = ser_data['release_name']
             git_branch = ser_data['git_branch']
@@ -47,10 +49,17 @@ class ReleaseBuildView(APIView):
                 return_dict = build_ret_data(THROW_EXP, 'gitlab触发错误，请确认gitlab连接，运行及配置正确')
                 return render_json(return_dict)
             # 在编译前，更新一下发布单的状态，待写编译历史库记录
-            deploy_status = ReleaseStatus.objects.get(name='Building')
-            Release.objects.filter(name=release_name).update(pipeline_id=pipeline.id,
-                                                             pipeline_url=pipeline.web_url,
-                                                             deploy_status=deploy_status)
+            deploy_status_name = 'Building'
+            deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
+            release = Release.objects.filter(name=release_name).update(pipeline_id=pipeline.id,
+                                                                       pipeline_url=pipeline.web_url,
+                                                                       deploy_status=deploy_status)
+            write_release_history(release_name=release_name,
+                                  env_name=None,
+                                  deploy_status_name=deploy_status_name,
+                                  deploy_type=None,
+                                  log='Building',
+                                  create_user=user)
 
             return_dict = build_ret_data(OP_SUCCESS, 'gitlab ci pipeline id: {}'.format(pipeline.id))
             return render_json(return_dict)
@@ -73,6 +82,7 @@ class ReleaseBuildStatusView(APIView):
         serializer = ReleaseBuildStatusSerializer(data=request.data)
         if serializer.is_valid():
             ser_data = serializer.validated_data
+            user = request.user
             app_name = ser_data['app_name']
             release_name = ser_data['release_name']
             app = App.objects.get(name=app_name)
@@ -91,18 +101,39 @@ class ReleaseBuildStatusView(APIView):
                 return_dict = build_ret_data(OP_SUCCESS, 'ing')
                 return render_json(return_dict)
             elif pipeline.status != 'success':
-                deploy_status = ReleaseStatus.objects.get(name='BuildFailed')
-                Release.objects.filter(name=release_name).update(deploy_status=deploy_status)
+                print(pipeline)
+                print(pipeline.id)
+                print(pipeline.status)
+                print(pipeline.ref)
+                print(pipeline.web_url)
+                print(pipeline.duration)
+                deploy_status_name = 'BuildFailed'
+                deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
+                release = Release.objects.filter(name=release_name).update(deploy_status=deploy_status)
+                write_release_history(release_name=release_name,
+                                      env_name=None,
+                                      deploy_status_name=deploy_status_name,
+                                      deploy_type=None,
+                                      log='Building',
+                                      create_user=user)
                 return_dict = build_ret_data(OP_SUCCESS, 'error')
                 return render_json(return_dict)
             else:
                 file_down_server = settings.FILE_DOWN_SERVER
                 deploy_script_url = '{}/{}/{}/{}'.format(file_down_server, app_name, release_name, deploy_script)
                 zip_package_url = '{}/{}/{}/{}'.format(file_down_server, app_name, release_name, zip_package_name)
-                deploy_status = ReleaseStatus.objects.get(name='Build')
+                deploy_status_name = 'Build'
+                deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
                 Release.objects.filter(name=release_name).update(deploy_status=deploy_status,
                                                                  deploy_script_url=deploy_script_url,
                                                                  zip_package_url=zip_package_url)
+                write_release_history(release_name=release_name,
+                                      env_name=None,
+                                      deploy_status_name=deploy_status_name,
+                                      deploy_type=None,
+                                      log='Build',
+                                      create_user=user)
+
                 return_dict = build_ret_data(OP_SUCCESS, 'success')
                 return render_json(return_dict)
         else:
