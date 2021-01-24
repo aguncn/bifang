@@ -1,7 +1,9 @@
 import time
+import threading
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from asgiref.sync import async_to_sync
+from django.contrib.auth import get_user_model
 from cmdb.models import App
 from utils.saltstack import salt_cmd
 from cmdb.models import Env
@@ -10,6 +12,10 @@ from cmdb.models import Action
 from .serializers import DeploySerializer
 from utils.ret_code import *
 from utils.permission import is_right
+from utils.write_history import write_release_history
+from utils.write_history import write_server_history
+
+User = get_user_model()
 
 
 @async_to_sync
@@ -34,6 +40,7 @@ async def deploy(request):
             app_name = ser_data['app_name']
             release_name = ser_data['release_name']
             env_name = ser_data['env_name']
+            user_id = ser_data['user_id']
             # op_type用于定义是部署应用，还是服务器启停，deploy_type用于定义操作指令
             op_type = ser_data['op_type']
             deploy_type = ser_data['deploy_type']
@@ -59,9 +66,12 @@ async def deploy(request):
                 action_list = ['stop', 'stop_status', 'start', 'start_status']
             else:
                 pass
+            threading.Thread(target=write_release_history, args=(release_name, env_name,
+                                                                 'Ongoing', None, 'Ongoing', user_id))\
+                .start()
 
             loop = asyncio.get_event_loop()
-            loop.create_task(thread_async(action_list, env_name, app_name, release_name, target_list))
+            loop.create_task(thread_async(action_list, env_name, app_name, release_name, target_list, user_id))
 
             return_dict = build_ret_data(OP_SUCCESS, 'success')
             return render_json(return_dict)
@@ -71,7 +81,7 @@ async def deploy(request):
 
 
 # 异步任务
-async def thread_async(action_list, env_name, app_name, release_name, target_list):
+async def thread_async(action_list, env_name, app_name, release_name, target_list, user_id):
 
     try:
         await asyncio.sleep(1)
@@ -79,12 +89,18 @@ async def thread_async(action_list, env_name, app_name, release_name, target_lis
             print('action: ', action)
             # 多线程版本，应用为IO密集型，适合threading模式
             executor = ThreadPoolExecutor()
-            for data in executor.map(cmd_run, [env_name], [app_name], [release_name], [target_list], [action]):
+            for data in executor.map(cmd_run, [env_name], [app_name], [release_name], [target_list], [action], [user_id]):
                 if not data:
                     print('data_false: ', data)
+                    threading.Thread(target=write_release_history, args=(release_name, env_name,
+                                                                         'Failed', None, 'Failed', user_id)) \
+                        .start()
                     return_dict = build_ret_data(THROW_EXP, action)
                     return render_json(return_dict)
                 print('data_true: ', data)
+        threading.Thread(target=write_release_history, args=(release_name, env_name,
+                                                             'Success', None, 'Success', user_id)) \
+            .start()
         print("finish: ", action_list, env_name, app_name, release_name, target_list)
     except asyncio.CancelledError:
         print('Cancel the future.')
@@ -93,7 +109,7 @@ async def thread_async(action_list, env_name, app_name, release_name, target_lis
 
 
 # cmd_run函数是在每一个线程当中运行的
-def cmd_run(env_name, app_name, release_name, target_list, action):
+def cmd_run(env_name, app_name, release_name, target_list, action, user_id):
     print(env_name, app_name, release_name, target_list, action, "@@@@@@@@@")
     env = Env.objects.get(name=env_name)
     app = App.objects.get(name=app_name)

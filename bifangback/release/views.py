@@ -76,7 +76,7 @@ class ReleaseCreateView(CreateAPIView):
                               deploy_status_name=deploy_status_name,
                               deploy_type=None,
                               log='Create',
-                              create_user=user)
+                              user_id=user.id)
         return_dict = build_ret_data(OP_SUCCESS, serializer.data)
         return render_json(return_dict)
 
