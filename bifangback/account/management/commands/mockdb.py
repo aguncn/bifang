@@ -139,7 +139,7 @@ class Command(BaseCommand):
                                git_trigger_token='559fbd3381bc39100811bd00e499a7',
                                project=project,
                                build_script='script/build.sh',
-                               deploy_script='script/bifang.sh',
+                               deploy_script='script/deploy.sh',
                                zip_package_name='go-demo.tar.gz',
                                service_port=9090,
                                service_username='sky',
@@ -169,7 +169,7 @@ class Command(BaseCommand):
         print('delete all ReleaseStatus data')
         create_user = User.objects.get(username=username)
         status_list = ['Create', 'Building', 'BuildFailed', 'Build', 'Ready', 'Ongoing', 'Success', 'Failed']
-        status_value_list = ['创建', '编译', '编译失败', '就绪', '部署中', '成功', '失败']
+        status_value_list = ['创建', '编译中', '编译失败', '编译成功', '准备部署', '部署中', '部署成功', '部署失败']
         for status_name, status_value_name in zip(status_list, status_value_list):
             ReleaseStatus.objects.create(name=status_name,
                                          description=status_name,

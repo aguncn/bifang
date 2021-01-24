@@ -59,7 +59,7 @@ class ReleaseBuildView(APIView):
                                   deploy_status_name=deploy_status_name,
                                   deploy_type=None,
                                   log='Building',
-                                  create_user=user)
+                                  user_id=user.id)
 
             return_dict = build_ret_data(OP_SUCCESS, 'gitlab ci pipeline id: {}'.format(pipeline.id))
             return render_json(return_dict)
@@ -115,7 +115,7 @@ class ReleaseBuildStatusView(APIView):
                                       deploy_status_name=deploy_status_name,
                                       deploy_type=None,
                                       log='Building',
-                                      create_user=user)
+                                      user_id=user.id)
                 return_dict = build_ret_data(OP_SUCCESS, 'error')
                 return render_json(return_dict)
             else:
@@ -132,7 +132,7 @@ class ReleaseBuildStatusView(APIView):
                                       deploy_status_name=deploy_status_name,
                                       deploy_type=None,
                                       log='Build',
-                                      create_user=user)
+                                      user_id=user.id)
 
                 return_dict = build_ret_data(OP_SUCCESS, 'success')
                 return render_json(return_dict)
