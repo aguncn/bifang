@@ -14,6 +14,7 @@ from utils.ret_code import *
 from utils.permission import is_right
 from utils.write_history import write_release_history
 from utils.write_history import write_server_history
+from utils.write_history import update_server_release
 
 User = get_user_model()
 
@@ -26,6 +27,7 @@ async def deploy(request):
         {
             "app_name": "go-demo",
             "env_name":"dev",
+            "user_id":111,
             "release_name": "20210117132941344089GA",
             "deploy_type": "deploy",
             "op_type": "deploy",
@@ -71,7 +73,9 @@ async def deploy(request):
                 .start()
 
             loop = asyncio.get_event_loop()
-            loop.create_task(thread_async(action_list, env_name, app_name, release_name, target_list, user_id))
+            loop.create_task(thread_async(action_list, env_name,
+                                          app_name, release_name,
+                                          target_list, user_id, op_type))
 
             return_dict = build_ret_data(OP_SUCCESS, 'success')
             return render_json(return_dict)
@@ -81,7 +85,9 @@ async def deploy(request):
 
 
 # 异步任务
-async def thread_async(action_list, env_name, app_name, release_name, target_list, user_id):
+async def thread_async(action_list, env_name,
+                       app_name, release_name,
+                       target_list, user_id, op_type):
 
     try:
         await asyncio.sleep(1)
@@ -89,19 +95,26 @@ async def thread_async(action_list, env_name, app_name, release_name, target_lis
             print('action: ', action)
             # 多线程版本，应用为IO密集型，适合threading模式
             executor = ThreadPoolExecutor()
-            for data in executor.map(cmd_run, [env_name], [app_name], [release_name], [target_list], [action], [user_id]):
+            for data in executor.map(cmd_run, [env_name], [app_name],
+                                     [release_name], [target_list],
+                                     [action], [user_id],
+                                     [op_type]):
                 if not data:
-                    print('data_false: ', data)
+                    # print('data_false: ', data)
                     threading.Thread(target=write_release_history, args=(release_name, env_name,
-                                                                         'Failed', None, 'Failed', user_id)) \
+                                                                         'Failed', None, 'Failed',
+                                                                         user_id)) \
                         .start()
                     return_dict = build_ret_data(THROW_EXP, action)
                     return render_json(return_dict)
-                print('data_true: ', data)
+                # print('data_true: ', data)
         threading.Thread(target=write_release_history, args=(release_name, env_name,
-                                                             'Success', None, 'Success', user_id)) \
+                                                             'Success', None, 'Success',
+                                                             user_id)) \
             .start()
         print("finish: ", action_list, env_name, app_name, release_name, target_list)
+        threading.Thread(target=update_server_release, args=(target_list, release_name)) \
+            .start()
     except asyncio.CancelledError:
         print('Cancel the future.')
     except Exception as e:
@@ -109,8 +122,10 @@ async def thread_async(action_list, env_name, app_name, release_name, target_lis
 
 
 # cmd_run函数是在每一个线程当中运行的
-def cmd_run(env_name, app_name, release_name, target_list, action, user_id):
-    print(env_name, app_name, release_name, target_list, action, "@@@@@@@@@")
+def cmd_run(env_name, app_name,
+            release_name, target_list,
+            action, user_id,
+            op_type):
     env = Env.objects.get(name=env_name)
     app = App.objects.get(name=app_name)
     release = Release.objects.get(name=release_name)
@@ -133,9 +148,18 @@ def cmd_run(env_name, app_name, release_name, target_list, action, user_id):
     time.sleep(1)
     for server in ret:
         for ip, detail in server.items():
+            threading.Thread(target=write_server_history, args=(ip, release_name,
+                                                                env_name, op_type,
+                                                                action, detail['stdout'],
+                                                                user_id)) \
+                .start()
+            if 'success' not in detail['stdout']:
+                return False
+            """
             print('ip: ', ip)
             print('retcode: ', detail['retcode'])
             print('stdout: ', detail['stdout'])
             print('stderr: ', detail['stderr'])
             print('pid: ', detail['pid'])
+            """
     return True

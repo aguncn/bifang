@@ -40,6 +40,15 @@ class ReleaseHistoryHistoryAdmin(SimpleHistoryAdmin):
 
 
 admin.site.register(ReleaseHistory, ReleaseHistoryHistoryAdmin)
-admin.site.register(ServerHistory)
+
+
+class ServerHistoryHistoryAdmin(SimpleHistoryAdmin):
+    list_display = ['id', 'server',  'release', 'env', 'op_type', 'action_type', 'log']
+    history_list_display = ["status"]
+    search_fields = ['name', 'release', 'log']
+    readonly_fields = ('create_date', 'update_date')
+
+
+admin.site.register(ServerHistory, ServerHistoryHistoryAdmin)
 admin.site.register(Action)
 admin.site.register(Permission, SimpleHistoryAdmin)
