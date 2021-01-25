@@ -12,6 +12,7 @@
     "axios": "^0.21.1",
     "core-js": "^3.8.2",
     "js-cookie": "^2.2.1",
+    "mockjs": "^1.1.0",
     "moment": "^2.29.1",
     "style-resources-loader": "^1.4.1",
     "vue": "^2.6.12",

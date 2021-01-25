@@ -5,6 +5,7 @@ import store from './store'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.less'
 import './theme/index.less'
+import '@/mock'
 import {request,initInterceptor} from '@/service/request'
 
 Vue.config.productionTip = false;

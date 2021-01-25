@@ -73,6 +73,7 @@ function initInterceptor($message){
 
 
 export {
+    METHOD,
     request,
     initInterceptor
 }

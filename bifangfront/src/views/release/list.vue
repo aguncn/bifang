@@ -65,7 +65,7 @@
           <a @click="deleteRecord(record.key)">
             <a-icon type="delete" />删除1
           </a>
-          <a @click="deleteRecord(record.key)" v-auth="`delete`">
+          <a @click="deleteRecord(record.key)">
             <a-icon type="delete" />删除2
           </a>
         </div>
@@ -79,6 +79,7 @@
 
 <script>
 import BfTable from '@/components/table/table'
+import { ReleaseList } from '@/service'
 const columns = [
   {
     title: '发布单编号',
@@ -110,19 +111,6 @@ const columns = [
   }
 ]
 
-const dataSource = []
-
-for (let i = 0; i < 100; i++) {
-  dataSource.push({
-    key: i,
-    no: 'NO ' + i,
-    description: '组件'+i,
-    callNo: Math.floor(Math.random() * 1000),
-    status: Math.ceil(Math.random()*2),
-    updatedAt: '2020-07-26'
-  })
-}
-
 export default {
   name: 'releaseList',
   components: {BfTable},
@@ -130,12 +118,16 @@ export default {
     return {
       advanced: true,
       columns: columns,
-      dataSource: dataSource,
+      dataSource: [],
       selectedRows: []
     }
   },
-  authorize: {
-    deleteRecord: 'delete'
+  created(){
+    ReleaseList().then((res)=>{
+      if(res.status == 200 && res.data.code == 0){
+        this.dataSource = res.data.results.list;
+      }
+    })
   },
   methods: {
     deleteRecord(key) {
