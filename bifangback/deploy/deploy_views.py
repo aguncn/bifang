@@ -58,6 +58,11 @@ async def deploy(request):
             """
             if deploy_type == 'deploy' and op_type == 'deploy':
                 action_list = ['fetch', 'stop', 'stop_status', 'deploy', 'start', 'start_status', 'health_check']
+                # 真正部署，才更新发布单历史，，因为在异步视图中，都需要新开一个线程，或是同步转异步
+                threading.Thread(target=write_release_history, args=(release_name, env_name,
+                                                                     'Ongoing', None, 'Ongoing', user_id)) \
+                    .start()
+            # 回滚，只更新服务器操作历史及服务器主备发布单， 因为在异步视图中，都需要新开一个线程，或是同步转异步
             elif deploy_type == 'rollback' and op_type == 'deploy':
                 action_list = ['stop', 'stop_status', 'rollback', 'start', 'start_status', 'health_check']
             elif deploy_type == 'stop' and op_type == 'maintenance':
@@ -68,14 +73,12 @@ async def deploy(request):
                 action_list = ['stop', 'stop_status', 'start', 'start_status']
             else:
                 pass
-            threading.Thread(target=write_release_history, args=(release_name, env_name,
-                                                                 'Ongoing', None, 'Ongoing', user_id))\
-                .start()
-
+            # python 3 的异步技术
             loop = asyncio.get_event_loop()
             loop.create_task(thread_async(action_list, env_name,
                                           app_name, release_name,
-                                          target_list, user_id, op_type))
+                                          target_list, user_id,
+                                          op_type, deploy_type))
 
             return_dict = build_ret_data(OP_SUCCESS, 'success')
             return render_json(return_dict)
@@ -87,9 +90,11 @@ async def deploy(request):
 # 异步任务
 async def thread_async(action_list, env_name,
                        app_name, release_name,
-                       target_list, user_id, op_type):
+                       target_list, user_id,
+                       op_type, deploy_type):
 
     try:
+        # await触发异步视图，有没有更好的方式？
         await asyncio.sleep(1)
         for action in action_list:
             print('action: ', action)
@@ -98,23 +103,28 @@ async def thread_async(action_list, env_name,
             for data in executor.map(cmd_run, [env_name], [app_name],
                                      [release_name], [target_list],
                                      [action], [user_id],
-                                     [op_type]):
+                                     [op_type], [deploy_type]):
                 if not data:
                     # print('data_false: ', data)
-                    threading.Thread(target=write_release_history, args=(release_name, env_name,
-                                                                         'Failed', None, 'Failed',
-                                                                         user_id)) \
-                        .start()
+                    # 有真正部署，出错时才需要更新发布单历史，其它情况，只更新服务器发布历史(暂不考虑回滚失败)
+                    if deploy_type == 'deploy':
+                        threading.Thread(target=write_release_history, args=(release_name, env_name,
+                                                                             'Failed', deploy_type, 'Failed',
+                                                                             user_id)) \
+                            .start()
                     return_dict = build_ret_data(THROW_EXP, action)
                     return render_json(return_dict)
                 # print('data_true: ', data)
-        threading.Thread(target=write_release_history, args=(release_name, env_name,
-                                                             'Success', None, 'Success',
-                                                             user_id)) \
-            .start()
+        # 只有部署和回滚，才需要更新发布单历史和服务器主备发布单(回滚时，发布单参数并没有用上)
+        if op_type == 'deploy':
+            threading.Thread(target=write_release_history, args=(release_name, env_name,
+                                                                 'Success', deploy_type, 'Success',
+                                                                 user_id)) \
+                .start()
+            threading.Thread(target=update_server_release, args=(target_list, release_name, deploy_type)) \
+                .start()
         print("finish: ", action_list, env_name, app_name, release_name, target_list)
-        threading.Thread(target=update_server_release, args=(target_list, release_name)) \
-            .start()
+
     except asyncio.CancelledError:
         print('Cancel the future.')
     except Exception as e:
@@ -125,7 +135,7 @@ async def thread_async(action_list, env_name,
 def cmd_run(env_name, app_name,
             release_name, target_list,
             action, user_id,
-            op_type):
+            op_type, deploy_type):
     env = Env.objects.get(name=env_name)
     app = App.objects.get(name=app_name)
     release = Release.objects.get(name=release_name)
@@ -139,7 +149,7 @@ def cmd_run(env_name, app_name,
     zip_package_name = app.zip_package_name
     zip_package_url = release.zip_package_url
     service_port = app.service_port
-
+    # 使用saltypie来获取返回值，不自己更写Http请求，更容易解析结果
     ret = salt_cmd(salt_url, salt_user, salt_pwd, eauth,
                    target_list, deploy_script_url,
                    app_name, release, env, action,
@@ -148,11 +158,13 @@ def cmd_run(env_name, app_name,
     time.sleep(1)
     for server in ret:
         for ip, detail in server.items():
+            # 记录服务器操作历史，因为在异步视图中，都需要新开一个线程，或是同步转异步
             threading.Thread(target=write_server_history, args=(ip, release_name,
                                                                 env_name, op_type,
                                                                 action, detail['stdout'],
                                                                 user_id)) \
                 .start()
+            # 部署脚本的每一个步骤，成功时必须返回success关键字
             if 'success' not in detail['stdout']:
                 return False
             """

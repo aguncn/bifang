@@ -10,19 +10,29 @@ from cmdb.history_models import ServerHistory
 User = get_user_model()
 
 
-def update_server_release(target_list, release_name):
-    release = Release.objects.get(name=release_name)
+# 更新服务器的主备发布单
+def update_server_release(target_list, release_name, deploy_type):
+
     for ip in target_list:
         server = Server.objects.get(name=ip)
-        if server.main_release:
-            back_release = server.main_release
+        # 真正部署时，将服务器的主发布单放到备用发布单，用新发布单填充主发布单
+        if deploy_type == 'deploy':
+            release = Release.objects.get(name=release_name)
+            if server.main_release:
+                back_release = server.main_release
+            else:
+                back_release = None
+            server.main_release = release
+            server.back_release = back_release
+            server.save()
+        # 如果是回滚，则将主备发布单都设置为备用发布单即可，因为只支持一次回滚。多次回滚，不如重新发布咯~~
         else:
-            back_release = None
-        server.main_release = release
-        server.back_release = back_release
-        server.save()
+            release = server.back_release
+            server.main_release = release
+            server.save()
 
 
+# 更新发布单历史，这样可以串联起来发布单的操作历史，但操作服务器历史不在此之列，在下一个函数
 def write_release_history(release_name=None, env_name=None,
                           deploy_status_name=None, deploy_type=None,
                           log=None, user_id=None):
@@ -44,6 +54,7 @@ def write_release_history(release_name=None, env_name=None,
                                   create_user=create_user)
 
 
+# 更新服务器操作历史，可用ajax展示具体部署过程，也可以查看一个具体服务器的操作历史
 def write_server_history(ip=None, release_name=None,
                          env_name=None, op_type=None,
                          action_type=None, log=None,
