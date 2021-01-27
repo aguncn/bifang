@@ -4,6 +4,7 @@
 import os
 import sys
 import subprocess
+import shutil
 import time
 import logging
 
@@ -14,14 +15,14 @@ app_name = sys.argv[1]
 release_name = sys.argv[2]
 # env环境参数
 env_name = sys.argv[3]
-# action服务启停及部署参数
-action = sys.argv[4]
 # app压缩包名参数
-zip_package_name = sys.argv[5]
+zip_package_name = sys.argv[4]
 # app压缩包的网络下载地址
-zip_package_url = sys.argv[6]
+zip_package_url = sys.argv[5]
 # port服务端口参数
-port = sys.argv[7]
+port = sys.argv[6]
+# action服务启停及部署参数
+action = sys.argv[7]
 
 # ###########自定义部署变量#################
 # app可执行文件名或包名
@@ -56,7 +57,7 @@ class Deploy:
 
     def logging(self, log):
         logger = logging.getLogger()
-        fh = logging.FileHandler(self.log_file, encoding="utf-8", mode="a")
+        fh = logging.FileHandler(log_file, encoding="utf-8", mode="a")
         formatter = logging.Formatter("%(asctime)s - %(name)s-%(levelname)s %(message)s")
         fh.setFormatter(formatter)
         logger.addHandler(fh)
@@ -72,7 +73,7 @@ class Deploy:
             self.shell('mkdir -p {}'.format(local_back))
 
     def get_app_id(self):
-        return self.shell("ps  aux|grep '{}'|grep -v 'salt'|grep -v 'grep'|awk '{print $2}'".format(PACKAGE_NAME))
+        return self.shell("pgrep -f '{}'|grep -v 'salt'|grep -v 'grep'".format(PACKAGE_NAME))
 
     def fetch(self):
         self.make_dirs()
@@ -91,8 +92,9 @@ class Deploy:
 
     def deploy(self):
         # 部署，从CURRENT目录解压恢复
+        if not os.path.exists(app_home):
+            shutil.move(app_home, '/tmp/')
         current_back_path = '{}/{}'.format(local_store, zip_package_name)
-        self.shell('mv {}/* /tmp/'.format(app_home))
         self.shell('tar -xzvf  {} -C {} '.format(current_back_path, app_home))
         print("APP_NAME: {} deploy success.".format(app_name))
 
@@ -120,10 +122,6 @@ class Deploy:
         if app_id:
             self.shell('kill -9 {}'.format(app_id))
         time.sleep(3)
-        if self.get_app_id():
-            print("APP_NAME: {} is failure stop.".format(app_name))
-        else:
-            print("APP_NAME: {} is success stop.".format(app_name))
 
     def start_status(self):
         if self.get_app_id():

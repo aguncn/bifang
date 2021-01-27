@@ -152,9 +152,9 @@ def cmd_run(env_name, app_name,
     # 使用saltypie来获取返回值，不自己更写Http请求，更容易解析结果
     ret = salt_cmd(salt_url, salt_user, salt_pwd, eauth,
                    target_list, deploy_script_url,
-                   app_name, release, env, action,
+                   app_name, release, env,
                    zip_package_name, zip_package_url,
-                   service_port)
+                   service_port, action)
     time.sleep(1)
     for server in ret:
         for ip, detail in server.items():
