@@ -1,10 +1,16 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
+import {isLogin} from '@/utils/request'
 
 Vue.use(VueRouter)
 
 const routes = [
+  {
+    path: '/login',
+    name: '登录页',
+    component: () => import('@/views/login/login')
+  },
   {
     path: '/',
     name: 'Home',
@@ -106,5 +112,20 @@ const routes = [
 const router = new VueRouter({
   routes
 })
+
+/**
+ * 增加登录路由拦截
+ */
+router.beforeEach((to, from, next) => {
+  if (to.path === '/login') {
+    next();
+  } else {
+    if (!isLogin()) {
+      next('/login');
+    } else {
+      next();
+    }
+  }
+});
 
 export default router

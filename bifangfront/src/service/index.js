@@ -1,4 +1,4 @@
-import {request,METHOD } from './request'
+import {request,METHOD } from '@/utils/request'
 
 const BASE_URL = process.env.VUE_APP_API_BASE_URL;
 const API = {

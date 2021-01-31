@@ -34,7 +34,8 @@ async function request(url, method, params) {
 //request拦截器
 const reqInterceptor = {
     onFulfilled(config,$message){
-        if (!Cookie.get(authHeader)) {
+        const {url} = config;
+        if (url.indexOf('jwt_auth') === -1 && !Cookie.get(authHeader)) {
             $message.warning('认证 token 已过期，请重新登录')
         }
         return config
@@ -57,7 +58,10 @@ const resInterceptor = {
     return Promise.reject(error)
   }
 }
-//初始化axios拦截器
+/**
+ * 初始化axios拦截器
+ * @param {*} $message 
+ */
 function initInterceptor($message){
     axios.interceptors.request.use(
         config => reqInterceptor.onFulfilled(config, $message),
@@ -70,10 +74,34 @@ function initInterceptor($message){
     )
 }
 
+/**
+ * 设置认证信息
+ * @param auth {Object}
+ */
+function setAuthorization(auth) {
+    Cookie.set(authHeader, 'Bearer ' + auth.token, {expires: auth.expireAt})
+}
 
+/**
+ * 是否登录
+ */
+function isLogin() {
+  let auth = Cookie.get(authHeader);
+  return auth?true:false
+}
+
+/**
+ * 登出
+ */
+function logout(){
+  Cookie.remove(authHeader);
+}
 
 export {
     METHOD,
     request,
-    initInterceptor
+    initInterceptor,
+    setAuthorization,
+    isLogin,
+    logout
 }
