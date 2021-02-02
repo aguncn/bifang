@@ -43,6 +43,7 @@
           </a-tab-pane>
           <a-tab-pane tab="注册" key="2">
             <a-form @submit="onRegister" :form="registerForm">
+                <a-alert type="error" :closable="true" v-show="regError" :message="regError" showIcon style="margin-bottom: 24px;" />
                 <a-form-item>
                 <a-input
                     autocomplete="autocomplete"
@@ -110,6 +111,7 @@ export default {
       logging: false,
       registing:false,
       error: '',
+      regError:'',
       activeKey:'1',
       loginForm: this.$form.createForm(this),
       registerForm: this.$form.createForm(this)
@@ -122,9 +124,9 @@ export default {
       this.loginForm.validateFields((err) => {
         if (!err) {
           this.logging = true
-          const name = this.loginForm.getFieldValue('name')
+          const username = this.loginForm.getFieldValue('name')
           const password = this.loginForm.getFieldValue('password')
-          Login(name, password).then(this.afterLogin)
+          Login({username, password}).then(this.afterLogin)
         }
       })
     },
@@ -133,11 +135,11 @@ export default {
       this.registerForm.validateFields((err) => {
         if (!err) {
           this.registing = true
-          const name = this.registerForm.getFieldValue('username')
+          const username = this.registerForm.getFieldValue('username')
           const password = this.registerForm.getFieldValue('password')
-          const confirmPassword = this.registerForm.getFieldValue('confirmPassword')
+          const passwordConfirm = this.registerForm.getFieldValue('confirmPassword')
           const email = this.registerForm.getFieldValue('email')
-          Register(name, password, confirmPassword, email).then(this.afterRegister)
+          Register({username, password, passwordConfirm, email}).then(this.afterRegister)
         }
       })
     },
@@ -173,23 +175,25 @@ export default {
         //   this.$message.success(loginRes.message, 3)
         // })
       } else {
-        this.error = loginRes.message
+        this.error = loginRes.data.message
       }
     },
     afterRegister(res) {
       const registerRes = res.data
+      this.registing = false;
       if (registerRes.code == 0) {
-          this.registing = false;
         this.$message.success('恭喜，注册成功！', 3)
+        const username = this.registerForm.getFieldValue('username')
+        const password = this.registerForm.getFieldValue('password')
         this.registerForm.resetFields()
         //回填
         this.loginForm.setFieldsValue({
-            name:registerRes.data["username"],
-            password: registerRes.data["password"]
+            name:username,
+            password
             })
         this.activeKey = "1"
       } else {
-        this.$message.success(registerRes.message, 3)
+        this.regError =registerRes.data
       }
     }
   }

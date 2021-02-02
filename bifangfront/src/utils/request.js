@@ -31,12 +31,28 @@ async function request(url, method, params) {
   }
 }
 
+const whiteRequstList = [];
+/**
+ * 请求白名单
+ * @param {*} apiList 
+ */
+function requestWhitelistConfig(apiList){
+  Object.prototype.toString.call(apiList) === '[object Array]'?
+  whiteRequstList.push.apply(whiteRequstList,apiList):whiteRequstList.push(apiList)
+}
+
 //request拦截器
 const reqInterceptor = {
-    onFulfilled(config,$message){
+    onFulfilled(config,$message,router){
         const {url} = config;
-        if (url.indexOf('jwt_auth') === -1 && !Cookie.get(authHeader)) {
-            $message.warning('认证 token 已过期，请重新登录')
+        let token = Cookie.get(authHeader)
+        config.headers.common[authHeader] = token
+        config.headers['Content-Type'] = 'application/json';
+        if (whiteRequstList.indexOf(url) === -1 && !Cookie.get(authHeader)) {
+            $message.warning('认证 token 已过期，请重新登录');
+            setTimeout(()=>{
+              router.push('/login')
+            },1000)
         }
         return config
     },
@@ -62,9 +78,9 @@ const resInterceptor = {
  * 初始化axios拦截器
  * @param {*} $message 
  */
-function initInterceptor($message){
+function initInterceptor($message,router){
     axios.interceptors.request.use(
-        config => reqInterceptor.onFulfilled(config, $message),
+        config => reqInterceptor.onFulfilled(config, $message,router),
         error => reqInterceptor.onRejected(error, $message)
     )
 
@@ -102,6 +118,7 @@ export {
     request,
     initInterceptor,
     setAuthorization,
+    requestWhitelistConfig,
     isLogin,
     logout
 }

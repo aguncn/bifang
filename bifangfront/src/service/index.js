@@ -1,11 +1,17 @@
-import {request,METHOD } from '@/utils/request'
+import {request,METHOD,requestWhitelistConfig } from '@/utils/request'
 
 const BASE_URL = process.env.VUE_APP_API_BASE_URL;
+const REAL_URL = process.env.VUE_APP_API_REAL_URL;
 const API = {
-    LOGIN: `${BASE_URL}/jwt_auth/`,
-    REGISTER: `${BASE_URL}/account/register`,
-    RELEASELIST: `${BASE_URL}/release/list`
+    LOGIN: `${REAL_URL}/jwt_auth/`,
+    REGISTER: `${REAL_URL}/account/register/`,
+    RELEASELIST: `${REAL_URL}/release/list/`
 }
+
+requestWhitelistConfig([
+    API.LOGIN,
+    API.REGISTER
+])
 
 /**
  * 登录
@@ -61,6 +67,7 @@ async function ReleaseList(){
 }
 
 export {
+    API,
     Login,
     Register,
     ReleaseList

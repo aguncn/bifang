@@ -3,15 +3,15 @@ const isProd = process.env.NODE_ENV === 'production'
 
 module.exports = {
     devServer: {
-      // proxy: {
-      //   '/api': { //此处要与 /services/api.js 中的 API_PROXY_PREFIX 值保持一致
-      //     target: process.env.VUE_APP_API_BASE_URL,
-      //     changeOrigin: true,
-      //     pathRewrite: {
-      //       '^/api': ''
-      //     }
-      //   }
-      // }
+      proxy: {
+        '/restapi': { //此处要与 /services/api.js 中的 API_PROXY_PREFIX 值保持一致
+          target: 'http://127.0.0.1:8000',
+          changeOrigin: true,
+          pathRewrite: {
+            '^/restapi': '/'
+          }
+        }
+      }
     },
     pluginOptions: {
         'style-resources-loader': {

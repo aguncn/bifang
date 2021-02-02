@@ -2,16 +2,16 @@
 <template>
   <a-card>
     <div class="search">
-      <a-form layout="horizontal">
+      <a-form layout="horizontal" :form="form">
         <div class="fold">
           <a-row >
           <a-col :md="8" :sm="24" >
             <a-form-item
-              label="项目"
+              label="组件"
               :labelCol="{span: 5}"
               :wrapperCol="{span: 18, offset: 1}"
             >
-              <a-input placeholder="请输入" />
+              <a-input name="" placeholder="请输入" />
             </a-form-item>
           </a-col>
           <a-col :md="8" :sm="24" >
@@ -51,6 +51,17 @@
         @clear="onClear"
         @change="onChange"
         @selectedRowChange="onSelectChange"
+        :pagination="{
+          current: page,
+          pageSize: pageSize,
+          total: total,
+          showSizeChanger: true,
+          showLessItems: true,
+          showQuickJumper: true,
+          showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`,
+          onChange: onPageChange,
+          onShowSizeChange: onSizeChange,
+        }"
       >
         <div slot="description" slot-scope="{text}">
           {{text}}
@@ -61,12 +72,6 @@
           </a>
           <a style="margin-right: 8px">
             <a-icon type="edit"/>编辑
-          </a>
-          <a @click="deleteRecord(record.key)">
-            <a-icon type="delete" />删除1
-          </a>
-          <a @click="deleteRecord(record.key)">
-            <a-icon type="delete" />删除2
           </a>
         </div>
         <template slot="statusTitle">
@@ -83,26 +88,30 @@ import { ReleaseList } from '@/service'
 const columns = [
   {
     title: '发布单编号',
-    dataIndex: 'no'
+    dataIndex: 'name'
   },
   {
     title: '组件',
-    dataIndex: 'description',
-    scopedSlots: { customRender: 'description' }
+    dataIndex: 'app'
+  },
+  {
+    title: '环境',
+    dataIndex: 'env',
+    customRender: (env) => {return env == 7?'UAT': ' 测试环境'}
   },
   {
     title: '编译分支',
-    dataIndex: 'callNo'
+    dataIndex: 'git_branch'
   },
   {
     title: '发布状态',
-    dataIndex: 'status',
+    dataIndex: 'deploy_status',
     slots: {title: 'statusTitle'},
-    customRender: (status) => {return status == 1?'已发布': ' 未发布'}
+    customRender: (status) => {return status == 29?'已发布': ' 未发布'}
   },
   {
     title: '更新时间',
-    dataIndex: 'updatedAt',
+    dataIndex: 'update_date',
     sorter: true
   },
   {
@@ -116,6 +125,9 @@ export default {
   components: {BfTable},
   data () {
     return {
+      page:1,
+      pageSize:20,
+      total:0,
       advanced: true,
       columns: columns,
       dataSource: [],
@@ -123,11 +135,7 @@ export default {
     }
   },
   created(){
-    ReleaseList().then((res)=>{
-      if(res.status == 200 && res.data.code == 0){
-        this.dataSource = res.data.results.list;
-      }
-    })
+    this.query()
   },
   methods: {
     deleteRecord(key) {
@@ -140,6 +148,32 @@ export default {
     remove () {
       this.dataSource = this.dataSource.filter(item => this.selectedRows.findIndex(row => row.key === item.key) === -1)
       this.selectedRows = []
+    },
+    query(){
+      let params = {
+        currentPage:this.page,
+        pageSize:this.pageSize
+      }
+      ReleaseList().then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          this.total = result.data.count
+          this.dataSource = result.data.results;
+        }
+        else{
+          this.dataSource = []
+        }
+      })
+    },
+    onPageChange(){
+      this.page = page
+      this.pageSize = pageSize
+      this.query()
+    },
+    onSizeChange(current, size) {
+      this.page = 1
+      this.pageSize = size
+      this.query()
     },
     onClear() {
       this.$message.info('您清空了勾选的所有行')
