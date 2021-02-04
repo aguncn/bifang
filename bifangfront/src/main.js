@@ -12,7 +12,7 @@ Vue.config.productionTip = false;
 
 Vue.use(Antd);
 Vue.prototype.$request = request;
-initInterceptor(Vue.prototype.$message)
+initInterceptor(Vue.prototype.$message,router)
 
 new Vue({
   router,
