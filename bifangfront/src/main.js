@@ -6,13 +6,13 @@ import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.less'
 import './theme/index.less'
 import '@/mock'
-import {request,initInterceptor} from '@/service/request'
+import {request,initInterceptor} from '@/utils/request'
 
 Vue.config.productionTip = false;
 
 Vue.use(Antd);
 Vue.prototype.$request = request;
-initInterceptor(Vue.prototype.$message)
+initInterceptor(Vue.prototype.$message,router)
 
 new Vue({
   router,

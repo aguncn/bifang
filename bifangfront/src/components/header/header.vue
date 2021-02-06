@@ -15,11 +15,11 @@
                 <span class="name">{{user.name}}</span>
             </div>
             <a-menu :class="['avatar-menu']" slot="overlay">
-            <a-menu-item>
+            <!-- <a-menu-item>
                 <a-icon type="user" />
                 <span>个人中心</span>
-            </a-menu-item>
-            <a-menu-divider />
+            </a-menu-item> 
+            <a-menu-divider />-->
             <a-menu-item @click="logout">
                 <a-icon style="margin-right: 8px;" type="poweroff" />
                 <span>退出登录</span>
@@ -33,6 +33,7 @@
 
 <script>
 // import {mapState, mapMutations} from 'vuex'
+import {logout} from '@/utils/request'
 
 export default {
   name: 'AdminHeader',
@@ -53,6 +54,7 @@ export default {
       this.$emit('toggleCollapse')
     },
     logout() {
+      logout()
       this.$router.push('/login')
     }
   }

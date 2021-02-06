@@ -2,55 +2,43 @@
 <template>
   <a-card>
     <div class="search">
-      <a-form layout="horizontal">
-        <div class="fold">
-          <a-row >
-          <a-col :md="8" :sm="24" >
+      <a-form layout="inline" :form="form" @submit="submitHandler">
             <a-form-item
-              label="项目"
-              :labelCol="{span: 5}"
-              :wrapperCol="{span: 18, offset: 1}"
+              label="发布单号"
             >
-              <a-input placeholder="请输入" />
+              <a-input 
+              placeholder="请输入发布单"
+              v-decorator="['releaseNo', { rules: [{ required: false, message: 'Please input your note!' }] }]" />
             </a-form-item>
-          </a-col>
-          <a-col :md="8" :sm="24" >
             <a-form-item
-              label="组件"
-              :labelCol="{span: 5}"
-              :wrapperCol="{span: 18, offset: 1}"
+              label="时间"
             >
-              <a-select placeholder="请选择">
-                <a-select-option value="1">关闭</a-select-option>
-                <a-select-option value="2">运行中</a-select-option>
-              </a-select>
+              <a-range-picker
+              v-decorator="['timePicker', {rules: [{ type: 'array', required: false }]}]" />
             </a-form-item>
-          </a-col>
-          <a-col :md="8" :sm="24" >
-            <a-form-item
-              label="组件状态"
-              :labelCol="{span: 7}"
-              :wrapperCol="{span: 16,offset: 1}"
-            >
-              <a-input placeholder="请输入" />
+            <a-form-item>
+              <a-button type="primary" html-type="submit">
+                查询
+              </a-button>
             </a-form-item>
-          </a-col>
-        </a-row>
-        </div>
-        <span style="float: right; margin-top: 3px;">
-          <a-button type="primary">查询</a-button>
-          <a-button style="margin-left: 8px">重置</a-button>
-        </span>
       </a-form>
     </div>
     <div>
       <bf-table
         :columns="columns"
         :dataSource="dataSource"
-        :selectedRows.sync="selectedRows"
+        rowKey="name"
         @clear="onClear"
         @change="onChange"
-        @selectedRowChange="onSelectChange"
+        :pagination="{
+          current: params.currentPage,
+          pageSize: params.pageSize,
+          total: total,
+          showSizeChanger: true,
+          showLessItems: true,
+          showQuickJumper: true,
+          showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
+        }"
       >
         <div slot="description" slot-scope="{text}">
           {{text}}
@@ -61,12 +49,6 @@
           </a>
           <a style="margin-right: 8px">
             <a-icon type="edit"/>编辑
-          </a>
-          <a @click="deleteRecord(record.key)">
-            <a-icon type="delete" />删除1
-          </a>
-          <a @click="deleteRecord(record.key)">
-            <a-icon type="delete" />删除2
           </a>
         </div>
         <template slot="statusTitle">
@@ -80,30 +62,36 @@
 <script>
 import BfTable from '@/components/table/table'
 import { ReleaseList } from '@/service'
+import moment from 'moment'
 const columns = [
   {
     title: '发布单编号',
-    dataIndex: 'no'
+    dataIndex: 'name'
   },
   {
     title: '组件',
-    dataIndex: 'description',
-    scopedSlots: { customRender: 'description' }
+    dataIndex: 'app'
+  },
+  {
+    title: '环境',
+    dataIndex: 'env',
+    customRender: (env) => {return env == 7?'UAT': ' 测试环境'}
   },
   {
     title: '编译分支',
-    dataIndex: 'callNo'
+    dataIndex: 'git_branch'
   },
   {
     title: '发布状态',
-    dataIndex: 'status',
+    dataIndex: 'deploy_status',
     slots: {title: 'statusTitle'},
-    customRender: (status) => {return status == 1?'已发布': ' 未发布'}
+    customRender: (status) => {return status == 29?'已发布': ' 未发布'}
   },
   {
     title: '更新时间',
-    dataIndex: 'updatedAt',
-    sorter: true
+    dataIndex: 'update_date',
+    sorter: true,
+    customRender: (date) =>{ return moment(date).format("YYYY-MM-DD hh:mm")}
   },
   {
     title: '操作',
@@ -116,24 +104,29 @@ export default {
   components: {BfTable},
   data () {
     return {
+      total:0,
       advanced: true,
       columns: columns,
       dataSource: [],
-      selectedRows: []
+      selectedRows: [],
+      params:{
+        name:"",
+        currentPage:1,
+        pageSize:20,
+        begin_time:"",
+        end_time:"",
+        sorter:""
+      }
+      
     }
   },
+  beforeCreate() {
+    this.form = this.$form.createForm(this, { name: 'releaseList' });
+  },
   created(){
-    ReleaseList().then((res)=>{
-      if(res.status == 200 && res.data.code == 0){
-        this.dataSource = res.data.results.list;
-      }
-    })
+    this.fetchData()
   },
   methods: {
-    deleteRecord(key) {
-      this.dataSource = this.dataSource.filter(item => item.key !== key)
-      this.selectedRows = this.selectedRows.filter(item => item.key !== key)
-    },
     toggleAdvanced () {
       this.advanced = !this.advanced
     },
@@ -141,17 +134,61 @@ export default {
       this.dataSource = this.dataSource.filter(item => this.selectedRows.findIndex(row => row.key === item.key) === -1)
       this.selectedRows = []
     },
+    submitHandler(e){
+      e.preventDefault()
+      this.form.validateFields((err, fieldsValue) => {
+          if (err) {
+            return;
+          }
+          const rangeValue = fieldsValue['timePicker']
+          this.params.name = fieldsValue["releaseNo"]
+          this.params.begin_time = rangeValue?rangeValue[0].format("YYYY-MM-DD"):""
+          this.params.end_time = rangeValue?rangeValue[1].format("YYYY-MM-DD"):""
+          this.fetchData()
+        });
+    },
+    fetchData(){
+      ReleaseList(this.params).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          this.total = result.data.count
+          this.dataSource = result.data.results;
+        }
+        else{
+          this.dataSource = []
+        }
+      })
+    },
+    onPageChange(page,pageSize){
+      this.params.currentPage = page
+      this.params.pageSize = pageSize
+      this.fetchData()
+    },
+    onSizeChange(current, size) {
+      this.params.currentPage = 1
+      this.params.pageSize = size
+      this.fetchData()
+    },
     onClear() {
       this.$message.info('您清空了勾选的所有行')
     },
     onStatusTitleClick() {
       this.$message.info('你点击了状态栏表头')
     },
-    onChange() {
-      this.$message.info('表格状态改变了')
-    },
-    onSelectChange() {
-      this.$message.info('选中行改变了')
+    onChange(pagination, filters, sorter) {
+       console.log('Various parameters', pagination, filters, sorter);
+       let {
+         current,
+         pageSize
+       } = pagination
+       let {
+         order,
+         field
+       } = sorter
+       this.params.currentPage = current
+       this.params.pageSize = pageSize
+       this.params.sorter = (field?field:"")
+       this.fetchData()
     },
     addNew () {
       this.dataSource.unshift({

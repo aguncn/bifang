@@ -31,11 +31,28 @@ async function request(url, method, params) {
   }
 }
 
+const whiteRequstList = [];
+/**
+ * 请求白名单
+ * @param {*} apiList 
+ */
+function requestWhitelistConfig(apiList){
+  Object.prototype.toString.call(apiList) === '[object Array]'?
+  whiteRequstList.push.apply(whiteRequstList,apiList):whiteRequstList.push(apiList)
+}
+
 //request拦截器
 const reqInterceptor = {
-    onFulfilled(config,$message){
-        if (!Cookie.get(authHeader)) {
-            $message.warning('认证 token 已过期，请重新登录')
+    onFulfilled(config,$message,router){
+        const {url} = config;
+        let token = Cookie.get(authHeader)
+        config.headers.common[authHeader] = token
+        config.headers['Content-Type'] = 'application/json';
+        if (whiteRequstList.indexOf(url) === -1 && !Cookie.get(authHeader)) {
+            $message.warning('认证 token 已过期，请重新登录');
+            setTimeout(()=>{
+              router.push('/login')
+            },1000)
         }
         return config
     },
@@ -57,10 +74,13 @@ const resInterceptor = {
     return Promise.reject(error)
   }
 }
-//初始化axios拦截器
-function initInterceptor($message){
+/**
+ * 初始化axios拦截器
+ * @param {*} $message 
+ */
+function initInterceptor($message,router){
     axios.interceptors.request.use(
-        config => reqInterceptor.onFulfilled(config, $message),
+        config => reqInterceptor.onFulfilled(config, $message,router),
         error => reqInterceptor.onRejected(error, $message)
     )
 
@@ -70,10 +90,35 @@ function initInterceptor($message){
     )
 }
 
+/**
+ * 设置认证信息
+ * @param auth {Object}
+ */
+function setAuthorization(auth) {
+    Cookie.set(authHeader, 'Bearer ' + auth.token, {expires: auth.expireAt})
+}
 
+/**
+ * 是否登录
+ */
+function isLogin() {
+  let auth = Cookie.get(authHeader);
+  return auth?true:false
+}
+
+/**
+ * 登出
+ */
+function logout(){
+  Cookie.remove(authHeader);
+}
 
 export {
     METHOD,
     request,
-    initInterceptor
+    initInterceptor,
+    setAuthorization,
+    requestWhitelistConfig,
+    isLogin,
+    logout
 }
