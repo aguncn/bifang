@@ -8,7 +8,7 @@
             >
               <a-input 
               placeholder="请输入应用名称"
-              v-decorator="['appName', { rules: [{ required: false, message: 'Please input your note!' }] }]" />
+              v-decorator="['appName', { rules: [{ required: false, message: '请输入应用名称' }] }]" />
             </a-form-item>
             <a-form-item
               label="时间"
@@ -19,6 +19,11 @@
             <a-form-item>
               <a-button type="primary" html-type="submit">
                 查询
+              </a-button>
+            </a-form-item>
+            <a-form-item>
+              <a-button type="primary" @click.prevent="onCreateApp">
+                新建
               </a-button>
             </a-form-item>
       </a-form>
@@ -44,11 +49,11 @@
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a style="margin-right: 8px">
-            <a-icon type="plus"/>新增
-          </a>
-          <a style="margin-right: 8px">
+          <a style="margin-right: 8px" @click.prevent="onShowEdit(record)">
             <a-icon type="edit"/>编辑
+          </a>
+          <a style="margin-right: 8px" @click.prevent="onDelete(record)">
+            <a-icon type="delete"/>删除
           </a>
         </div>
         <template slot="statusTitle">
@@ -61,7 +66,7 @@
 
 <script>
 import BfTable from '@/components/table/table'
-import { AppList } from '@/service'
+import { AppList, DeleteApplication } from '@/service'
 const columns = [
   {
     title: '应用ID',
@@ -76,8 +81,8 @@ const columns = [
     dataIndex: 'cn_name'
   },
   {
-    title: 'GIT ID',
-    dataIndex: 'git_app_id',
+    title: '归属项目',
+    dataIndex: 'project_name',
   },
   {
     title: '服务名称',
@@ -194,20 +199,31 @@ export default {
        this.params.sorter = (field?field:"")
        this.fetchData()
     },
-    addNew () {
-      this.dataSource.unshift({
-        key: this.dataSource.length,
-        no: 'NO ' + this.dataSource.length,
-        description: '这是一段描述',
-        callNo: Math.floor(Math.random() * 1000),
-        status: Math.floor(Math.random() * 10) % 4,
-        updatedAt: '2018-07-26'
+    onCreateApp(){
+      this.$router.push("appDetail")
+    },
+    onShowEdit(record){
+      this.$router.push({
+        name:"appdetail",
+        params:record
       })
     },
-    handleMenuClick (e) {
-      if (e.key === 'delete') {
-        this.remove()
+    onDelete(record){
+      let {id} = record;
+      if(id == undefined){
+        this.$message.error("操作参数非法！")
+        return false
       }
+      DeleteApplication({id}).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          this.$message.success("删除成功~")
+          this.fetchData()
+        }
+        else{
+          this.$message.error("操作错误~:"+result.message)
+        }
+      })
     }
   }
 }

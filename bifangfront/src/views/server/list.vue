@@ -21,6 +21,11 @@
                 查询
               </a-button>
             </a-form-item>
+            <a-form-item>
+              <a-button type="primary" @click.prevent="createDialog">
+                新建
+              </a-button>
+            </a-form-item>
       </a-form>
     </div>
     <div>
@@ -44,11 +49,11 @@
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a style="margin-right: 8px">
-            <a-icon type="plus"/>新增
-          </a>
-          <a style="margin-right: 8px">
+          <a style="margin-right: 8px" @click.prevent="onShowEdit(record)">
             <a-icon type="edit"/>编辑
+          </a>
+          <a style="margin-right: 8px" @click.prevent="onDelete(record)">
+            <a-icon type="delete"/>删除
           </a>
         </div>
         <template slot="statusTitle">
@@ -56,12 +61,96 @@
         </template>
       </bf-table>
     </div>
+    <a-modal
+      :visible="visible"
+      :title="isEdit?'编辑服务器':'新增服务器'"
+      :okText="isEdit?'更新':'新建'"
+      @cancel="onReset"
+      @ok="isEdit?onUpdateServer():onCreateServer()"
+    >
+      <a-form layout='vertical' :form="formDialog">
+        <a-form-item
+          label="名称"
+          v-show="false"
+        >
+          <a-input placeholder="自动生成" 
+            v-decorator="['id']"
+          />
+        </a-form-item>
+        <a-form-item
+          label="名称"
+          v-show="isEdit"
+        >
+          <a-input placeholder="自动生成" 
+            v-decorator="['serverName']"
+          />
+        </a-form-item>
+        <a-form-item label='服务器IP'>
+          <a-input
+            :disabled="isEdit?true:false"
+            v-decorator="[
+              'ip',
+              {
+                rules: [{ required: true, message: '请输入服务器IP' }],
+              }
+            ]"
+          />
+        </a-form-item>
+        <a-form-item label='服务器端口'>
+          <a-input
+            :disabled="isEdit?true:false"
+            v-decorator="[
+              'port',
+              {
+                rules: [{ required: true, message: '请输入服务器端口' }],
+              }
+            ]"
+          />
+        </a-form-item>
+        <a-form-item
+          label="组件选择"
+        >
+          <a-select
+            show-search
+            placeholder="请选择组件"
+            option-filter-prop="children"
+            style="min-width: 200px;width:100%"
+            :filter-option="filterOption"
+            v-decorator="['appId', { rules: [{ required: true, message: '请选择发布的组件!' }] }]"
+          >
+            <a-select-option v-for="d in options" :key="d.value">
+            {{ d.label }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item 
+          label="操作系统"
+        >
+          <a-select
+            v-decorator="[ 'system', { rules: [{ required: true, message: '请选择操作系统' }] }]"
+          >
+            <a-select-option value="WINDOWS">
+              WINDOWS
+            </a-select-option>
+            <a-select-option value="LINUX">
+              LINUX
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label='描述'>
+          <a-input
+            type='textarea'
+            v-decorator="['description']"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </a-card>
 </template>
 
 <script>
 import BfTable from '@/components/table/table'
-import { ServerList } from '@/service'
+import { ServerList, AppList, CreateServer, DeleteServer, UpdateServer } from '@/service'
 import moment from 'moment'
 const columns = [
   {
@@ -77,7 +166,7 @@ const columns = [
     dataIndex: 'system_type'
   },
   {
-    title: '所属项目',
+    title: '所属应用',
     dataIndex: 'app'
   },
   {
@@ -107,6 +196,9 @@ export default {
       columns: columns,
       dataSource: [],
       selectedRows: [],
+      visible:false,
+      options:[],
+      isEdit:false,
       params:{
         name:"",
         currentPage:1,
@@ -120,9 +212,11 @@ export default {
   },
   beforeCreate() {
     this.form = this.$form.createForm(this, { name: 'serverList' });
+    this.formDialog = this.$form.createForm(this, { name: 'formDialog' });
   },
   created(){
     this.fetchData()
+    this.fetchComponentList()
   },
   methods: {
     toggleAdvanced () {
@@ -157,6 +251,80 @@ export default {
         }
       })
     },
+    onShowEdit(record){
+      this.visible = true
+      this.isEdit = true
+      this.$nextTick(()=>{
+        this.formDialog.setFieldsValue({
+          id:record.id,
+          serverName:record.name,
+          ip:record.ip,
+          port:record.port,
+          system:record.system_type,
+          appId:record.app,
+          description:record.description
+        })
+      })
+    },
+    onUpdateServer(){
+      this.formDialog.validateFields((err, fieldsValue) => {
+          if (err) {
+            return;
+          }
+          let id = fieldsValue["id"],
+              name = fieldsValue["serverName"],
+              ip = fieldsValue["ip"],
+              port = fieldsValue["port"],
+              app_id = fieldsValue["appId"],
+              system_type = fieldsValue["system"],
+              description = fieldsValue["description"]||""
+          let data = {
+            id,
+            name,
+            ip,
+            port,
+            app_id,
+            system_type,
+            description
+          }
+          UpdateServer(data).then((res)=>{
+            let result = res.data
+            if(res.status == 200){
+              this.$message.success("服务器更新成功~")
+              this.onReset()
+              this.fetchData()
+            }
+            else{
+              this.$message.error("服务器更新失败:"+result.message)
+            }
+          })
+        })
+    },
+    onDelete(record){
+      let {id} = record;
+      if(id == undefined){
+        this.$message.error("操作参数非法！")
+        return false
+      }
+      DeleteServer({id}).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          this.$message.success("删除成功~")
+          this.fetchData()
+        }
+        else{
+          this.$message.error("操作错误~:"+result.message)
+        }
+      })
+    },
+    createDialog(){
+      this.visible = true
+    },
+    onReset(){
+      this.visible = false
+      this.isEdit = false
+      this.formDialog.resetFields()
+    },
     onPageChange(page,pageSize){
       this.params.currentPage = page
       this.params.pageSize = pageSize
@@ -188,20 +356,57 @@ export default {
        this.params.sorter = (field?field:"")
        this.fetchData()
     },
-    addNew () {
-      this.dataSource.unshift({
-        key: this.dataSource.length,
-        no: 'NO ' + this.dataSource.length,
-        description: '这是一段描述',
-        callNo: Math.floor(Math.random() * 1000),
-        status: Math.floor(Math.random() * 10) % 4,
-        updatedAt: '2018-07-26'
+    filterOption(input, option) {
+      return (
+        option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+      );
+    },
+    fetchComponentList(){
+      AppList({}).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          result.data.results.forEach(item=>{
+            this.options.push({
+              label:item.name,
+              value:item.id
+            })
+          })
+        }
+        else{
+          this.$message.error("无法获取应用列表~")
+        }
       })
     },
-    handleMenuClick (e) {
-      if (e.key === 'delete') {
-        this.remove()
-      }
+    onCreateServer () {
+      this.formDialog.validateFields((err, fieldsValue) => {
+          if (err) {
+            return;
+          }
+          let ip = fieldsValue["ip"],
+              port = fieldsValue["port"],
+              app_id = fieldsValue["appId"],
+              system_type = fieldsValue["system"],
+              description = fieldsValue["description"]||""
+          let data = {
+            name:[ip,'-', port].join(''),
+            ip,
+            port,
+            app_id,
+            system_type,
+            description
+          }
+          CreateServer(data).then((res)=>{
+            let result = res.data
+            if(res.status == 200 && result.code == 0){
+              this.$message.success("服务器新增成功~")
+              this.visible = false
+              this.fetchData()
+            }
+            else{
+              this.$message.error("服务器新增失败:"+result.message)
+            }
+          })
+        })
     }
   }
 }

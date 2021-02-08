@@ -21,6 +21,11 @@
                 查询
               </a-button>
             </a-form-item>
+            <a-form-item>
+              <a-button type="primary" @click.prevent="onCreateRelease">
+                新建
+              </a-button>
+            </a-form-item>
       </a-form>
     </div>
     <div>
@@ -190,15 +195,8 @@ export default {
        this.params.sorter = (field?field:"")
        this.fetchData()
     },
-    addNew () {
-      this.dataSource.unshift({
-        key: this.dataSource.length,
-        no: 'NO ' + this.dataSource.length,
-        description: '这是一段描述',
-        callNo: Math.floor(Math.random() * 1000),
-        status: Math.floor(Math.random() * 10) % 4,
-        updatedAt: '2018-07-26'
-      })
+    onCreateRelease(){
+      this.$router.push("createRelease")
     },
     handleMenuClick (e) {
       if (e.key === 'delete') {

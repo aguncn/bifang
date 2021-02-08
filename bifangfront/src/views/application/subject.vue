@@ -21,6 +21,11 @@
                 查询
               </a-button>
             </a-form-item>
+            <a-form-item>
+              <a-button type="primary" @click.prevent="createDialog">
+                新建
+              </a-button>
+            </a-form-item>
       </a-form>
     </div>
     <div>
@@ -44,11 +49,11 @@
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a style="margin-right: 8px">
-            <a-icon type="plus"/>新增
-          </a>
-          <a style="margin-right: 8px">
+          <a style="margin-right: 8px" @click.prevent="onShowEdit(record)">
             <a-icon type="edit"/>编辑
+          </a>
+          <a style="margin-right: 8px" @click.prevent="onDelete(record)">
+            <a-icon type="delete"/>删除
           </a>
         </div>
         <template slot="statusTitle">
@@ -56,12 +61,57 @@
         </template>
       </bf-table>
     </div>
+    <a-modal
+      :visible="visible"
+      :title="isEdit?'编辑项目':'新增项目'"
+      :okText="isEdit?'更新':'新建'"
+      @cancel="onReset"
+      @ok="isEdit?onUpdateSubject():onCreateSubject()"
+    >
+      <a-form layout='vertical' :form="formDialog">
+        <a-form-item
+          label="ID"
+          v-show="false"
+        >
+          <a-input placeholder="自动生成" 
+            v-decorator="['id']"
+          />
+        </a-form-item>
+        <a-form-item label='英文名称'>
+          <a-input
+            :disabled="isEdit?true:false"
+            v-decorator="[
+              'name',
+              {
+                rules: [{ required: true, message: '请输入中文名称' }],
+              }
+            ]"
+          />
+        </a-form-item>
+        <a-form-item label='中文名称'>
+          <a-input
+            v-decorator="[
+              'cnname',
+              {
+                rules: [{ required: true, message: '请输入中文名称' }],
+              }
+            ]"
+          />
+        </a-form-item>
+        <a-form-item label='项目描述'>
+          <a-input
+            type='textarea'
+            v-decorator="['description']"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </a-card>
 </template>
 
 <script>
 import BfTable from '@/components/table/table'
-import { ProjectList } from '@/service'
+import { ProjectList, CreateSubject, DeleteSubject, UpdateSubject } from '@/service'
 import moment from 'moment'
 const columns = [
   {
@@ -103,6 +153,8 @@ export default {
       columns: columns,
       dataSource: [],
       selectedRows: [],
+      visible:false,
+      isEdit:false,
       params:{
         name:"",
         currentPage:1,
@@ -116,6 +168,7 @@ export default {
   },
   beforeCreate() {
     this.form = this.$form.createForm(this, { name: 'moduleList' });
+    this.formDialog = this.$form.createForm(this, { name: 'formDialog' });
   },
   created(){
     this.fetchData()
@@ -184,21 +237,97 @@ export default {
        this.params.sorter = (field?field:"")
        this.fetchData()
     },
-    addNew () {
-      this.dataSource.unshift({
-        key: this.dataSource.length,
-        no: 'NO ' + this.dataSource.length,
-        description: '这是一段描述',
-        callNo: Math.floor(Math.random() * 1000),
-        status: Math.floor(Math.random() * 10) % 4,
-        updatedAt: '2018-07-26'
+    onShowEdit(record){
+      this.visible = true
+      this.isEdit = true
+      this.$nextTick(()=>{
+        this.formDialog.setFieldsValue({
+          id:record.id,
+          name:record.name,
+          cnname:record.cn_name,
+          description:record.description
+        })
       })
     },
-    handleMenuClick (e) {
-      if (e.key === 'delete') {
-        this.remove()
+    onCreateSubject () {
+      this.formDialog.validateFields((err, fieldsValue) => {
+          if (err) {
+            return;
+          }
+          let name = fieldsValue["name"],
+              cn_name = fieldsValue["cnname"],
+              description = fieldsValue["description"]||""
+          let data = {
+            name,
+            cn_name,
+            description
+          }
+          CreateSubject(data).then((res)=>{
+            let result = res.data
+            if(res.status == 200 && result.code == 0){
+              this.$message.success("项目新增成功~")
+              this.visible = false
+              this.fetchData()
+            }
+            else{
+              this.$message.error("项目新增失败:"+result.message)
+            }
+          })
+        })
+    },
+    onUpdateSubject(){
+      this.formDialog.validateFields((err, fieldsValue) => {
+          if (err) {
+            return;
+          }
+          let id = fieldsValue["id"],
+              name = fieldsValue["name"],
+              cn_name = fieldsValue["cnname"],
+              description = fieldsValue["description"]||""
+          let data = {
+            id,
+            name,
+            cn_name,
+            description
+          }
+          UpdateSubject(data).then((res)=>{
+            let result = res.data
+            if(res.status == 200){
+              this.$message.success("项目更新成功~")
+              this.onReset()
+              this.fetchData()
+            }
+            else{
+              this.$message.error("项目更新失败:"+result.message)
+            }
+          })
+        })
+    },
+    onDelete(record){
+      let {id} = record;
+      if(id == undefined){
+        this.$message.error("操作参数非法！")
+        return false
       }
-    }
+      DeleteSubject({id}).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          this.$message.success("删除成功~")
+          this.fetchData()
+        }
+        else{
+          this.$message.error("操作错误~:"+result.message)
+        }
+      })
+    },
+    createDialog(){
+      this.visible = true
+    },
+    onReset(){
+      this.visible = false
+      this.isEdit = false
+      this.formDialog.resetFields()
+    },
   }
 }
 </script>

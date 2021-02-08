@@ -59,7 +59,7 @@ class AppCreateView(CreateAPIView):
         data['name'] = req_data['name']
         data['description'] = req_data['description']
         data['cn_name'] = req_data['cn_name']
-        data['app_id'] = req_data['app_id']
+        #data['app_id'] = req_data['app_id']
         data['git_app_id'] = req_data['git_app_id']
         # 外键关联
         data['git'] = req_data['git_id']

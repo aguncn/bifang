@@ -74,28 +74,28 @@ const routes = [
         component: () => import('@/views/application/subject')
       },
       {
-        path: 'module',
+        path: 'application',
         name: '组件',
         meta: {
           icon: 'dashboard'
         },
-        component: () => import('@/views/application/module')
+        component: () => import('@/views/application/app')
       },
       {
-        path: 'serverlist',
+        path: '/appdetail',
+        name: 'appdetail',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/application/appdetail')
+      },
+      {
+        path: '/serverlist',
         name: '服务器列表',
         meta: {
           icon: 'dashboard'
         },
         component: () => import('@/views/server/list')
-      },
-      {
-        path: 'addserver',
-        name: '新增服务器',
-        meta: {
-          icon: 'dashboard'
-        },
-        component: () => import('@/views/server/add')
       },
     ]
   },

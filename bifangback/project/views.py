@@ -37,7 +37,7 @@ class ProjectCreateView(CreateAPIView):
         data['name'] = req_data['name']
         data['description'] = req_data['description']
         data['cn_name'] = req_data['cn_name']
-        data['project_id'] = req_data['project_id']
+        # data['project_id'] = req_data['project_id']
         # 从drf的request中获取用户(对django的request作了扩展的)
         data['create_user'] = request.user.id
         serializer = ProjectSerializer(data=data)

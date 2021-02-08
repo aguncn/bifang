@@ -1,80 +1,141 @@
 <template>
-  <div class="card-list">
-    <a-list
-      :grid="{gutter: 24, lg: 3, md: 2, sm: 1, xs: 1}"
-      :dataSource="dataSource"
-    >
-      <a-list-item slot="renderItem" slot-scope="item">
-        <template v-if="item.add">
-          <a-button class="new-btn" type="dashed">
-            <a-icon type="plus" />新增产品
-          </a-button>
-        </template>
-        <template v-else>
-          <a-card :hoverable="true">
-            <a-card-meta >
-              <div style="margin-bottom: 3px" slot="title">{{item.title}}</div>
-              <a-avatar class="card-avatar" slot="avatar" :src="item.avatar" size="large" />
-              <div class="meta-content" slot="description">{{item.content}}</div>
-            </a-card-meta>
-            <a slot="actions">操作一</a>
-            <a slot="actions">操作一</a>
-          </a-card>
-        </template>
-      </a-list-item>
-    </a-list>
-  </div>
+  <a-card :body-style="{padding: '24px 32px'}" :bordered="false">
+    <a-form :form="form" @submit="submitHandler">
+      <a-form-item
+        label="发布单号"
+        :labelCol="{span: 7}"
+        :wrapperCol="{span: 10}"
+      >
+        <a-input disabled value="自动生成" placeholder="自动生成" />
+      </a-form-item>
+      <a-form-item
+        label="组件选择"
+        :labelCol="{span: 7}"
+        :wrapperCol="{span: 10}"
+      >
+        <a-select
+          show-search
+          placeholder="请选择组件"
+          option-filter-prop="children"
+          style="width: 200px"
+          :filter-option="filterOption"
+          @focus="handleFocus"
+          @blur="handleBlur"
+          @change="handleChange"
+          v-decorator="['appId', { rules: [{ required: true, message: '请选择发布的组件!' }] }]"
+        >
+          <a-select-option v-for="d in options" :key="d.value">
+          {{ d.label }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item
+        label="发布分支"
+        :labelCol="{span: 7}"
+        :wrapperCol="{span: 10}"
+      >
+        <a-input 
+          placeholder="请输入发布单分支"
+          v-decorator="['branch', { rules: [{ required: true, message: '请输入组件分支!' }] }]"
+        />
+      </a-form-item>
+      <a-form-item
+        label="发布描述"
+        :labelCol="{span: 7}"
+        :wrapperCol="{span: 10}"
+      >
+        <a-textarea rows="4" 
+        placeholder="请输入发布单描述"
+        v-decorator="['description', { rules: [{ required: false, message: '请输入组件分支!' }] }]"
+        />
+      </a-form-item>
+      <a-form-item style="margin-top: 24px" :wrapperCol="{span: 10, offset: 7}">
+        <a-button type="primary" html-type="submit">创建</a-button>
+      </a-form-item>
+    </a-form>
+  </a-card>
 </template>
 
 <script>
-const dataSource = []
-dataSource.push({
-  add: true
-})
-for (let i = 0; i < 11; i++) {
-  dataSource.push({
-    title: 'Alipay',
-    avatar: 'https://gw.alipayobjects.com/zos/rmsportal/WdGqmHpayyMjiEhcKoVE.png',
-    content: '在中台产品的研发过程中，会出现不同的设计规范和实现方式，但其中往往存在很多类似的页面和组件，这些类似的组件会被抽离成一套标准规范。'
-  })
-}
-
+import { AppList,CreateRelease } from '@/service'
 export default {
   name: 'createRelease',
   data () {
     return {
-      desc: '段落示意：蚂蚁金服务设计平台 ant.design，用最小的工作量，无缝接入蚂蚁金服生态， 提供跨越设计与开发的体验解决方案。',
-      linkList: [
-        {icon: 'rocket', href: '/#/', title: '快速开始'},
-        {icon: 'info-circle-o', href: '/#/', title: '产品简介'},
-        {icon: 'file-text', href: '/#/', title: '产品文档'}
-      ],
-      extraImage: 'https://gw.alipayobjects.com/zos/rmsportal/RzwpdLnhmvDJToTdfDPe.png',
-      dataSource
+      value: 1,
+      fetching:false,
+      options:[]
     }
+  },
+  beforeCreate() {
+    this.form = this.$form.createForm(this, { name: 'createRelease' });
+  },
+  created(){
+    this.fetch()
+  },
+  computed: {
+    desc() {
+    }
+  },
+  methods: {
+    fetch(){
+      AppList({}).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          result.data.results.forEach(item=>{
+            this.options.push({
+              label:item.name,
+              value:item.id
+            })
+          })
+        }
+        else{
+          this.$message,error("无法获取应用列表~")
+        }
+      })
+    },
+    handleChange(value) {
+      console.log(`selected ${value}`);
+    },
+    handleBlur() {
+      console.log('blur');
+    },
+    handleFocus() {
+      console.log('focus');
+    },
+    submitHandler(e){
+      e.preventDefault()
+      this.form.validateFields((err, fieldsValue) => {
+          if (err) {
+            return;
+          }
+          let data = {
+            name:"",
+            app_id:fieldsValue["appId"],
+            git_branch:fieldsValue["branch"],
+            description:fieldsValue["description"]
+          }
+          CreateRelease(data).then((res)=>{
+            let result = res.data
+            if(res.status == 200 && result.code == 0){
+              this.$message.success("发布单创建成功~")
+              this.$router.push("releaseList")
+            }
+            else{
+              this.$message.error("无法获取应用列表~")
+            }
+          })
+        });
+    },
+    filterOption(input, option) {
+      return (
+        option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+      );
+    },
   }
 }
 </script>
 
-<style lang="less" scoped>
-  .card-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 48px;
-  }
-  .new-btn{
-    border-radius: 2px;
-    width: 100%;
-    height: 187px;
-  }
-  .meta-content{
-    position: relative;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    height: 64px;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-  }
+<style scoped>
 
 </style>

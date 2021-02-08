@@ -40,7 +40,7 @@
             <router-link to="/subject">项目</router-link>
           </a-menu-item>
           <a-menu-item key="8">
-            <router-link to="/module">组件</router-link>
+            <router-link to="/application">应用</router-link>
           </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="sub5">
@@ -48,9 +48,9 @@
           <a-menu-item key="9">
             <router-link to="/serverlist">列表</router-link>
           </a-menu-item>
-          <a-menu-item key="10">
+          <!-- <a-menu-item key="10">
             <router-link to="/addserver">新增</router-link>
-          </a-menu-item>
+          </a-menu-item> -->
         </a-sub-menu>
     </a-menu>
   </a-layout-sider>

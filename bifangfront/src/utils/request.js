@@ -10,7 +10,9 @@ axios.defaults.withCredentials= true
 // http method
 const METHOD = {
   GET: 'get',
-  POST: 'post'
+  POST: 'post',
+  DELETE: 'delete',
+  PUT: 'put'
 }
 
 /**
@@ -26,6 +28,10 @@ async function request(url, method, params) {
       return axios.get(url, {params})
     case METHOD.POST:
       return axios.post(url, params)
+    case METHOD.DELETE:
+      return axios.delete(url, params)
+    case METHOD.PUT:
+      return axios.put(url, params)
     default:
       return axios.get(url, {params})
   }
