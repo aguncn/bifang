@@ -8,6 +8,7 @@ const API = {
     REGISTER: `${REAL_URL}/account/register/`,
     RELEASELIST: `${REAL_URL}/release/list/`,
     APPLICATIONLIST: `${REAL_URL}/app/list/`,
+    ENVLIST: `${REAL_URL}/env/list/`,
     SERVERLIST: `${REAL_URL}/server/list/`,
     PROJECTIST: `${REAL_URL}/project/list/`,
     CREATERELEASE: `${REAL_URL}/release/create/`,
@@ -20,6 +21,14 @@ const API = {
     DELETEAPPLICATION: `${REAL_URL}/app/delete/{{id}}/`,
     CREATEAPPLICATION: `${REAL_URL}/app/create/`,
     UPDATEAPPLICATION: `${REAL_URL}/app/update/{{id}}/`,
+    GROUPLIST: `${REAL_URL}/account/groups/`,
+    CREATEGROUP:`${REAL_URL}/account/groups/`,
+    DELETEGROUP: `${REAL_URL}/account/groups/{{id}}/`,
+    UPDATEGROUP: `${REAL_URL}/account/groups/{{id}}/`,
+    USERLIST: `${REAL_URL}/account/users/`,
+    CREATEUSER:`${REAL_URL}/account/users/`,
+    DELETEUSER: `${REAL_URL}/account/users/{{id}}/`,
+    UPDATEUSER: `${REAL_URL}/account/users/{{id}}/`,
 }
 
 requestWhitelistConfig([
@@ -121,6 +130,19 @@ async function ServerList(params){
 }
 
 /**
+ * 获取环境列表
+ * @param {*} params 
+ */
+async function EnvList(params){
+
+    return request(
+        API.ENVLIST, 
+        METHOD.GET,
+        params
+    )
+}
+
+/**
  * 新建发布单
  * @param {*} params 
  */
@@ -164,6 +186,108 @@ async function DeleteServer(params){
  */
 async function UpdateServer(params){
     const url = urlFormat(API.UPDATESERVER, params)
+    return request(
+        url, 
+        METHOD.PUT,
+        params
+    )
+}
+
+/**
+ * 获取账户组列表
+ * @param {*} params 
+ */
+async function GroupList(params){
+
+    return request(
+        API.GROUPLIST, 
+        METHOD.GET,
+        params
+    )
+}
+
+/**
+ * 新增账户组
+ * @param {*} params 
+ */
+async function CreateGroup(params){
+
+    return request(
+        API.CREATEGROUP, 
+        METHOD.POST,
+        params
+    )
+}
+
+/**
+ * 删除服务器
+ * @param {*} params 
+ */
+async function DeleteGroup(params){
+    const url = urlFormat(API.DELETEGROUP, params)
+    return request(
+        url, 
+        METHOD.DELETE
+    )
+}
+
+/**
+ *更新服务器
+ * @param {*} params 
+ */
+async function UpdateGroup(params){
+    const url = urlFormat(API.UPDATEGROUP, params)
+    return request(
+        url, 
+        METHOD.PUT,
+        params
+    )
+}
+
+/**
+ * 获取账户组列表
+ * @param {*} params 
+ */
+async function UserList(params){
+
+    return request(
+        API.USERLIST, 
+        METHOD.GET,
+        params
+    )
+}
+
+/**
+ * 新增账户组
+ * @param {*} params 
+ */
+async function CreateUser(params){
+
+    return request(
+        API.CREATEUSER, 
+        METHOD.POST,
+        params
+    )
+}
+
+/**
+ * 删除服务器
+ * @param {*} params 
+ */
+async function DeleteUser(params){
+    const url = urlFormat(API.DELETEUSER, params)
+    return request(
+        url, 
+        METHOD.DELETE
+    )
+}
+
+/**
+ *更新服务器
+ * @param {*} params 
+ */
+async function UpdateUser(params){
+    const url = urlFormat(API.UPDATEUSER, params)
     return request(
         url, 
         METHOD.PUT,
@@ -254,6 +378,7 @@ export {
     ReleaseList,
     AppList,
     ProjectList,
+    EnvList,
     ServerList,
     CreateRelease,
     CreateServer,
@@ -264,5 +389,13 @@ export {
     UpdateSubject,
     DeleteApplication,
     CreateApplication,
-    UpdateApplication
+    UpdateApplication,
+    GroupList,
+    CreateGroup,
+    UpdateGroup,
+    DeleteGroup,
+    UserList,
+    CreateUser,
+    UpdateUser,
+    DeleteUser
 }

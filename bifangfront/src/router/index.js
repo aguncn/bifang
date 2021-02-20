@@ -18,7 +18,7 @@ const routes = [
     redirect: '/releaseList',
     children:[
       {
-        path: 'releaseList',
+        path: '/release/releaseList',
         name: '发布单列表',
         meta: {
           icon: 'dashboard'
@@ -26,7 +26,7 @@ const routes = [
         component: () => import('@/views/release/list')
       },
       {
-        path: 'createRelease',
+        path: '/release/createRelease',
         name: '新建发布单',
         meta: {
           icon: 'dashboard'
@@ -48,6 +48,14 @@ const routes = [
           icon: 'dashboard'
         },
         component: () => import('@/views/environment/history')
+      },
+      {
+        path: 'envlist',
+        name: '环境列表',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/environment/envlist')
       },
       {
         path: 'deploy',
@@ -96,6 +104,22 @@ const routes = [
           icon: 'dashboard'
         },
         component: () => import('@/views/server/list')
+      },
+      {
+        path: '/group',
+        name: '账户组列表',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/account/group')
+      },
+      {
+        path: '/user',
+        name: '用户列表',
+        meta: {
+          icon: 'dashboard'
+        },
+        component: () => import('@/views/account/user')
       },
     ]
   },

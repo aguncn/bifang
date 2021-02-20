@@ -6,14 +6,14 @@
         <h1>{{systemName}}</h1>
       </router-link>
     </div>
-    <a-menu theme="dark" mode="inline" :default-selected-keys="['1']" :open-keys.sync="openKey">
-        <a-sub-menu key="sub1">
+    <a-menu theme="dark" mode="inline" :default-selected-keys="defaultKey" :open-keys.sync="openKey">
+        <a-sub-menu key="/release">
           <span slot="title"><a-icon type="profile" /><span>发布单</span></span>
-          <a-menu-item key="1">
-            <router-link to="/releaseList">列表</router-link>
+          <a-menu-item key="/releaseList">
+            <router-link to="/release/releaseList">列表</router-link>
           </a-menu-item>
-          <a-menu-item key="2">
-            <router-link to="/createRelease">新建</router-link>
+          <a-menu-item key="/createRelease">
+            <router-link to="/release/createRelease">新建</router-link>
           </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="sub2">
@@ -22,7 +22,7 @@
             <router-link to="/transfer">流转</router-link>
           </a-menu-item>
           <a-menu-item key="4">
-            <router-link to="/history">历史</router-link>
+            <router-link to="/envlist">列表</router-link>
           </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="sub3">
@@ -52,6 +52,15 @@
             <router-link to="/addserver">新增</router-link>
           </a-menu-item> -->
         </a-sub-menu>
+        <a-sub-menu key="sub6">
+          <span slot="title"><a-icon type="appstore" /><span>账户</span></span>
+          <a-menu-item key="10">
+            <router-link to="/group">用户组</router-link>
+          </a-menu-item>
+          <a-menu-item key="11">
+            <router-link to="/user">用户</router-link>
+          </a-menu-item>
+        </a-sub-menu>
     </a-menu>
   </a-layout-sider>
 </template>
@@ -63,8 +72,15 @@ export default {
   data(){
     return {
       systemName:"毕方部署平台",
-      openKey:['sub1']
+      defaultKey:['/createRelease'],
+      openKey:['/release']
     }
+  },
+  beforeUpdate(){
+    console.log("bf update",this.$route)
+  },
+  updated(){
+    console.log("update",this.$route)
   },
   props: {
     collapsible: {
