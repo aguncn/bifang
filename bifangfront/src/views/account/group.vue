@@ -94,7 +94,7 @@
 
 <script>
 import BfTable from '@/components/table/table'
-import { GroupList, CreateGroup, DeleteGroup, UpdateGroup } from '@/service'
+import API from '@/service'
 const columns = [
   {
     title: '组名称',
@@ -163,7 +163,7 @@ export default {
         });
     },
     fetchData(){
-      GroupList(this.params).then((res)=>{
+      API.GroupList(this.params).then((res)=>{
         let result = res.data
         if(res.status == 200 ){
           this.total = result.count
@@ -195,7 +195,7 @@ export default {
             id,
             name
           }
-          UpdateGroup(data).then((res)=>{
+          API.UpdateGroup(data).then((res)=>{
             let result = res.data
             if(res.status == 200){
               this.$message.success("用户组更新成功~")
@@ -214,7 +214,7 @@ export default {
         this.$message.error("操作参数非法！")
         return false
       }
-      DeleteGroup({id}).then((res)=>{
+      API.DeleteGroup({id}).then((res)=>{
         let result = res.data
         if(res.status == 204){
           this.$message.success("删除成功~")
@@ -278,7 +278,7 @@ export default {
           let data = {
             name
           }
-          CreateGroup(data).then((res)=>{
+          API.CreateGroup(data).then((res)=>{
             let result = res.data
             if(res.status == 201){
               this.$message.success("用户组新增成功~")

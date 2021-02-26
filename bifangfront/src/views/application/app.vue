@@ -66,7 +66,7 @@
 
 <script>
 import BfTable from '@/components/table/table'
-import { AppList, DeleteApplication } from '@/service'
+import API from '@/service'
 const columns = [
   {
     title: '应用ID',
@@ -157,7 +157,7 @@ export default {
         });
     },
     fetchData(){
-      AppList(this.params).then((res)=>{
+      API.AppList(this.params).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           this.total = result.data.count
@@ -214,7 +214,7 @@ export default {
         this.$message.error("操作参数非法！")
         return false
       }
-      DeleteApplication({id}).then((res)=>{
+      API.DeleteApplication({id}).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           this.$message.success("删除成功~")

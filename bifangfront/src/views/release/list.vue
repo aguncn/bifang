@@ -49,24 +49,40 @@
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a style="margin-right: 8px">
-            <a-icon type="plus"/>新增
-          </a>
-          <a style="margin-right: 8px">
-            <a-icon type="edit"/>编辑
-          </a>
+          <a-button type="primary" @click="onBuild(record)">
+                编译
+          </a-button>
         </div>
         <template slot="statusTitle">
           <a-icon @click.native="onStatusTitleClick" type="info-circle" />
         </template>
       </bf-table>
     </div>
+    <a-modal
+      :visible="visiable"
+      title="编译中"
+      okText="确定"
+      cancelText="关闭"
+      @cancel="onReset"
+      @ok="onReset"
+    >
+      <div style="text-align:center">
+          <a-progress
+            type="circle"
+            :stroke-color="{
+              '0%': '#108ee9',
+              '100%': '#87d068',
+            }"
+            :percent="70"
+          />
+      </div>
+    </a-modal>
   </a-card>
 </template>
 
 <script>
 import BfTable from '@/components/table/table'
-import { ReleaseList } from '@/service'
+import API from '@/service'
 import moment from 'moment'
 const columns = [
   {
@@ -87,10 +103,10 @@ const columns = [
     dataIndex: 'git_branch'
   },
   {
-    title: '发布状态',
+    title: '编译状态',
     dataIndex: 'deploy_status',
     slots: {title: 'statusTitle'},
-    customRender: (status) => {return status == 29?'已发布': ' 未发布'}
+    customRender: (status) => {return status == 29?'已编译': ' 未编译'}
   },
   {
     title: '更新时间',
@@ -110,6 +126,7 @@ export default {
   data () {
     return {
       total:0,
+      visiable:false,
       advanced: true,
       columns: columns,
       dataSource: [],
@@ -153,7 +170,7 @@ export default {
         });
     },
     fetchData(){
-      ReleaseList(this.params).then((res)=>{
+      API.ReleaseList(this.params).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           this.total = result.data.count
@@ -163,6 +180,25 @@ export default {
           this.dataSource = []
         }
       })
+    },
+    onBuild(data){
+      this.visiable = true
+      let params = {
+        app_name: data.app,
+        release_name: data.name,
+        git_branch: data.git_branch
+      }
+      API.BuildRelease(params).then((res)=>{
+        if(res.status == 200 ){
+          this.$message.success("编译请中")
+        }
+        else{
+          this.$message.error("编译请求失败~")
+        }
+      })
+    },
+    onReset(){
+      this.visiable = false
     },
     onPageChange(page,pageSize){
       this.params.currentPage = page

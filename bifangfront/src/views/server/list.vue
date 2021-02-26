@@ -150,7 +150,7 @@
 
 <script>
 import BfTable from '@/components/table/table'
-import { ServerList, AppList, CreateServer, DeleteServer, UpdateServer } from '@/service'
+import API from '@/service'
 import moment from 'moment'
 const columns = [
   {
@@ -240,7 +240,7 @@ export default {
         });
     },
     fetchData(){
-      ServerList(this.params).then((res)=>{
+      API.ServerList(this.params).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           this.total = result.data.count
@@ -287,7 +287,7 @@ export default {
             system_type,
             description
           }
-          UpdateServer(data).then((res)=>{
+          API.UpdateServer(data).then((res)=>{
             let result = res.data
             if(res.status == 200){
               this.$message.success("服务器更新成功~")
@@ -306,7 +306,7 @@ export default {
         this.$message.error("操作参数非法！")
         return false
       }
-      DeleteServer({id}).then((res)=>{
+      API.DeleteServer({id}).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           this.$message.success("删除成功~")
@@ -362,7 +362,7 @@ export default {
       );
     },
     fetchComponentList(){
-      AppList({}).then((res)=>{
+      API.AppList({}).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           result.data.results.forEach(item=>{
@@ -395,7 +395,7 @@ export default {
             system_type,
             description
           }
-          CreateServer(data).then((res)=>{
+          API.CreateServer(data).then((res)=>{
             let result = res.data
             if(res.status == 200 && result.code == 0){
               this.$message.success("服务器新增成功~")

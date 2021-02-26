@@ -83,7 +83,7 @@
             v-decorator="[
               'name',
               {
-                rules: [{ required: true, message: '请输入中文名称' }],
+                rules: [{ required: true, message: '请输入英文名称' }],
               }
             ]"
           />
@@ -111,7 +111,7 @@
 
 <script>
 import BfTable from '@/components/table/table'
-import { ProjectList, CreateSubject, DeleteSubject, UpdateSubject } from '@/service'
+import API from '@/service'
 import moment from 'moment'
 const columns = [
   {
@@ -195,7 +195,7 @@ export default {
         });
     },
     fetchData(){
-      ProjectList(this.params).then((res)=>{
+      API.ProjectList(this.params).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           this.total = result.data.count
@@ -262,7 +262,7 @@ export default {
             cn_name,
             description
           }
-          CreateSubject(data).then((res)=>{
+          API.CreateSubject(data).then((res)=>{
             let result = res.data
             if(res.status == 200 && result.code == 0){
               this.$message.success("项目新增成功~")
@@ -290,7 +290,7 @@ export default {
             cn_name,
             description
           }
-          UpdateSubject(data).then((res)=>{
+          API.UpdateSubject(data).then((res)=>{
             let result = res.data
             if(res.status == 200){
               this.$message.success("项目更新成功~")
@@ -309,7 +309,7 @@ export default {
         this.$message.error("操作参数非法！")
         return false
       }
-      DeleteSubject({id}).then((res)=>{
+      API.DeleteSubject({id}).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           this.$message.success("删除成功~")

@@ -99,7 +99,7 @@
 
 <script>
 import CommonLayout from '@/layouts/CommonLayout'
-import {Login,Register} from '@/service'
+import API from '@/service'
 import {setAuthorization} from '@/utils/request'
 // import {mapMutations} from 'vuex'
 
@@ -126,7 +126,7 @@ export default {
           this.logging = true
           const username = this.loginForm.getFieldValue('name')
           const password = this.loginForm.getFieldValue('password')
-          Login({username, password}).then(this.afterLogin)
+          API.Login({username, password}).then(this.afterLogin)
         }
       })
     },
@@ -139,7 +139,7 @@ export default {
           const password = this.registerForm.getFieldValue('password')
           const passwordConfirm = this.registerForm.getFieldValue('confirmPassword')
           const email = this.registerForm.getFieldValue('email')
-          Register({username, password, passwordConfirm, email}).then(this.afterRegister)
+          API.Register({username, password, passwordConfirm, email}).then(this.afterRegister)
         }
       })
     },

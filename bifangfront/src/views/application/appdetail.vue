@@ -173,7 +173,7 @@
 </template>
 
 <script>
-import { AppList, ProjectList, CreateApplication, UpdateApplication } from '@/service'
+import API from '@/service'
 export default {
   name: 'appDetail',
   data () {
@@ -210,7 +210,7 @@ export default {
   },
   methods: {
     fetchProjectList(){
-      ProjectList({}).then((res)=>{
+      API.ProjectList({}).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           this.projectList = result.data.results
@@ -237,7 +237,7 @@ export default {
             ...fieldsValue,
             project_name: project.name
           }
-          CreateApplication(data).then((res)=>{
+          API.CreateApplication(data).then((res)=>{
             let result = res.data
             if(res.status == 200 && result.code == 0){
               this.$message.success("应用创建成功~")
@@ -259,7 +259,7 @@ export default {
             ...fieldsValue,
             project_name:project.name
           }
-          UpdateApplication(data).then((res)=>{
+          API.UpdateApplication(data).then((res)=>{
             let result = res.data
             if(res.status == 200){
               this.$message.success("应用更新成功~")

@@ -121,7 +121,7 @@
 
 <script>
 import BfTable from '@/components/table/table'
-import { UserList, GroupList, CreateUser, DeleteUser, UpdateUser } from '@/service'
+import API from '@/service'
 const columns = [
   {
     title: '用户名',
@@ -195,7 +195,7 @@ export default {
         });
     },
     fetchData(){
-      UserList(this.params).then((res)=>{
+      API.UserList(this.params).then((res)=>{
         let result = res.data
         if(res.status == 200 ){
           this.total = result.count
@@ -228,7 +228,7 @@ export default {
             email,
             groups
           }
-          UpdateUser(data).then((res)=>{
+          API.UpdateUser(data).then((res)=>{
             let result = res.data
             if(res.status == 200){
               this.$message.success("用户组更新成功~")
@@ -247,7 +247,7 @@ export default {
         this.$message.error("操作参数非法！")
         return false
       }
-      DeleteUser({id}).then((res)=>{
+      API.API.DeleteUser({id}).then((res)=>{
         let result = res.data
         if(res.status == 204){
           this.$message.success("删除成功~")
@@ -303,7 +303,7 @@ export default {
       );
     },
     fetchGroupList(){
-      GroupList({}).then((res)=>{
+      API.GroupList({}).then((res)=>{
         let result = res.data
         if(res.status == 200){
           result.results.forEach(item=>{
@@ -324,7 +324,7 @@ export default {
             return;
           }
           let data = fieldsValue;
-          CreateUser(data).then((res)=>{
+          API.CreateUser(data).then((res)=>{
             let result = res.data
             if(res.status == 201){
               this.$message.success("用户组新增成功~")

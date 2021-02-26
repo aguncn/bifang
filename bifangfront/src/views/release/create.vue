@@ -57,7 +57,8 @@
 </template>
 
 <script>
-import { AppList,CreateRelease } from '@/service'
+import API from '@/service'
+console.log("API",API)
 export default {
   name: 'createRelease',
   data () {
@@ -79,7 +80,7 @@ export default {
   },
   methods: {
     fetch(){
-      AppList({}).then((res)=>{
+      API.AppList({}).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           result.data.results.forEach(item=>{
@@ -115,7 +116,7 @@ export default {
             git_branch:fieldsValue["branch"],
             description:fieldsValue["description"]
           }
-          CreateRelease(data).then((res)=>{
+          API.CreateRelease(data).then((res)=>{
             let result = res.data
             if(res.status == 200 && result.code == 0){
               this.$message.success("发布单创建成功~")

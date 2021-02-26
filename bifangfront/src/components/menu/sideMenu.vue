@@ -6,8 +6,14 @@
         <h1>{{systemName}}</h1>
       </router-link>
     </div>
-    <a-menu theme="dark" mode="inline" :default-selected-keys="defaultKey" :open-keys.sync="openKey">
-        <a-sub-menu key="/release">
+    <a-menu theme="dark" mode="inline" @select="onSelect"  :default-selected-keys="defaultKey" :open-keys.sync="openKey">
+        <a-sub-menu v-for="menu in menuList" :key="menu.path">
+          <span slot="title"><a-icon :type="menu.meta.icon||'form'" /><span>{{menu.name}}</span></span>
+            <a-menu-item v-for="sub in menu.children" :key="sub.path">
+              <router-link :to="menu.path+sub.path">{{sub.name}}</router-link>
+            </a-menu-item>        
+        </a-sub-menu> 
+        <!--<a-sub-menu key="/release">
           <span slot="title"><a-icon type="profile" /><span>发布单</span></span>
           <a-menu-item key="/releaseList">
             <router-link to="/release/releaseList">列表</router-link>
@@ -48,9 +54,9 @@
           <a-menu-item key="9">
             <router-link to="/serverlist">列表</router-link>
           </a-menu-item>
-          <!-- <a-menu-item key="10">
+          <a-menu-item key="10">
             <router-link to="/addserver">新增</router-link>
-          </a-menu-item> -->
+          </a-menu-item> 
         </a-sub-menu>
         <a-sub-menu key="sub6">
           <span slot="title"><a-icon type="appstore" /><span>账户</span></span>
@@ -60,27 +66,34 @@
           <a-menu-item key="11">
             <router-link to="/user">用户</router-link>
           </a-menu-item>
-        </a-sub-menu>
+        </a-sub-menu>-->
     </a-menu>
   </a-layout-sider>
 </template>
 
 <script>
 // import {mapState} from 'vuex'
+import {routeConfig} from '@/router/config'
 export default {
   name: 'SideMenu',
   data(){
     return {
       systemName:"毕方部署平台",
+      menuList:[],
       defaultKey:['/createRelease'],
       openKey:['/release']
     }
   },
-  beforeUpdate(){
-    console.log("bf update",this.$route)
-  },
-  updated(){
-    console.log("update",this.$route)
+  created(){
+    
+     let match = this.$route.path.slice(1).split('/')
+     if(match && match.length > 1){
+        this.openKey = ["/"+match[0]]
+        this.defaultKey = ["/"+match[1]]
+     }
+     let item = routeConfig.find(item=>item.path == '/')
+     this.menuList = item?item.children:[]
+     console.log('route',this.openKey,this.defaultKey)
   },
   props: {
     collapsible: {
@@ -101,6 +114,7 @@ export default {
   },
   methods: {
     onSelect (obj) {
+      console.log("select",obj)
       this.$emit('menuSelect', obj)
     }
   }
