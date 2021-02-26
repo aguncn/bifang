@@ -3,6 +3,47 @@ import {urlFormat} from '@/utils/util'
 import {API} from './api'
 
 /**
+ * 登录
+ * @param {*} params 
+ */
+async function Login(params){
+    let {username,password} = params
+
+    return request(
+        API.LOGIN, 
+        METHOD.POST,
+        {
+            username,
+            password
+        }
+    )
+}
+
+/**
+ * 注册
+ * @param {*} params 
+ */
+async function Register(params){
+    let {
+        username = '',
+        password = '',
+        passwordConfirm = '',
+        email = ''
+    } = params;
+
+    return request(
+        API.REGISTER, 
+        METHOD.POST,
+        {
+            username,
+            password,
+            passwordConfirm,
+            email
+        }
+    )
+}
+
+/**
  * 获取账户组列表
  * @param {*} params 
  */
@@ -105,6 +146,8 @@ async function UpdateUser(params){
 }
 
 export default {
+    Login,
+    Register,
     GroupList,
     CreateGroup,
     UpdateGroup,
