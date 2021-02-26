@@ -49,7 +49,10 @@
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a-button type="primary" @click="onBuild(record)">
+          <a-button type="default" v-if="record.deploy_status == 29" disabled="true">
+                已编译
+          </a-button>
+          <a-button type="primary" v-else @click="onBuild(record)">
                 编译
           </a-button>
         </div>
@@ -90,23 +93,27 @@ const columns = [
     dataIndex: 'name'
   },
   {
-    title: '组件',
-    dataIndex: 'app'
+    title: '项目',
+    dataIndex: 'project_name'
   },
   {
-    title: '环境',
-    dataIndex: 'env',
-    customRender: (env) => {return env == 7?'UAT': ' 测试环境'}
+    title: '组件',
+    dataIndex: 'app_name'
   },
   {
     title: '编译分支',
     dataIndex: 'git_branch'
   },
   {
+
     title: '编译状态',
     dataIndex: 'deploy_status',
     slots: {title: 'statusTitle'},
     customRender: (status) => {return status == 29?'已编译': ' 未编译'}
+  },
+  {
+    title: '用户',
+    dataIndex: 'create_user_name'
   },
   {
     title: '更新时间',
@@ -137,7 +144,7 @@ export default {
         pageSize:20,
         begin_time:"",
         end_time:"",
-        sorter:""
+        sort:""
       }
       
     }

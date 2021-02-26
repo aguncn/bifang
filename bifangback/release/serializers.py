@@ -5,6 +5,10 @@ from cmdb.models import Release
 
 
 class ReleaseSerializer(serializers.ModelSerializer):
+    project_name = serializers.CharField(source='app.project.name')
+    app_name = serializers.CharField(source='app.name')
+    create_user_name = serializers.CharField(source='create_user.username')
+
     class Meta:
         model = Release
         fields = '__all__'
