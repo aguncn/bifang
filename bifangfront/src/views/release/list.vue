@@ -50,10 +50,7 @@
         </div>
         <div slot="action" slot-scope="{text, record}">
           <a style="margin-right: 8px">
-            <a-icon type="plus"/>新增
-          </a>
-          <a style="margin-right: 8px">
-            <a-icon type="edit"/>编辑
+            <a-icon type="right-circle"/>编译
           </a>
         </div>
         <template slot="statusTitle">
@@ -74,23 +71,20 @@ const columns = [
     dataIndex: 'name'
   },
   {
-    title: '组件',
-    dataIndex: 'app'
+    title: '项目',
+    dataIndex: 'project_name'
   },
   {
-    title: '环境',
-    dataIndex: 'env',
-    customRender: (env) => {return env == 7?'UAT': ' 测试环境'}
+    title: '组件',
+    dataIndex: 'app_name'
   },
   {
     title: '编译分支',
     dataIndex: 'git_branch'
   },
   {
-    title: '发布状态',
-    dataIndex: 'deploy_status',
-    slots: {title: 'statusTitle'},
-    customRender: (status) => {return status == 29?'已发布': ' 未发布'}
+    title: '用户',
+    dataIndex: 'create_user_name'
   },
   {
     title: '更新时间',
@@ -120,7 +114,7 @@ export default {
         pageSize:20,
         begin_time:"",
         end_time:"",
-        sorter:""
+        sort:""
       }
       
     }

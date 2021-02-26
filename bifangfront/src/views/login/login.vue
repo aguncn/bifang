@@ -166,7 +166,7 @@ export default {
         // this.setPermissions(permissions)
         // this.setRoles(roles)
         setAuthorization({token: loginRes.data.token, expireAt: new Date(loginRes.data.expireAt)})
-        this.$router.push('/releaseList')
+        this.$router.push('/release/releaseList')
         // 获取路由配置
         // getRoutesConfig().then(result => {
         //   const routesConfig = result.data.data

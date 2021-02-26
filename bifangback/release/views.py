@@ -19,7 +19,7 @@ from utils.write_history import write_release_history
 
 
 class ReleaseListView(ListAPIView):
-    queryset = Release.objects.all()
+    queryset = Release.objects.all().order_by('-create_date')
     serializer_class = ReleaseSerializer
     filter_class = ReleaseFilter
 
