@@ -75,7 +75,7 @@
         <p>git地址: {{this.modelData.git_url}}/{{this.modelData.project_name}}/{{this.modelData.app_name}}</p>
         <p>git 项目ID: {{this.modelData.git_app_id}}</p>
         <p>代码分支: {{this.modelData.git_branch}}</p>
-        <p>编译状态: {{this.buildStatus}}</p>
+        <p>编译状态: {{this.build_status}}</p>
         <a-button type="danger" @click="onBuild">开始构建</a-button>
       </a-card>
     </a-modal>
@@ -128,7 +128,7 @@ export default {
       visiable:false,
       modelData: {},
       buildTimer: null, 
-      buildStatus: "",
+      buildtatus: "",
       advanced: true,
       columns: columns,
       dataSource: [],

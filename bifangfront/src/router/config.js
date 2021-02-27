@@ -38,13 +38,8 @@ const routeConfig = [
             },
             children:[
                 {
-                    path: '/transfer',
-                    name: '流转列表',
-                    component: () => import('@/views/environment/transfer')
-                },
-                {
                     path: '/list',
-                    name: '环境列表',
+                    name: '流转环境',
                     component: () => import('@/views/environment/envlist')
                   }
             ]
