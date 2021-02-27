@@ -18,9 +18,9 @@ export default {
       return {
           copyright:'',
           linkList:[{
-              name:"Ant Design",
+              name:"Ant Design Vue",
               icon:"",
-              link:"https://ant.design"
+              link:"https://antdv.com/docs/vue/introduce-cn/"
           }]
       }
   }

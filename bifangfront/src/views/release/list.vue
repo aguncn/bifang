@@ -49,11 +49,11 @@
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a-button type="default" v-if="record.deploy_status == 29" disabled="true">
-                已编译
+          <a-button type="default" v-if="record.deploy_status_name != 'Create'" disabled="true">
+                已构建
           </a-button>
-          <a-button type="primary" v-else @click="onBuild(record)">
-                编译
+          <a-button type="primary" v-else @click="buildShow(record)">
+                构建
           </a-button>
         </div>
         <template slot="statusTitle">
@@ -63,22 +63,21 @@
     </div>
     <a-modal
       :visible="visiable"
-      title="编译中"
+      title="软件构建"
       okText="确定"
       cancelText="关闭"
       @cancel="onReset"
       @ok="onReset"
     >
-      <div style="text-align:center">
-          <a-progress
-            type="circle"
-            :stroke-color="{
-              '0%': '#108ee9',
-              '100%': '#87d068',
-            }"
-            :percent="70"
-          />
-      </div>
+      <a-card>
+        <p>发布单: {{this.modelData.name}}</p>
+        <p>app: {{this.modelData.app_name}}</p>
+        <p>git地址: {{this.modelData.git_url}}/{{this.modelData.project_name}}/{{this.modelData.app_name}}</p>
+        <p>git 项目ID: {{this.modelData.git_app_id}}</p>
+        <p>代码分支: {{this.modelData.git_branch}}</p>
+        <p>编译状态: {{this.buildStatus}}</p>
+        <a-button type="danger" @click="onBuild">开始构建</a-button>
+      </a-card>
     </a-modal>
   </a-card>
 </template>
@@ -105,13 +104,6 @@ const columns = [
     dataIndex: 'git_branch'
   },
   {
-
-    title: '编译状态',
-    dataIndex: 'deploy_status',
-    slots: {title: 'statusTitle'},
-    customRender: (status) => {return status == 29?'已编译': ' 未编译'}
-  },
-  {
     title: '用户',
     dataIndex: 'create_user_name'
   },
@@ -134,6 +126,9 @@ export default {
     return {
       total:0,
       visiable:false,
+      modelData: {},
+      buildTimer: null, 
+      buildStatus: "",
       advanced: true,
       columns: columns,
       dataSource: [],
@@ -182,27 +177,61 @@ export default {
         if(res.status == 200 && result.code == 0){
           this.total = result.data.count
           this.dataSource = result.data.results;
-        }
-        else{
+          console.log(this.dataSource)
+        } else {
           this.dataSource = []
         }
       })
     },
-    onBuild(data){
+    buildShow(data){
+      this.modelData = data
       this.visiable = true
+    },
+    onBuild(){
       let params = {
-        app_name: data.app,
-        release_name: data.name,
-        git_branch: data.git_branch
+        app_name: this.modelData.app_name,
+        release_name: this.modelData.name,
+        git_branch: this.modelData.git_branch
       }
       API.BuildRelease(params).then((res)=>{
         if(res.status == 200 ){
-          this.$message.success("编译请中")
-        }
-        else{
-          this.$message.error("编译请求失败~")
+          this.$message.success("开始构建......")
+          this.getBuildStatus()
+        } else {
+          this.$message.error("构建请求失败~")
         }
       })
+    },
+    getBuildStatus() {
+      this.buildTimer = setInterval(() => {  //创建定时器
+          let params = {
+            app_name: this.modelData.app_name,
+            release_name: this.modelData.name
+          }
+          API.BuildReleaseStatus(params).then((res)=>{
+            if(res.status != 200 ){
+              console.log(res, "no 200")
+              this.buildTimer && this.clearBuildTimer(); // 关闭定时器
+            } else {
+              let resData = res.data.data
+              if(resData == "ing" ){
+                this.buildStatus = '正在构建。。。'
+              } else if (resData == "success" ) {
+                this.buildStatus = '构建完成！'
+                console.log(resData)
+                this.buildTimer && this.clearBuildTimer();
+              } else {
+                this.buildStatus = '构建出错！！！'
+                console.log(resData)
+                this.buildTimer && this.clearBuildTimer();
+              }
+            }
+          })
+      }, 3000);
+    },
+    clearBuildTimer() {//清除定时器
+      clearInterval(this.buildTimer);
+      this.buildTimer = null;
     },
     onReset(){
       this.visiable = false

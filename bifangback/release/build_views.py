@@ -30,6 +30,7 @@ class ReleaseBuildView(APIView):
             app_name = ser_data['app_name']
             release_name = ser_data['release_name']
             git_branch = ser_data['git_branch']
+            print(app_name, git_branch, release_name)
             app = App.objects.get(name=app_name)
             git_url = app.git.git_url
             git_access_token = app.git.git_token
@@ -98,6 +99,7 @@ class ReleaseBuildStatusView(APIView):
 
             pipeline = pipeline_status(git_url, git_access_token, project_id, pipeline_id)
             if pipeline.finished_at is None:
+                print(pipeline.status)
                 return_dict = build_ret_data(OP_SUCCESS, 'ing')
                 return render_json(return_dict)
             elif pipeline.status != 'success':
@@ -119,6 +121,7 @@ class ReleaseBuildStatusView(APIView):
                 return_dict = build_ret_data(OP_SUCCESS, 'error')
                 return render_json(return_dict)
             else:
+                print(pipeline.status)
                 file_down_server = settings.FILE_DOWN_SERVER
                 deploy_script_url = '{}/{}/{}/{}'.format(file_down_server, app_name, release_name, deploy_script)
                 zip_package_url = '{}/{}/{}/{}'.format(file_down_server, app_name, release_name, zip_package_name)

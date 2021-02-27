@@ -5,6 +5,7 @@ const API = {
     REGISTER: `${REAL_URL}/account/register/`,
     RELEASELIST: `${REAL_URL}/release/list/`,
     RELEASEBUILD: `${REAL_URL}/release/build/`,
+    RELEASEBUILDSTATUS: `${REAL_URL}/release/build_status/`,
     APPLICATIONLIST: `${REAL_URL}/app/list/`,
     ENVLIST: `${REAL_URL}/env/list/`,
     SERVERLIST: `${REAL_URL}/server/list/`,

@@ -109,8 +109,8 @@ class Command(BaseCommand):
         Project.objects.all().delete()
         print('delete all Project data')
         create_user = User.objects.get(username=username)
-        project_name_list = ['User', 'Service', 'Store', 'Card', 'Support']
-        project_cn_name_list = ['用户管理', '服务', '库存', '购物车', '客服']
+        project_name_list = ['User', 'Service', 'Store', 'Card', 'Support', 'BookInfo', 'Demo']
+        project_cn_name_list = ['用户管理', '服务', '库存', '购物车', '客服', '书店', 'Go项目']
         for project_name, project_cn_name in zip(project_name_list, project_cn_name_list):
             Project.objects.create(name=project_name,
                                    description=project_name,
@@ -144,6 +144,33 @@ class Command(BaseCommand):
                                service_port=9090,
                                service_username='sky',
                                service_group='operate')
+        app_name_list = ['ProductPage', 'Details', 'Reviews', 'Ratings']
+        app_cn_name_list = ['产品页', '详情页', '评论页', '评级页']
+        git_app_list = [3, 4, 5, 6]
+        git_trigger_token_list = ['b843f743187a6632e0440a716cf038',
+                                  '1b57c3f005caf21f90fb3cc833eeb6',
+                                  '4abe06d297ded3da79ab0ff0c67f7e',
+                                  'c14b9eead3021965918e187eca16a0']
+        service_port_list = [8001, 8002, 8003, 8004]
+        for app_name, app_cn_name, git_trigger_token, service_port, git_app_id in \
+                zip(app_name_list, app_cn_name_list, git_trigger_token_list, service_port_list, git_app_list):
+            git = GitTb.objects.order_by('?').first()
+            project = Project.objects.get(name='BookInfo')
+            App.objects.create(name=app_name,
+                               description=app_name,
+                               cn_name=app_cn_name,
+                               create_user=create_user,
+                               app_id=random.randint(10000, 100000),
+                               git=git,
+                               git_app_id=git_app_id,
+                               git_trigger_token=git_trigger_token,
+                               project=project,
+                               build_script='script/build.sh',
+                               deploy_script='script/deploy.sh',
+                               zip_package_name='{}.tar.gz'.format(app_name),
+                               service_port=service_port,
+                               service_username='root',
+                               service_group='root')
         self.stdout.write('App重建完成。')
 
     # 新建server服务器
@@ -161,6 +188,20 @@ class Command(BaseCommand):
                                   port=random.randint(10000, 100000),
                                   app=app,
                                   system_type=random.choice(['WINDOWS', 'LINUX']))
+        app_name_list = ['ProductPage', 'Details', 'Reviews', 'Ratings']
+        service_port_list = [8001, 8002, 8003, 8004]
+        ip_list = ['192.168.1.211', '192.168.1.212', '192.168.1.213', '192.168.1.214']
+        for app_name, service_port in zip(app_name_list, service_port_list):
+            app = App.objects.get(name=app_name)
+            for ip in ip_list:
+                Server.objects.create(name='{}_{}'.format(ip, service_port),
+                                      description=app_name,
+                                      create_user=create_user,
+                                      ip=ip,
+                                      port=service_port,
+                                      app=app,
+                                      system_type='LINUX')
+
         self.stdout.write('Server重建完成。')
 
     # 新建发布单状态

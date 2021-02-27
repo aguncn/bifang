@@ -173,6 +173,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 SIMPLE_HISTORY_REVERT_DISABLED = True
 
-FILE_UP_SERVER = 'http://192.168.1.111:9001/upload-file'
-FILE_DOWN_SERVER = 'http://192.168.1.111:9002'
+FILE_UP_SERVER = 'http://192.168.1.8:9001/upload-file'
+FILE_DOWN_SERVER = 'http://192.168.1.8:9002'
 

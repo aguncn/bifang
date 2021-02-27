@@ -40,8 +40,22 @@ async function BuildRelease(params){
     )
 }
 
+/**
+ * 获取发布单编译进度和状态
+ * @param {*} params 
+ */
+async function BuildReleaseStatus(params){
+
+    return request(
+        API.RELEASEBUILDSTATUS, 
+        METHOD.POST,
+        params
+    )
+}
+
 export default {
     ReleaseList,
     CreateRelease,
-    BuildRelease
+    BuildRelease,
+    BuildReleaseStatus
 }
