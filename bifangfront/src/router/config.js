@@ -6,6 +6,11 @@ const routeConfig = [
       component: () => import('@/views/login/login')
     },
     {
+        path: '/deploy/',
+        name: '部署',
+        component: () => import('@/views/deployment/deploy')
+    },
+    {
       path: '/',
       name: 'Home',
       component: MainLayout,
@@ -38,7 +43,7 @@ const routeConfig = [
             },
             children:[
                 {
-                    path: '/list',
+                    path: '/environmentList',
                     name: '流转环境',
                     component: () => import('@/views/environment/envlist')
                   }
@@ -52,9 +57,9 @@ const routeConfig = [
             },
             children:[
                 {
-                    path: '/deploy',
+                    path: '/deployList',
                     name: '服务部署',
-                    component: () => import('@/views/deployment/deploy')
+                    component: () => import('@/views/deployment/deployList')
                 },
                 {
                     path: '/startup',
