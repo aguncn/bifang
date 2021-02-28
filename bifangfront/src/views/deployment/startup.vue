@@ -65,7 +65,7 @@
           <a @click="deleteRecord(record.key)">
             <a-icon type="delete" />PRD
           </a>
-          <a @click="deleteRecord(record.key)" v-auth="`delete`">
+          <a @click="deleteRecord(record.key)">
             <a-icon type="delete" />DRP
           </a>
         </div>

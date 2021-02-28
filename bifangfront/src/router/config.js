@@ -83,11 +83,16 @@ const routeConfig = [
                   {
                     path: '/app',
                     name: '应用',
-                    meta: {
-                      icon: 'dashboard'
-                    },
                     component: () => import('@/views/application/app')
-                  }
+                  },
+                  {
+                    path: '/appDetail',
+                    name: '新建',
+                    meta: {
+                      isShowMenu: false
+                    },
+                    component: () => import('@/views/application/appdetail')
+                  },
             ]
         },
         {

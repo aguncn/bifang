@@ -204,8 +204,8 @@ export default {
     },
     onShowEdit(record){
       this.$router.push({
-        name:"appdetail",
-        params:record
+        path:"/application/appdetail",
+        query:record
       })
     },
     onDelete(record){
