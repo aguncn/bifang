@@ -14,7 +14,20 @@ async function EnvList(params){
     )
 }
 
+/**
+ * 环境流转
+ * @param {*} params 
+ */
+async function EnvExchange(params){
+
+    return request(
+        API.ENVEXCHANGE, 
+        METHOD.POST,
+        params
+    )
+}
 
 export default {
-    EnvList
+    EnvList,
+    EnvExchange
 }

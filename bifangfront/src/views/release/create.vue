@@ -58,7 +58,6 @@
 
 <script>
 import API from '@/service'
-console.log("API",API)
 export default {
   name: 'createRelease',
   data () {

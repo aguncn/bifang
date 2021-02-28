@@ -33,7 +33,6 @@
         :columns="columns"
         :dataSource="dataSource"
         rowKey="name"
-        @clear="onClear"
         @change="onChange"
         :pagination="{
           current: params.currentPage,
@@ -49,41 +48,28 @@
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a-select placeholder="选择环境" style="width: 120px" @change="handleChange">
-            <a-select-option value="dev">
-              dev
-            </a-select-option>
-            <a-select-option value="prd">
-              prd
+          <a-select
+            show-search
+            placeholder="环境"
+            option-filter-prop="children"
+            style="width: 80px"
+            @change="handleChange"
+            v-decorator="['appId', { rules: [{ required: true, message: '请选择发布的组件!' }] }]"
+          >
+            <a-select-option v-for="d in envOptions" :key="d.value">
+            {{ d.label }}
             </a-select-option>
           </a-select>
-          <a-button type="primary" @click="buildShow(record)">
-             流转
-          </a-button>
+          <a-popconfirm
+          	:title="`是否将${record.name}发布单流转到${selectEnv}环境?`"
+          	ok-text="是" 
+          	cancel-text="否"
+          	@confirm="envExchange(record)">
+          	<a-button type="danger" >流转</a-button>
+          </a-popconfirm>
         </div>
-        <template slot="statusTitle">
-          <a-icon @click.native="onStatusTitleClick" type="info-circle" />
-        </template>
       </bf-table>
     </div>
-    <a-modal
-      :visible="visiable"
-      title="软件构建"
-      okText="确定"
-      cancelText="关闭"
-      @cancel="onReset"
-      @ok="onReset"
-    >
-      <a-card>
-        <p>发布单: {{this.modelData.name}}</p>
-        <p>app: {{this.modelData.app_name}}</p>
-        <p>git地址: {{this.modelData.git_url}}/{{this.modelData.project_name}}/{{this.modelData.app_name}}</p>
-        <p>git 项目ID: {{this.modelData.git_app_id}}</p>
-        <p>代码分支: {{this.modelData.git_branch}}</p>
-        <p>编译状态: {{this.build_status}}</p>
-        <a-button type="danger" @click="onBuild">开始构建</a-button>
-      </a-card>
-    </a-modal>
   </a-card>
 </template>
 
@@ -103,10 +89,6 @@ const columns = [
   {
     title: '组件',
     dataIndex: 'app_name'
-  },
-  {
-    title: '编译分支',
-    dataIndex: 'git_branch'
   },
   {
     title: '用户',
@@ -134,20 +116,18 @@ export default {
   data () {
     return {
       total:0,
-      visiable:false,
-      modelData: {},
-      buildTimer: null, 
-      buildtatus: "",
       advanced: true,
       columns: columns,
       dataSource: [],
-      selectedRows: [],
+      envOptions:[],
+      selectEnv: "",
       params:{
         name:"",
         currentPage:1,
         pageSize:20,
         begin_time:"",
         end_time:"",
+        deploy_status: 'Build,Ready,Success',
         sort:""
       }
       
@@ -158,17 +138,14 @@ export default {
   },
   created(){
     this.fetchData()
+    this.fetchEnv()
   },
   methods: {
     toggleAdvanced () {
       this.advanced = !this.advanced
     },
     handleChange(value) {
-      console.log(`selected ${value}`);
-    },
-    remove () {
-      this.dataSource = this.dataSource.filter(item => this.selectedRows.findIndex(row => row.key === item.key) === -1)
-      this.selectedRows = []
+      this.selectEnv = value
     },
     submitHandler(e){
       e.preventDefault()
@@ -195,58 +172,21 @@ export default {
         }
       })
     },
-    buildShow(data){
-      this.modelData = data
-      this.visiable = true
-    },
-    onBuild(){
-      let params = {
-        app_name: this.modelData.app_name,
-        release_name: this.modelData.name,
-        git_branch: this.modelData.git_branch
-      }
-      API.BuildRelease(params).then((res)=>{
-        if(res.status == 200 ){
-          this.$message.success("开始构建......")
-          this.getBuildStatus()
-        } else {
-          this.$message.error("构建请求失败~")
+    fetchEnv(){
+      API.EnvList({}).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          result.data.results.forEach(item=>{
+            this.envOptions.push({
+              label:item.name,
+              value:item.name
+            })
+          })
+        }
+        else{
+          this.$message,error("无法获取环境列表~")
         }
       })
-    },
-    getBuildStatus() {
-      this.buildTimer = setInterval(() => {  //创建定时器
-          let params = {
-            app_name: this.modelData.app_name,
-            release_name: this.modelData.name
-          }
-          API.BuildReleaseStatus(params).then((res)=>{
-            if(res.status != 200 ){
-              console.log(res, "no 200")
-              this.buildTimer && this.clearBuildTimer(); // 关闭定时器
-            } else {
-              let resData = res.data.data
-              if(resData == "ing" ){
-                this.buildStatus = '正在构建。。。'
-              } else if (resData == "success" ) {
-                this.buildStatus = '构建完成！'
-                console.log(resData)
-                this.buildTimer && this.clearBuildTimer();
-              } else {
-                this.buildStatus = '构建出错！！！'
-                console.log(resData)
-                this.buildTimer && this.clearBuildTimer();
-              }
-            }
-          })
-      }, 3000);
-    },
-    clearBuildTimer() {//清除定时器
-      clearInterval(this.buildTimer);
-      this.buildTimer = null;
-    },
-    onReset(){
-      this.visiable = false
     },
     onPageChange(page,pageSize){
       this.params.currentPage = page
@@ -257,12 +197,6 @@ export default {
       this.params.currentPage = 1
       this.params.pageSize = size
       this.fetchData()
-    },
-    onClear() {
-      this.$message.info('您清空了勾选的所有行')
-    },
-    onStatusTitleClick() {
-      this.$message.info('你点击了状态栏表头')
     },
     onChange(pagination, filters, sorter) {
        console.log('Various parameters', pagination, filters, sorter);
@@ -279,14 +213,21 @@ export default {
        this.params.sorter = (field?field:"")
        this.fetchData()
     },
-    onCreateRelease(){
-      this.$router.push("createRelease")
-    },
-    handleMenuClick (e) {
-      if (e.key === 'delete') {
-        this.remove()
+    envExchange(record) {
+      let params = {
+        env_name: this.selectEnv,
+        release_name: record.name
       }
-    }
+      console.log(params)
+      API.EnvExchange(params).then((res)=>{
+        if(res.status == 200 ){
+          this.$message.success("环境流转完成，此发布单可以在指定环境进行部署。")
+          this.fetchData()
+        } else {
+          this.$message.error("环境流转错误，请联系系统管理员~")
+        }
+      })
+    },
   }
 }
 </script>

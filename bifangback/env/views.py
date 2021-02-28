@@ -26,9 +26,8 @@ class EnvExchangeView(APIView):
     环境流转
 
     参数:
-    app_name
+    env_name
     release_name
-    git_branch
     """
     def post(self, request):
         # 序列化前端数据，并判断是否有效

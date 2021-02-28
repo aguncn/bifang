@@ -8,6 +8,7 @@ const API = {
     RELEASEBUILDSTATUS: `${REAL_URL}/release/build_status/`,
     APPLICATIONLIST: `${REAL_URL}/app/list/`,
     ENVLIST: `${REAL_URL}/env/list/`,
+    ENVEXCHANGE: `${REAL_URL}/env/exchange/`,
     SERVERLIST: `${REAL_URL}/server/list/`,
     PROJECTIST: `${REAL_URL}/project/list/`,
     CREATERELEASE: `${REAL_URL}/release/create/`,
