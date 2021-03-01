@@ -44,9 +44,16 @@
           showQuickJumper: true,
           showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
         }"
-      >
-        <div slot="description" slot-scope="{text}">
-          {{text}}
+      > 
+        <div slot="name" slot-scope="{text, record}">
+          <a-tooltip>
+          	<template slot="title">
+          		{{record.description}}
+          	</template>
+          	<a @click="showReleaseHistory(record)">
+          	  {{text}}
+          	</a>
+          </a-tooltip>
         </div>
         <div slot="action" slot-scope="{text, record}">
           <a-button type="default" v-if="record.deploy_status_name != 'Create'" disabled="true">
@@ -56,6 +63,14 @@
                 构建
           </a-button>
         </div>
+        <template slot="git_branch" slot-scope="{text,record}">
+          <a-tooltip>
+          	<template slot="title">
+          		{{record.description}}
+          	</template>
+          	<a-tag color='blue'>{{text}}</a-tag>
+          </a-tooltip>
+        </template>
         <template slot="statusTitle">
           <a-icon @click.native="onStatusTitleClick" type="info-circle" />
         </template>
@@ -89,7 +104,8 @@ import moment from 'moment'
 const columns = [
   {
     title: '发布单编号',
-    dataIndex: 'name'
+    dataIndex: 'name',
+    scopedSlots: {customRender: 'name'} 
   },
   {
     title: '项目',
@@ -100,8 +116,9 @@ const columns = [
     dataIndex: 'app_name'
   },
   {
-    title: '编译分支',
-    dataIndex: 'git_branch'
+  	title: '编译分支',
+  	dataIndex: 'git_branch',
+    scopedSlots: {customRender: 'git_branch'} 
   },
   {
     title: '用户',
@@ -183,6 +200,11 @@ export default {
         }
       })
     },
+    showReleaseHistory(data) {
+      console.log(data)
+    	//链接到发布单历史部署详细页面
+    	this.$router.push({ name: '发布单部署历史', params: { releaseId: data.id }});
+    },
     buildShow(data){
       this.modelData = data
       this.visiable = true
@@ -245,12 +267,6 @@ export default {
       this.params.currentPage = 1
       this.params.pageSize = size
       this.fetchData()
-    },
-    onClear() {
-      this.$message.info('您清空了勾选的所有行')
-    },
-    onStatusTitleClick() {
-      this.$message.info('你点击了状态栏表头')
     },
     onChange(pagination, filters, sorter) {
        console.log('Various parameters', pagination, filters, sorter);

@@ -44,9 +44,14 @@
           showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
         }"
       >
-        <div slot="description" slot-scope="{text}">
-          {{text}}
-        </div>
+        <template slot="env_name" slot-scope="{text,record}">
+          <a-tooltip>
+          	<template slot="title">
+          		{{record.description}}
+          	</template>
+          	<a-tag color='blue'>{{text}}</a-tag>
+          </a-tooltip>
+        </template>
         <div slot="action" slot-scope="{text, record}">
           <a-select
             show-search
@@ -102,7 +107,8 @@ const columns = [
   },
   {
     title: '环境',
-    dataIndex: 'env_name'
+    dataIndex: 'env_name',
+    scopedSlots: { customRender: 'env_name' }
   },
   {
     title: '操作',
