@@ -6,21 +6,6 @@ const routeConfig = [
       component: () => import('@/views/login/login')
     },
     {
-        path: '/release/releaseHistory/',
-        name: '发布单部署历史',
-        component: () => import('@/views/release/history')
-    },
-    {
-        path: '/server/serverHistory/',
-        name: '服务器操作历史',
-        component: () => import('@/views/server/history')
-    },
-    {
-        path: '/deployment/deploy/',
-        name: '发布单部署',
-        component: () => import('@/views/deployment/deploy')
-    },
-    {
       path: '/',
       name: 'Home',
       component: MainLayout,
@@ -42,7 +27,15 @@ const routeConfig = [
                     path: '/createRelease',
                     name: '新建',
                     component: () => import('@/views/release/create')
-                }
+                },
+                {
+                  path: '/releaseHistory',
+                  name: '发布单部署历史',
+                  meta:{
+                    isShowMenu:false
+                  },
+                  component: () => import('@/views/release/history')
+              },
             ]
         },
         {
@@ -75,6 +68,14 @@ const routeConfig = [
                     path: '/startup',
                     name: '服务启停',
                     component: () => import('@/views/deployment/startup')
+                },
+                {
+                  path: '/deploy',
+                  name: '发布单部署',
+                  meta:{
+                    isShowMenu:false
+                  },
+                  component: () => import('@/views/deployment/deploy')
                 }
             ]
         },
@@ -116,7 +117,15 @@ const routeConfig = [
                     path: '/serverlist',
                     name: '列表',
                     component: () => import('@/views/server/list')
-                }
+                },
+                {
+                  path: '/serverHistory',
+                  name: '服务器操作历史',
+                  meta: {
+                    isShowMenu: false
+                  },
+                  component: () => import('@/views/server/history')
+              },
             ]
         },
         {

@@ -9,6 +9,27 @@
         <a-input disabled value="自动生成" placeholder="自动生成" />
       </a-form-item>
       <a-form-item
+        label="项目选择"
+        :labelCol="{span: 7}"
+        :wrapperCol="{span: 10}"
+      >
+      <a-select
+          show-search
+          placeholder="请选择项目"
+          option-filter-prop="children"
+          style="width: 200px"
+          :filter-option="filterOption"
+          @focus="handleFocus"
+          @blur="handleBlur"
+          @change="handleChange"
+          v-decorator="['projectId', { rules: [{ required: true, message: '请选择项目!' }] }]"
+        >
+          <a-select-option v-for="d in projectOption" :key="d">
+          {{ d }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item
         label="组件选择"
         :labelCol="{span: 7}"
         :wrapperCol="{span: 10}"
@@ -21,7 +42,6 @@
           :filter-option="filterOption"
           @focus="handleFocus"
           @blur="handleBlur"
-          @change="handleChange"
           v-decorator="['appId', { rules: [{ required: true, message: '请选择发布的组件!' }] }]"
         >
           <a-select-option v-for="d in options" :key="d.value">
@@ -64,7 +84,9 @@ export default {
     return {
       value: 1,
       fetching:false,
-      options:[]
+      projectOption:[],
+      options:[],
+      projects:{}
     }
   },
   beforeCreate() {
@@ -83,11 +105,16 @@ export default {
         let result = res.data
         if(res.status == 200 && result.code == 0){
           result.data.results.forEach(item=>{
-            this.options.push({
+            this.projects[item.project_name]?
+              this.projects[item.project_name].push({
               label:item.name,
               value:item.id
-            })
+            }):this.projects[item.project_name] = [{
+              label:item.name,
+              value:item.id
+            }]
           })
+          this.projectOption = Object.keys(this.projects)
         }
         else{
           this.$message,error("无法获取应用列表~")
@@ -95,7 +122,10 @@ export default {
       })
     },
     handleChange(value) {
-      console.log(`selected ${value}`);
+      this.form.setFieldsValue({
+        appId:""
+      })
+      this.options = this.projects[value]
     },
     handleBlur() {
       console.log('blur');

@@ -33,7 +33,6 @@
         :columns="columns"
         :dataSource="dataSource"
         rowKey="name"
-        @clear="onClear"
         @change="onChange"
         :pagination="{
           current: params.currentPage,
