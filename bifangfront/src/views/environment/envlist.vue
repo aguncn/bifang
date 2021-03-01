@@ -143,8 +143,13 @@ export default {
     this.form = this.$form.createForm(this, { name: 'releaseList' });
   },
   created(){
-    this.fetchData()
     this.fetchEnv()
+  },
+  mounted(){
+    this.form.setFieldsValue({
+        releaseNo:this.$route.query.releaseNo||""
+    })
+    this.fetchData()
   },
   methods: {
     toggleAdvanced () {
@@ -167,16 +172,26 @@ export default {
         });
     },
     fetchData(){
-      API.ReleaseList(this.params).then((res)=>{
-        let result = res.data
-        if(res.status == 200 && result.code == 0){
-          this.total = result.data.count
-          this.dataSource = result.data.results;
-          console.log(this.dataSource)
-        } else {
-          this.dataSource = []
-        }
-      })
+        this.form.validateFields((err, fieldsValue) => {
+            if (err) {
+            return;
+            }
+            const rangeValue = fieldsValue['timePicker']
+            this.params.name = fieldsValue["releaseNo"]
+            this.params.begin_time = rangeValue?rangeValue[0].format("YYYY-MM-DD"):""
+            this.params.end_time = rangeValue?rangeValue[1].format("YYYY-MM-DD"):""
+            API.ReleaseList(this.params).then((res)=>{
+                let result = res.data
+                if(res.status == 200 && result.code == 0){
+                this.total = result.data.count
+                this.dataSource = result.data.results;
+                console.log(this.dataSource)
+                } else {
+                this.dataSource = []
+                }
+            })
+        });
+      
     },
     fetchEnv(){
       API.EnvList({}).then((res)=>{

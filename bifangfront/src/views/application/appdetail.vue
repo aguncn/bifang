@@ -191,19 +191,20 @@ export default {
   },
   created(){
     this.fetchProjectList()
-    if(this.$route.params.id){
+    if(this.$route.query.id){
         this.isEdit=true
         this.btnDesc = "更新"
     }
     
   },
   mounted(){
+      console.log(this.$route.query)
     if(this.isEdit){
         this.$nextTick(()=>{
             this.form.setFieldsValue({
-                ...this.$route.params,
-                project_id: this.$route.params["project"],
-                git_id: this.$route.params["git"]
+                ...this.$route.query,
+                project_id: this.$route.query["project"],
+                git_id: this.$route.query["git"]
             })
         })
     }

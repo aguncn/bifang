@@ -56,7 +56,7 @@
           </a-tooltip>
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a-button type="default" v-if="record.deploy_status_name != 'Create'" disabled="true">
+          <a-button type="default" v-if="record.deploy_status_name != 'Create'" disabled>
                 已构建
           </a-button>
           <a-button type="primary" v-else @click="buildShow(record)">
@@ -90,8 +90,9 @@
         <p>git地址: {{this.modelData.git_url}}/{{this.modelData.project_name}}/{{this.modelData.app_name}}</p>
         <p>git 项目ID: {{this.modelData.git_app_id}}</p>
         <p>代码分支: {{this.modelData.git_branch}}</p>
-        <p>编译状态: {{this.build_status}}</p>
+        <p>编译状态: {{this.buildStatus}}</p>
         <a-button type="danger" @click="onBuild">开始构建</a-button>
+        <a-button type="danger" @click="onSwitch">环境流转</a-button>
       </a-card>
     </a-modal>
   </a-card>
@@ -145,7 +146,7 @@ export default {
       visiable:false,
       modelData: {},
       buildTimer: null, 
-      buildtatus: "",
+      buildStatus: "",
       advanced: true,
       columns: columns,
       dataSource: [],
@@ -166,6 +167,9 @@ export default {
   },
   created(){
     this.fetchData()
+  },
+  destroyed(){
+    this.clearBuildTimer()
   },
   methods: {
     toggleAdvanced () {
@@ -208,6 +212,14 @@ export default {
     buildShow(data){
       this.modelData = data
       this.visiable = true
+    },
+    onSwitch(){
+      this.$router.push({
+        path:'/environment/environmentList',
+        query:{
+          releaseNo: this.modelData.name
+        }
+      })
     },
     onBuild(){
       let params = {

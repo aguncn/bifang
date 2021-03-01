@@ -33,7 +33,10 @@ function formatRoutes(routeConfig){
                     route.push({
                         path: item.path + child.path,
                         name: child.name,
-                        meta: item.meta,
+                        meta: {
+                            ...item.meta,
+                            ...child.meta
+                        },
                         component: child.component
                     })
                 })
