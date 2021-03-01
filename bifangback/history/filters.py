@@ -13,7 +13,7 @@ class ReleaseHistoryFilter(FilterSet):
 
     class Meta:
         model = ReleaseHistory
-        fields = ['release', 'begin_time', 'end_time']
+        fields = ['release_id', 'begin_time', 'end_time']
 
 
 class ServerHistoryFilter(FilterSet):

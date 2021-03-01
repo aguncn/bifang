@@ -44,9 +44,17 @@
           showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
         }"
       >
-        <div slot="description" slot-scope="{text}">
-          {{text}}
-        </div>
+        <template slot="deploy_status_name" slot-scope="{text,record}">
+          <a-tooltip>
+          	<template slot="title">
+          		{{record.description}}
+          	</template>
+          	<a-tag color='blue' v-if="text==='Ready'">准备就绪</a-tag>
+            <a-tag color='green' v-if="text==='Success'">部署完成</a-tag>
+            <a-tag color='orange' v-if="text==='Ongoing'">部署中...</a-tag>
+            <a-tag color='red' v-if="text==='Failed'">部署异常</a-tag>
+          </a-tooltip>
+        </template>
         <div slot="action" slot-scope="{text, record}">
           <a-button type="primary" @click="goDeploy(record)">部署</a-button>
         </div>
@@ -88,7 +96,8 @@ const columns = [
   },
   {
     title: '状态',
-    dataIndex: 'deploy_status_name'
+    dataIndex: 'deploy_status_name',
+    scopedSlots: { customRender: 'deploy_status_name' }
   },
   {
     title: '操作',

@@ -6,11 +6,23 @@ import {API} from './api'
  * @param {*} params 
  */
 async function ReleaseList(params){
+  return request(
+      API.RELEASELIST, 
+      METHOD.GET,
+      params
+  )
+}
 
+/**
+ * 获取发布单详情
+ * @param {*} params 
+ */
+async function ReleaseDetail(params){
+    URL = `${API.RELEASEDETAIL}${params}/`
+    console.log(URL)
     return request(
-        API.RELEASELIST, 
-        METHOD.GET,
-        params
+        URL, 
+        METHOD.GET
     )
 }
 
@@ -19,12 +31,11 @@ async function ReleaseList(params){
  * @param {*} params 
  */
 async function CreateRelease(params){
-
-    return request(
-        API.CREATERELEASE, 
-        METHOD.POST,
-        params
-    )
+  return request(
+      API.CREATERELEASE, 
+      METHOD.POST,
+      params
+  )
 }
 
 /**
@@ -32,12 +43,11 @@ async function CreateRelease(params){
  * @param {*} params 
  */
 async function BuildRelease(params){
-
-    return request(
-        API.RELEASEBUILD, 
-        METHOD.POST,
-        params
-    )
+  return request(
+      API.RELEASEBUILD, 
+      METHOD.POST,
+      params
+  )
 }
 
 /**
@@ -45,17 +55,30 @@ async function BuildRelease(params){
  * @param {*} params 
  */
 async function BuildReleaseStatus(params){
+  return request(
+      API.RELEASEBUILDSTATUS, 
+      METHOD.POST,
+      params
+  )
+}
 
-    return request(
-        API.RELEASEBUILDSTATUS, 
-        METHOD.POST,
-        params
-    )
+/**
+ * 获取发布单历史操作
+ * @param {*} params 
+ */
+async function ReleaseHistory(params){
+  return request(
+      API.RELEASEHISTORY, 
+      METHOD.GET,
+      params
+  )
 }
 
 export default {
     ReleaseList,
+    ReleaseDetail,
     CreateRelease,
     BuildRelease,
-    BuildReleaseStatus
+    BuildReleaseStatus,
+    ReleaseHistory
 }

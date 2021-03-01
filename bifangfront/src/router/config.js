@@ -6,8 +6,18 @@ const routeConfig = [
       component: () => import('@/views/login/login')
     },
     {
-        path: '/deploy/',
-        name: '部署',
+        path: '/release/releaseHistory/',
+        name: '发布单部署历史',
+        component: () => import('@/views/release/history')
+    },
+    {
+        path: '/server/serverHistory/',
+        name: '服务器操作历史',
+        component: () => import('@/views/server/history')
+    },
+    {
+        path: '/deployment/deploy/',
+        name: '发布单部署',
         component: () => import('@/views/deployment/deploy')
     },
     {

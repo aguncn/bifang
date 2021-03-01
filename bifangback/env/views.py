@@ -46,7 +46,7 @@ class EnvExchangeView(APIView):
                                   env_name=env_name,
                                   deploy_status_name=deploy_status_name,
                                   deploy_type=None,
-                                  log='target env is {}, Release if ready for deploy.'.format(env_name),
+                                  log='target env is {}.'.format(env_name),
                                   user_id=user.id)
 
             return_dict = build_ret_data(OP_SUCCESS, 'env exchange is ok.')
