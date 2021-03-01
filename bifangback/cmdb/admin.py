@@ -27,7 +27,16 @@ class AppHistoryAdmin(SimpleHistoryAdmin):
 
 
 admin.site.register(App, AppHistoryAdmin)
-admin.site.register(Server)
+
+
+class ServerHistoryAdmin(SimpleHistoryAdmin):
+    list_display = ['id', 'name',  'ip', 'port', 'system_type', 'main_release', 'back_release']
+    history_list_display = ["status"]
+    search_fields = ['name', 'ip', 'port']
+    readonly_fields = ('create_date', 'update_date')
+
+
+admin.site.register(Server, ServerHistoryAdmin)
 admin.site.register(ReleaseStatus)
 
 
