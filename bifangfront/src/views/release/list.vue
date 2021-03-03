@@ -4,6 +4,39 @@
     <div class="search">
       <a-form layout="inline" :form="form" @submit="submitHandler">
             <a-form-item
+              label="项目选择"
+            >
+            <a-select
+                show-search
+                placeholder="请选择项目"
+                option-filter-prop="children"
+                :filter-option="filterOption"
+                @change="handleChange"
+                style="width:200px"
+                v-decorator="['projectId', { rules: [{ required: false, message: '请选择项目!' }] }]"
+              >
+                <a-select-option v-for="d in projectOption" :key="d">
+                {{ d }}
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+            <a-form-item
+              label="组件选择"
+            >
+              <a-select
+                show-search
+                placeholder="请选择组件"
+                option-filter-prop="children"
+                :filter-option="filterOption"
+                style="width:200px"
+                v-decorator="['appId', { rules: [{ required: false, message: '请选择发布的组件!' }] }]"
+              >
+                <a-select-option v-for="d in options" :key="d.value">
+                {{ d.label }}
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+            <a-form-item
               label="发布单号"
             >
               <a-input 
@@ -150,6 +183,9 @@ export default {
       columns: columns,
       dataSource: [],
       selectedRows: [],
+      projects:{},
+      projectOption: [],
+      options:[],
       params:{
         name:"",
         currentPage:1,
@@ -164,6 +200,7 @@ export default {
     this.form = this.$form.createForm(this, { name: 'releaseList' });
   },
   created(){
+    this.fetchAppList()
     this.fetchData()
   },
   destroyed(){
@@ -185,6 +222,8 @@ export default {
           }
           const rangeValue = fieldsValue['timePicker']
           this.params.name = fieldsValue["releaseNo"]
+          this.params.projectName = fieldsValue["projectId"]
+          this.params.appId = fieldsValue["appId"]
           this.params.begin_time = rangeValue?rangeValue[0].format("YYYY-MM-DD"):""
           this.params.end_time = rangeValue?rangeValue[1].format("YYYY-MM-DD"):""
           this.fetchData()
@@ -201,6 +240,38 @@ export default {
           this.dataSource = []
         }
       })
+    },
+    fetchAppList(){
+      API.AppList({}).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          result.data.results.forEach(item=>{
+            this.projects[item.project_name]?
+              this.projects[item.project_name].push({
+              label:item.name,
+              value:item.id
+            }):this.projects[item.project_name] = [{
+              label:item.name,
+              value:item.id
+            }]
+          })
+          this.projectOption = Object.keys(this.projects)
+        }
+        else{
+          this.$message,error("无法获取应用列表~")
+        }
+      })
+    },
+    handleChange(value) {
+      this.form.setFieldsValue({
+        appId:""
+      })
+      this.options = this.projects[value]
+    },
+    filterOption(input, option) {
+      return (
+        option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+      );
     },
     showReleaseHistory(data) {
       console.log(data)

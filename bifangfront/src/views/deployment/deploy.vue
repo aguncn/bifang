@@ -2,30 +2,20 @@
 <template>
   <a-card>
     <div>
-      <a-button-group>
-        <a-button type="primary">
-          发布单信息
-        </a-button>
-        <a-button >
-          项目：{{ title.project_name }}
-        </a-button>
-        <a-button >
-          应用：{{ title.app_name }}
-        </a-button>
-        <a-button>
-          环境：{{ title.env_name }}
-        </a-button>
-        <a-button >
-          发布单：{{ title.name }}
-        </a-button>
-        <a-button >
-          发布描述：{{ title.description }}
-        </a-button>
-      </a-button-group>
-      <bf-table
+      <a-card type="inner" title="发布单信息">
+        <detail-list size="small">
+          <detail-list-item term="项目">111{{ title.project_name }}</detail-list-item>
+          <detail-list-item term="应用">{{ title.app_name }}</detail-list-item>
+          <detail-list-item term="环境">{{ title.env_name }}</detail-list-item>
+          <detail-list-item term="发布单">{{ title.name }}</detail-list-item>
+          <detail-list-item term="发布描述">{{ title.description }}</detail-list-item>
+        </detail-list>
+      </a-card>
+      <a-table
         :columns="columns"
         :dataSource="dataSource"
-        rowKey="name"
+        rowKey="ip"
+        :row-selection="{ selectedRowKeys: selectedRow, onChange: onSelectChange }"
         @change="onChange"
         :pagination="{
           current: params.currentPage,
@@ -37,33 +27,29 @@
           showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
         }"
       >
-        <template slot="deploy_status_name" slot-scope="{text,record}">
-          <a-tooltip>
-          	<template slot="title">
-          		{{record.description}}
-          	</template>
-          	<a-tag color='blue' v-if="text==='Ready'">准备就绪</a-tag>
-            <a-tag color='green' v-if="text==='Success'">部署完成</a-tag>
-            <a-tag color='orange' v-if="text==='Ongoing'">部署中...</a-tag>
-            <a-tag color='red' v-if="text==='Failed'">部署异常</a-tag>
-          </a-tooltip>
-        </template>
-        <div slot="action" slot-scope="{text, record}">
-          <a-button type="primary" @click="goDeploy(record)">部署</a-button>
-        </div>
-      </bf-table>
+      </a-table>
+      <div class="alert">
+        <a-alert type="info" style="line-height:2.4" :show-icon="true" v-if="selectedRow">
+          <div class="message" slot="message">
+            已选择&nbsp;<a>{{selectedRow.length}}</a>&nbsp;项 
+            <a-button type="danger" style="float:right" @click="onDeploy">部署</a-button>
+          </div>
+        </a-alert>
+      </div>
     </div>
   </a-card>
 </template>
 
 <script>
 import BfTable from '@/components/table/table'
+import DetailList from '@/components/tool/DetailList'
 import API from '@/service'
 import moment from 'moment'
 
+const DetailListItem = DetailList.Item
 const columns = [
   {
-    title: 'ip',
+    title: 'IP',
     dataIndex: 'ip'
   },
   {
@@ -75,32 +61,19 @@ const columns = [
     dataIndex: 'system_type'
   },
   {
-    title: '版本',
-    dataIndex: 'main_release'
+    title: '环境',
+    dataIndex: 'env_name'
   },
   {
     title: '更新时间',
     dataIndex: 'update_date',
     sorter: true,
     customRender: (date) =>{ return moment(date).format("YYYY-MM-DD hh:mm")}
-  },
-  {
-    title: '环境',
-    dataIndex: 'env_name'
-  },
-  {
-    title: '状态',
-    dataIndex: 'deploy_status_name',
-    scopedSlots: { customRender: 'deploy_status_name' }
-  },
-  {
-    title: '操作',
-    scopedSlots: { customRender: 'action' }
   }
 ]
 export default {
   name: 'serviceDeploy',
-  components: {BfTable},
+  components: {BfTable,DetailList,DetailListItem},
   data () {
     return {
       total: 0,
@@ -110,6 +83,7 @@ export default {
       title: "",
       columns: columns,
       dataSource: [],
+      selectedRow:[],
       params:{
         currentPage:1,
         pageSize:20,
@@ -158,6 +132,13 @@ export default {
       this.params.currentPage = 1
       this.params.pageSize = size
       this.fetchData()
+    },
+    onSelectChange(selectedRowKeys,selectedRows) {
+      console.log('selectedRowKeys changed: ', selectedRowKeys,selectedRows);
+      this.selectedRow = selectedRowKeys;
+    },
+    onDeploy(){
+
     },
     onChange(pagination, filters, sorter) {
        console.log('Various parameters', pagination, filters, sorter);

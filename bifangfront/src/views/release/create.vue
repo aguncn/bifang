@@ -17,7 +17,6 @@
           show-search
           placeholder="请选择项目"
           option-filter-prop="children"
-          style="width: 200px"
           :filter-option="filterOption"
           @focus="handleFocus"
           @blur="handleBlur"
@@ -38,7 +37,6 @@
           show-search
           placeholder="请选择组件"
           option-filter-prop="children"
-          style="width: 200px"
           :filter-option="filterOption"
           @focus="handleFocus"
           @blur="handleBlur"
