@@ -30,7 +30,7 @@ admin.site.register(App, AppHistoryAdmin)
 
 
 class ServerHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ['id', 'name',  'ip', 'port', 'system_type', 'main_release', 'back_release']
+    list_display = ['id', 'name',  'ip', 'port', 'system_type', 'env', 'main_release', 'back_release']
     history_list_display = ["status"]
     search_fields = ['name', 'ip', 'port']
     readonly_fields = ('create_date', 'update_date')

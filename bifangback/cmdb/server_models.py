@@ -2,6 +2,7 @@ from django.db import models
 from .base_models import BaseModel
 from .app_models import App
 from .release_models import Release
+from .env_models import Env
 
 SYSTEM_CHOICES = (
     ('WINDOWS', 'WINDOWS'),
@@ -29,6 +30,13 @@ class Server(BaseModel):
                             null=True,
                             on_delete=models.SET_NULL,
                             verbose_name='应用服务')
+    # 环境关联，在部署时，根据环境关联服务器
+    env = models.ForeignKey(Env,
+                            related_name="ra_server",
+                            blank=True,
+                            null=True,
+                            on_delete=models.SET_NULL,
+                            verbose_name="环境")
     # 保存在此服务器正在运行的app的最近发布单
     main_release = models.ForeignKey(Release,
                                      related_name='ra_server_main',

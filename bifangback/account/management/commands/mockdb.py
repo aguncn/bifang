@@ -181,16 +181,19 @@ class Command(BaseCommand):
         for number in range(100):
             ip = '192.168.1.{}'.format(number)
             app = App.objects.order_by('?').first()
+            env = Env.objects.order_by('?').first()
             Server.objects.create(name=ip,
                                   description=ip,
                                   create_user=create_user,
                                   ip=ip,
                                   port=random.randint(10000, 100000),
                                   app=app,
+                                  env=env,
                                   system_type=random.choice(['WINDOWS', 'LINUX']))
         app_name_list = ['ProductPage', 'Details', 'Reviews', 'Ratings']
         service_port_list = [8001, 8002, 8003, 8004]
         ip_list = ['192.168.1.211', '192.168.1.212', '192.168.1.213', '192.168.1.214']
+        env = Env.objects.get(name='dev')
         for app_name, service_port in zip(app_name_list, service_port_list):
             app = App.objects.get(name=app_name)
             for ip in ip_list:
@@ -200,6 +203,7 @@ class Command(BaseCommand):
                                       ip=ip,
                                       port=service_port,
                                       app=app,
+                                      env=env,
                                       system_type='LINUX')
 
         self.stdout.write('Server重建完成。')

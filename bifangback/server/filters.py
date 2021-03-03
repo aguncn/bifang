@@ -12,4 +12,4 @@ class ServerFilter(FilterSet):
 
     class Meta:
         model = Server
-        fields = ['name', 'app_id', 'begin_time', 'end_time']
+        fields = ['name', 'app_id', 'env_id', 'begin_time', 'end_time']
