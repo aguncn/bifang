@@ -136,7 +136,7 @@ export default {
       this.advanced = !this.advanced
     },
     goDeploy(data){
-      console.log(data)
+			this.$router.push({ name: '发布单部署', params: { releaseId: data.id,  appId: data.app, envId: data.env}});
     },
     submitHandler(e){
       e.preventDefault()
@@ -157,7 +157,6 @@ export default {
         if(res.status == 200 && result.code == 0){
           this.total = result.data.count
           this.dataSource = result.data.results;
-          console.log(this.dataSource)
         } else {
           this.dataSource = []
         }

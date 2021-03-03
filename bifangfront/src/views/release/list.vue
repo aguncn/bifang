@@ -158,7 +158,6 @@ export default {
         end_time:"",
         sort:""
       }
-      
     }
   },
   beforeCreate() {

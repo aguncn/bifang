@@ -18,23 +18,23 @@ const routeConfig = [
               icon: 'profile'
             },
             children:[
-                {
-                    path: '/releaseList',
-                    name: '列表',
-                    component: () => import('@/views/release/list')
+              {
+                  path: '/releaseList',
+                  name: '列表',
+                  component: () => import('@/views/release/list')
+              },
+              {
+                  path: '/createRelease',
+                  name: '新建',
+                  component: () => import('@/views/release/create')
+              },
+              {
+                path: '/releaseHistory',
+                name: '发布单部署历史',
+                meta:{
+                  isShowMenu:false
                 },
-                {
-                    path: '/createRelease',
-                    name: '新建',
-                    component: () => import('@/views/release/create')
-                },
-                {
-                  path: '/releaseHistory',
-                  name: '发布单部署历史',
-                  meta:{
-                    isShowMenu:false
-                  },
-                  component: () => import('@/views/release/history')
+                component: () => import('@/views/release/history')
               },
             ]
         },
