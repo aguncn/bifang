@@ -14,7 +14,7 @@
       <a-table
         :columns="columns"
         :dataSource="dataSource"
-        rowKey="ip"
+        rowKey="name"
         :row-selection="{ selectedRowKeys: selectedRow, onChange: onSelectChange }"
         @change="onChange"
         :pagination="{
@@ -49,12 +49,8 @@ import moment from 'moment'
 const DetailListItem = DetailList.Item
 const columns = [
   {
-    title: 'IP',
-    dataIndex: 'ip'
-  },
-  {
-    title: '端口',
-    dataIndex: 'port'
+    title: 'IP_Port',
+    dataIndex: 'name'
   },
   {
     title: '系统',
@@ -84,7 +80,6 @@ export default {
       columns: columns,
       dataSource: [],
       selectedRow:[],
-      deploySelectedRows:[],
       params:{
         currentPage:1,
         pageSize:20,
@@ -136,10 +131,25 @@ export default {
     },
     onSelectChange(selectedRowKeys,selectedRows) {
       this.selectedRow = selectedRowKeys;
-      this.deploySelectedRows = selectedRows
     },
     onDeploy(){
-      console.log("3:", this.deploySelectedRows)
+      let params = {
+        target_list: this.selectedRow.toString(),
+        user_id: this.title.create_user,
+        app_name: this.title.app_name,
+        env_name: this.title.env_name,
+        release_name: this.title.name,
+        deploy_type: 'deploy',
+        op_type: 'deploy',
+      }
+      console.log(params)
+      API.Deploy(params).then((res)=>{
+        if(res.status == 200 ){
+          console.log(res, "ok!!!!!!!!!!!!")
+        } else {
+          console.log(res,"wrong!!!!!!!!!!")
+        }
+      })
     },
     onChange(pagination, filters, sorter) {
        console.log('Various parameters', pagination, filters, sorter);

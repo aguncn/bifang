@@ -10,6 +10,7 @@ const API = {
     APPLICATIONLIST: `${REAL_URL}/app/list/`,
     ENVLIST: `${REAL_URL}/env/list/`,
     ENVEXCHANGE: `${REAL_URL}/env/exchange/`,
+    DEPLOY: `${REAL_URL}/deploy/deploy/`,
     SERVERLIST: `${REAL_URL}/server/list/`,
     PROJECTIST: `${REAL_URL}/project/list/`,
     CREATERELEASE: `${REAL_URL}/release/create/`,
