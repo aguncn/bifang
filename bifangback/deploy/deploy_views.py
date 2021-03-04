@@ -35,6 +35,7 @@ async def deploy(request):
         }
         """
         req_data = json.loads(request.body.decode('utf-8'))
+        req_data['target_list'] = req_data['target_list'].split(",")
         # 序列化前端数据，并判断是否有效
         serializer = DeploySerializer(data=req_data)
         if serializer.is_valid():

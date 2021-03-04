@@ -180,13 +180,14 @@ class Command(BaseCommand):
         create_user = User.objects.get(username=username)
         for number in range(50):
             ip = '192.168.1.{}'.format(number)
+            port = random.randint(10000, 100000)
             app = App.objects.order_by('?').first()
             env = Env.objects.order_by('?').first()
-            Server.objects.create(name=ip,
-                                  description=ip,
+            Server.objects.create(name='{}_{}'.format(ip, port),
+                                  description=app.name,
                                   create_user=create_user,
                                   ip=ip,
-                                  port=random.randint(10000, 100000),
+                                  port=port,
                                   app=app,
                                   env=env,
                                   system_type=random.choice(['WINDOWS', 'LINUX']))
