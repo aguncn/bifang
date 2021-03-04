@@ -4,7 +4,7 @@
     <div>
       <a-card type="inner" title="发布单信息">
         <detail-list size="small">
-          <detail-list-item term="项目">111{{ title.project_name }}</detail-list-item>
+          <detail-list-item term="项目">{{ title.project_name }}</detail-list-item>
           <detail-list-item term="应用">{{ title.app_name }}</detail-list-item>
           <detail-list-item term="环境">{{ title.env_name }}</detail-list-item>
           <detail-list-item term="发布单">{{ title.name }}</detail-list-item>
@@ -84,6 +84,7 @@ export default {
       columns: columns,
       dataSource: [],
       selectedRow:[],
+      deploySelectedRows:[],
       params:{
         currentPage:1,
         pageSize:20,
@@ -134,11 +135,11 @@ export default {
       this.fetchData()
     },
     onSelectChange(selectedRowKeys,selectedRows) {
-      console.log('selectedRowKeys changed: ', selectedRowKeys,selectedRows);
       this.selectedRow = selectedRowKeys;
+      this.deploySelectedRows = selectedRows
     },
     onDeploy(){
-
+      console.log("3:", this.deploySelectedRows)
     },
     onChange(pagination, filters, sorter) {
        console.log('Various parameters', pagination, filters, sorter);

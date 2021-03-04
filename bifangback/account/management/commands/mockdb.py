@@ -178,7 +178,7 @@ class Command(BaseCommand):
         Server.objects.all().delete()
         print('delete all Server data')
         create_user = User.objects.get(username=username)
-        for number in range(100):
+        for number in range(50):
             ip = '192.168.1.{}'.format(number)
             app = App.objects.order_by('?').first()
             env = Env.objects.order_by('?').first()
@@ -205,7 +205,21 @@ class Command(BaseCommand):
                                       app=app,
                                       env=env,
                                       system_type='LINUX')
-
+        app_name_list = ['go-demo']
+        service_port_list = [9090]
+        ip_list = ['192.168.1.211', '192.168.1.212']
+        env = Env.objects.get(name='dev')
+        for app_name, service_port in zip(app_name_list, service_port_list):
+            app = App.objects.get(name=app_name)
+            for ip in ip_list:
+                Server.objects.create(name='{}_{}'.format(ip, service_port),
+                                      description=app_name,
+                                      create_user=create_user,
+                                      ip=ip,
+                                      port=service_port,
+                                      app=app,
+                                      env=env,
+                                      system_type='LINUX')
         self.stdout.write('Server重建完成。')
 
     # 新建发布单状态

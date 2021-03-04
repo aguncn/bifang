@@ -3,62 +3,57 @@
   <a-card>
     <div class="search">
       <a-form layout="inline" :form="form" @submit="submitHandler">
-            <a-form-item
-              label="项目选择"
-            >
-            <a-select
-                show-search
-                placeholder="请选择项目"
-                option-filter-prop="children"
-                :filter-option="filterOption"
-                @change="handleChange"
-                style="width:200px"
-                v-decorator="['projectId', { rules: [{ required: false, message: '请选择项目!' }] }]"
-              >
-                <a-select-option v-for="d in projectOption" :key="d">
-                {{ d }}
-                </a-select-option>
-              </a-select>
-            </a-form-item>
-            <a-form-item
-              label="组件选择"
-            >
-              <a-select
-                show-search
-                placeholder="请选择组件"
-                option-filter-prop="children"
-                :filter-option="filterOption"
-                style="width:200px"
-                v-decorator="['appId', { rules: [{ required: false, message: '请选择发布的组件!' }] }]"
-              >
-                <a-select-option v-for="d in options" :key="d.value">
-                {{ d.label }}
-                </a-select-option>
-              </a-select>
-            </a-form-item>
-            <a-form-item
-              label="发布单号"
-            >
-              <a-input 
-              placeholder="请输入发布单"
-              v-decorator="['releaseNo', { rules: [{ required: false, message: 'Please input your note!' }] }]" />
-            </a-form-item>
-            <a-form-item
-              label="时间"
-            >
-              <a-range-picker
-              v-decorator="['timePicker', {rules: [{ type: 'array', required: false }]}]" />
-            </a-form-item>
-            <a-form-item>
-              <a-button type="primary" html-type="submit">
-                查询
-              </a-button>
-            </a-form-item>
-            <a-form-item>
-              <a-button type="primary" @click.prevent="onCreateRelease">
-                新建
-              </a-button>
-            </a-form-item>
+        <a-form-item
+          label="项目选择"
+        >
+        <a-select
+            show-search
+            placeholder="请选择项目"
+            option-filter-prop="children"
+            :filter-option="filterOption"
+            @change="handleChange"
+            style="width:200px"
+            v-decorator="['projectId', { rules: [{ required: false, message: '请选择项目!' }] }]"
+          >
+            <a-select-option v-for="d in projectOption" :key="d">
+            {{ d }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item
+          label="组件选择"
+        >
+          <a-select
+            show-search
+            placeholder="请选择组件"
+            option-filter-prop="children"
+            :filter-option="filterOption"
+            style="width:200px"
+            v-decorator="['appId', { rules: [{ required: false, message: '请选择发布的组件!' }] }]"
+          >
+            <a-select-option v-for="d in options" :key="d.value">
+            {{ d.label }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item
+          label="发布单号"
+        >
+          <a-input 
+          placeholder="请输入发布单"
+          v-decorator="['releaseNo', { rules: [{ required: false, message: 'Please input your note!' }] }]" />
+        </a-form-item>
+        <a-form-item
+          label="时间"
+        >
+          <a-range-picker
+          v-decorator="['timePicker', {rules: [{ type: 'array', required: false }]}]" />
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" html-type="submit">
+            查询
+          </a-button>
+        </a-form-item>
       </a-form>
     </div>
     <div>
@@ -91,7 +86,7 @@
             placeholder="环境"
             option-filter-prop="children"
             style="width: 80px"
-            @change="handleChange"
+            @change="handleChangeEnv"
             v-decorator="['appId', { rules: [{ required: true, message: '请选择发布的组件!' }] }]"
           >
             <a-select-option v-for="d in envOptions" :key="d.value">
@@ -192,7 +187,7 @@ export default {
     toggleAdvanced () {
       this.advanced = !this.advanced
     },
-    handleChange(value) {
+    handleChangeEnv(value) {
       this.selectEnv = value
     },
     submitHandler(e){
