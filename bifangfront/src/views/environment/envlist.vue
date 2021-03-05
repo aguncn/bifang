@@ -80,26 +80,13 @@
           	<a-tag color='blue'>{{text}}</a-tag>
           </a-tooltip>
         </template>
-        <div slot="action" slot-scope="{text, record}">
-          <a-select
-            show-search
-            placeholder="环境"
-            option-filter-prop="children"
-            style="width: 80px"
-            @change="handleChangeEnv"
-            v-decorator="['appId', { rules: [{ required: true, message: '请选择发布的组件!' }] }]"
-          >
-            <a-select-option v-for="d in envOptions" :key="d.value">
-            {{ d.label }}
-            </a-select-option>
-          </a-select>
-          <a-popconfirm
-          	:title="`是否将${record.name}发布单流转到${selectEnv}环境?`"
-          	ok-text="是" 
-          	cancel-text="否"
-          	@confirm="envExchange(record)">
-          	<a-button type="danger" >流转</a-button>
-          </a-popconfirm>
+        <div slot="action" slot-scope="{text, record, selectEnv}">
+            <env-exchange
+                title="流转"
+                :items="envOptions"
+                :record="record"
+                @onChange="envExchange"
+            ></env-exchange>
         </div>
       </bf-table>
     </div>
@@ -108,6 +95,7 @@
 
 <script>
 import BfTable from '@/components/table/table'
+import envExchange from '@/components/tool/envExchange'
 import API from '@/service'
 import moment from 'moment'
 const columns = [
@@ -146,7 +134,7 @@ const columns = [
 
 export default {
   name: 'envList',
-  components: {BfTable},
+  components: {BfTable,envExchange},
   data () {
     return {
       total:0,
@@ -154,7 +142,6 @@ export default {
       columns: columns,
       dataSource: [],
       envOptions:[],
-      selectEnv: "",
       projects:{},
       projectOption: [],
       options:[],
@@ -291,9 +278,9 @@ export default {
        this.params.sorter = (field?field:"")
        this.fetchData()
     },
-    envExchange(record) {
+    envExchange(record,env) {
       let params = {
-        env_name: this.selectEnv,
+        env_name: env,
         release_name: record.name
       }
       console.log(params)
