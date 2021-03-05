@@ -4,6 +4,7 @@ from rest_framework import serializers
 class DeploySerializer(serializers.Serializer):
     user_id = serializers.CharField(max_length=16)
     app_name = serializers.CharField(max_length=100)
+    service_port = serializers.CharField(max_length=8)
     release_name = serializers.CharField(max_length=64)
     env_name = serializers.CharField(max_length=16)
     deploy_type = serializers.CharField(max_length=64)

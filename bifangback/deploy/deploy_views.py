@@ -12,6 +12,7 @@ from cmdb.models import Action
 from .serializers import DeploySerializer
 from utils.ret_code import *
 from utils.permission import is_right
+from utils.write_history import update_release_status
 from utils.write_history import write_release_history
 from utils.write_history import write_server_history
 from utils.write_history import update_server_release
@@ -35,12 +36,13 @@ async def deploy(request):
         }
         """
         req_data = json.loads(request.body.decode('utf-8'))
-        req_data['target_list'] = req_data['target_list'].split(",")
+        req_data['target_list'] = req_data['target_list'].split(',')
         # 序列化前端数据，并判断是否有效
         serializer = DeploySerializer(data=req_data)
         if serializer.is_valid():
             ser_data = serializer.validated_data
             app_name = ser_data['app_name']
+            service_port = ser_data['service_port']
             release_name = ser_data['release_name']
             env_name = ser_data['env_name']
             user_id = ser_data['user_id']
@@ -63,6 +65,7 @@ async def deploy(request):
                 threading.Thread(target=write_release_history, args=(release_name, env_name,
                                                                      'Ongoing', None, 'Ongoing', user_id)) \
                     .start()
+                threading.Thread(target=update_release_status, args=(release_name, 'Ongoing')).start()
             # 回滚，只更新服务器操作历史及服务器主备发布单， 因为在异步视图中，都需要新开一个线程，或是同步转异步
             elif deploy_type == 'rollback' and op_type == 'deploy':
                 action_list = ['stop', 'stop_status', 'rollback', 'start', 'start_status', 'health_check']
@@ -77,7 +80,7 @@ async def deploy(request):
             # python 3 的异步技术
             loop = asyncio.get_event_loop()
             loop.create_task(thread_async(action_list, env_name,
-                                          app_name, release_name,
+                                          app_name, service_port, release_name,
                                           target_list, user_id,
                                           op_type, deploy_type))
 
@@ -90,7 +93,7 @@ async def deploy(request):
 
 # 异步任务
 async def thread_async(action_list, env_name,
-                       app_name, release_name,
+                       app_name, service_port, release_name,
                        target_list, user_id,
                        op_type, deploy_type):
 
@@ -101,7 +104,7 @@ async def thread_async(action_list, env_name,
             print('action: ', action)
             # 多线程版本，应用为IO密集型，适合threading模式
             executor = ThreadPoolExecutor()
-            for data in executor.map(cmd_run, [env_name], [app_name],
+            for data in executor.map(cmd_run, [env_name], [app_name], [service_port],
                                      [release_name], [target_list],
                                      [action], [user_id],
                                      [op_type], [deploy_type]):
@@ -113,6 +116,7 @@ async def thread_async(action_list, env_name,
                                                                              'Failed', deploy_type, 'Failed',
                                                                              user_id)) \
                             .start()
+                        threading.Thread(target=update_release_status, args=(release_name, 'Failed')).start()
                     return_dict = build_ret_data(THROW_EXP, action)
                     return render_json(return_dict)
                 # print('data_true: ', data)
@@ -122,8 +126,9 @@ async def thread_async(action_list, env_name,
                                                                  'Success', deploy_type, 'Success',
                                                                  user_id)) \
                 .start()
-            threading.Thread(target=update_server_release, args=(target_list, release_name, deploy_type)) \
+            threading.Thread(target=update_server_release, args=(target_list, service_port, release_name, deploy_type)) \
                 .start()
+            threading.Thread(target=update_release_status, args=(release_name, 'Success')).start()
         print("finish: ", action_list, env_name, app_name, release_name, target_list)
 
     except asyncio.CancelledError:
@@ -133,7 +138,7 @@ async def thread_async(action_list, env_name,
 
 
 # cmd_run函数是在每一个线程当中运行的
-def cmd_run(env_name, app_name,
+def cmd_run(env_name, app_name, service_port,
             release_name, target_list,
             action, user_id,
             op_type, deploy_type):
@@ -149,7 +154,6 @@ def cmd_run(env_name, app_name,
     deploy_script_url = release.deploy_script_url
     zip_package_name = app.zip_package_name
     zip_package_url = release.zip_package_url
-    service_port = app.service_port
     # 使用saltypie来获取返回值，不自己更写Http请求，更容易解析结果
     ret = salt_cmd(salt_url, salt_user, salt_pwd, eauth,
                    target_list, deploy_script_url,
@@ -157,10 +161,13 @@ def cmd_run(env_name, app_name,
                    zip_package_name, zip_package_url,
                    service_port, action)
     time.sleep(1)
+    # salt找不到服务器，则返回列表里字典都是空的，这一步要提前判断
+    if all(not item for item in ret):
+        return False
     for server in ret:
         for ip, detail in server.items():
             # 记录服务器操作历史，因为在异步视图中，都需要新开一个线程，或是同步转异步
-            threading.Thread(target=write_server_history, args=(ip, release_name,
+            threading.Thread(target=write_server_history, args=(ip, service_port, release_name,
                                                                 env_name, op_type,
                                                                 action, detail['stdout'],
                                                                 user_id)) \

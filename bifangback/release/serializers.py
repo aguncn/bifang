@@ -7,6 +7,7 @@ from cmdb.models import Release
 class ReleaseSerializer(serializers.ModelSerializer):
     project_name = serializers.CharField(source='app.project.name')
     app_name = serializers.CharField(source='app.name')
+    service_port = serializers.CharField(source='app.service_port')
     env_name = serializers.CharField(source='env.name', default="None")
     create_user_name = serializers.CharField(source='create_user.username')
     deploy_status_name = serializers.CharField(source='deploy_status.name')

@@ -10,11 +10,17 @@ from cmdb.history_models import ServerHistory
 User = get_user_model()
 
 
+# 更新发布单部署
+def update_release_status(release_name, deploy_status_name):
+    deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
+    release = Release.objects.filter(name=release_name).update(deploy_status=deploy_status)
+
+
 # 更新服务器的主备发布单
-def update_server_release(target_list, release_name, deploy_type):
+def update_server_release(target_list, service_port, release_name, deploy_type):
 
     for ip in target_list:
-        server = Server.objects.get(name=ip)
+        server = Server.objects.get(name='{}_{}'.format(ip, service_port))
         # 真正部署时，将服务器的主发布单放到备用发布单，用新发布单填充主发布单
         if deploy_type == 'deploy':
             release = Release.objects.get(name=release_name)
@@ -55,12 +61,12 @@ def write_release_history(release_name=None, env_name=None,
 
 
 # 更新服务器操作历史，可用ajax展示具体部署过程，也可以查看一个具体服务器的操作历史
-def write_server_history(ip=None, release_name=None,
+def write_server_history(ip=None, service_port=None, release_name=None,
                          env_name=None, op_type=None,
                          action_type=None, log=None,
                          user_id=None):
     name = uuid.uuid1()
-    server = Server.objects.get(name=ip)
+    server = Server.objects.get(name='{}_{}'.format(ip, service_port))
     release = None
     if release_name is not None:
         release = Release.objects.get(name=release_name)

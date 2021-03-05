@@ -14,7 +14,7 @@
       <a-table
         :columns="columns"
         :dataSource="dataSource"
-        rowKey="name"
+        rowKey="ip"
         :row-selection="{ selectedRowKeys: selectedRow, onChange: onSelectChange }"
         @change="onChange"
         :pagination="{
@@ -27,6 +27,15 @@
           showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
         }"
       >
+        <template slot="release_name" slot-scope="record">
+          <a-tooltip>
+          	<template slot="title">
+          		{{ record.back_release_name }}
+          	</template>
+            <a-tag color='green' v-if="record.main_release_name===title.name">{{ record.main_release_name }}</a-tag>
+          	<a-tag color='red' v-if="record.main_release_name!==title.name">{{ record.main_release_name }}</a-tag>
+          </a-tooltip>
+        </template>
       </a-table>
       <div class="alert">
         <a-alert type="info" style="line-height:2.4" :show-icon="true" v-if="selectedRow">
@@ -59,6 +68,10 @@ const columns = [
   {
     title: '环境',
     dataIndex: 'env_name'
+  },
+  {
+    title: '发布单',
+    scopedSlots: { customRender: 'release_name' }
   },
   {
     title: '更新时间',
@@ -133,10 +146,12 @@ export default {
       this.selectedRow = selectedRowKeys;
     },
     onDeploy(){
+      console.log(this.title, "@@@@@@@@@@@")
       let params = {
         target_list: this.selectedRow.toString(),
         user_id: this.title.create_user,
         app_name: this.title.app_name,
+        service_port: this.title.service_port,
         env_name: this.title.env_name,
         release_name: this.title.name,
         deploy_type: 'deploy',
