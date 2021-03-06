@@ -1,8 +1,5 @@
 import time
 import threading
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
-from asgiref.sync import async_to_sync
 from django.contrib.auth import get_user_model
 from cmdb.models import App
 from utils.saltstack import salt_cmd
@@ -20,9 +17,7 @@ from utils.write_history import update_server_release
 User = get_user_model()
 
 
-@async_to_sync
-# django异步视图
-async def deploy(request):
+def deploy(request):
     if request.method == 'POST':
         """
         {
@@ -61,11 +56,9 @@ async def deploy(request):
             """
             if deploy_type == 'deploy' and op_type == 'deploy':
                 action_list = ['fetch', 'stop', 'stop_status', 'deploy', 'start', 'start_status', 'health_check']
-                # 真正部署，才更新发布单历史，，因为在异步视图中，都需要新开一个线程，或是同步转异步
-                threading.Thread(target=write_release_history, args=(release_name, env_name,
-                                                                     'Ongoing', None, 'Ongoing', user_id)) \
-                    .start()
-                threading.Thread(target=update_release_status, args=(release_name, 'Ongoing')).start()
+                # 更新发布单历史及状态
+                write_release_history(release_name, env_name, 'Ongoing', None, 'Ongoing', user_id)
+                update_release_status(release_name, 'Ongoing')
             # 回滚，只更新服务器操作历史及服务器主备发布单， 因为在异步视图中，都需要新开一个线程，或是同步转异步
             elif deploy_type == 'rollback' and op_type == 'deploy':
                 action_list = ['stop', 'stop_status', 'rollback', 'start', 'start_status', 'health_check']
@@ -77,12 +70,11 @@ async def deploy(request):
                 action_list = ['stop', 'stop_status', 'start', 'start_status']
             else:
                 pass
-            # python 3 的异步技术
-            loop = asyncio.get_event_loop()
-            loop.create_task(thread_async(action_list, env_name,
-                                          app_name, service_port, release_name,
-                                          target_list, user_id,
-                                          op_type, deploy_type))
+
+            task_run(action_list, env_name,
+                     app_name, service_port, release_name,
+                     target_list, user_id,
+                     op_type, deploy_type)
 
             return_dict = build_ret_data(OP_SUCCESS, 'success')
             return render_json(return_dict)
@@ -91,48 +83,37 @@ async def deploy(request):
             return render_json(return_dict)
 
 
-# 异步任务
-async def thread_async(action_list, env_name,
-                       app_name, service_port, release_name,
-                       target_list, user_id,
-                       op_type, deploy_type):
+def task_run(action_list, env_name,
+             app_name, service_port, release_name,
+             target_list, user_id,
+             op_type, deploy_type):
 
     try:
-        # await触发异步视图，有没有更好的方式？
-        await asyncio.sleep(1)
         for action in action_list:
             print('action: ', action)
-            # 多线程版本，应用为IO密集型，适合threading模式
-            executor = ThreadPoolExecutor()
-            for data in executor.map(cmd_run, [env_name], [app_name], [service_port],
-                                     [release_name], [target_list],
-                                     [action], [user_id],
-                                     [op_type], [deploy_type]):
-                if not data:
-                    # print('data_false: ', data)
-                    # 有真正部署，出错时才需要更新发布单历史，其它情况，只更新服务器发布历史(暂不考虑回滚失败)
-                    if deploy_type == 'deploy':
-                        threading.Thread(target=write_release_history, args=(release_name, env_name,
-                                                                             'Failed', deploy_type, 'Failed',
-                                                                             user_id)) \
-                            .start()
-                        threading.Thread(target=update_release_status, args=(release_name, 'Failed')).start()
-                    return_dict = build_ret_data(THROW_EXP, action)
-                    return render_json(return_dict)
-                # print('data_true: ', data)
+
+            ret_data = cmd_run(env_name, app_name,
+                               service_port,release_name,
+                               target_list, action,
+                               user_id, op_type, deploy_type)
+            if not ret_data:
+                # print('data_false: ', data)
+                # 有真正部署，出错时才需要更新发布单历史，其它情况，只更新服务器发布历史(暂不考虑回滚失败)
+                if deploy_type == 'deploy':
+                    threading.Thread(target=write_release_history, args=(release_name, env_name,
+                                                                         'Failed', deploy_type, 'Failed',
+                                                                         user_id)) \
+                        .start()
+                    threading.Thread(target=update_release_status, args=(release_name, 'Failed')).start()
+                return_dict = build_ret_data(THROW_EXP, action)
+                return render_json(return_dict)
+            # print('data_true: ', data)
         # 只有部署和回滚，才需要更新发布单历史和服务器主备发布单(回滚时，发布单参数并没有用上)
         if op_type == 'deploy':
-            threading.Thread(target=write_release_history, args=(release_name, env_name,
-                                                                 'Success', deploy_type, 'Success',
-                                                                 user_id)) \
-                .start()
-            threading.Thread(target=update_server_release, args=(target_list, service_port, release_name, deploy_type)) \
-                .start()
-            threading.Thread(target=update_release_status, args=(release_name, 'Success')).start()
+            write_release_history(release_name, env_name, 'Success', deploy_type, 'Success', user_id)
+            update_server_release(target_list, service_port, release_name, deploy_type)
+            update_release_status(release_name, 'Success')
         print("finish: ", action_list, env_name, app_name, release_name, target_list)
-
-    except asyncio.CancelledError:
-        print('Cancel the future.')
     except Exception as e:
         print(e)
 

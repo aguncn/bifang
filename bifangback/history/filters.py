@@ -17,11 +17,12 @@ class ReleaseHistoryFilter(FilterSet):
 
 
 class ServerHistoryFilter(FilterSet):
-    server = filters.CharFilter(field_name='server__name', lookup_expr='icontains',)
+    release_name = filters.CharFilter(field_name='release__name', lookup_expr='icontains',)
+    env_name = filters.CharFilter(field_name='env__name', lookup_expr='icontains', )
     begin_time = filters.DateTimeFilter(field_name='create_date', lookup_expr='gte',)
     end_time = filters.DateTimeFilter(field_name='create_date', lookup_expr='lte',)
     sort = OrderingFilter(fields=('create_date',))
 
     class Meta:
         model = ServerHistory
-        fields = ['server', 'begin_time', 'end_time']
+        fields = ['release_name', 'env_name', 'release_id', 'env_id', 'log_no', 'begin_time', 'end_time']

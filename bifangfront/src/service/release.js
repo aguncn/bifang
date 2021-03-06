@@ -62,23 +62,10 @@ async function BuildReleaseStatus(params){
   )
 }
 
-/**
- * 获取发布单历史操作
- * @param {*} params 
- */
-async function ReleaseHistory(params){
-  return request(
-      API.RELEASEHISTORY, 
-      METHOD.GET,
-      params
-  )
-}
-
 export default {
     ReleaseList,
     ReleaseDetail,
     CreateRelease,
     BuildRelease,
-    BuildReleaseStatus,
-    ReleaseHistory
+    BuildReleaseStatus
 }
