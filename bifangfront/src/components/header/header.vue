@@ -11,7 +11,7 @@
           </a-tooltip>
           <a-dropdown>
             <div class="header-avatar" style="cursor: pointer">
-                <a-avatar class="avatar" size="small" shape="circle" :src="user.avatar"/>
+                <a-avatar class="avatar" size="small" shape="circle" :src="avatar"/>
                 <span class="name">{{user.name}}</span>
             </div>
             <a-menu :class="['avatar-menu']" slot="overlay">
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-// import {mapState, mapMutations} from 'vuex'
+import {mapState} from 'vuex'
 import {logout} from '@/utils/request'
 
 export default {
@@ -40,14 +40,12 @@ export default {
   props: ['collapsed'],
   data() {
     return {
-      user:{
-        name: 'superman',
-        avatar: 'https://gw.alipayobjects.com/zos/rmsportal/gaOngJwsRYRaVAuXXcmB.png'
-      },
+      avatar: 'https://gw.alipayobjects.com/zos/rmsportal/gaOngJwsRYRaVAuXXcmB.png',
       searchActive: false
     }
   },
   computed: {
+    ...mapState(['user']),
   },
   methods: {
     toggleCollapse () {

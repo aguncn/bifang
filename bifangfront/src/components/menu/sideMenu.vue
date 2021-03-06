@@ -9,7 +9,7 @@
     <a-menu theme="dark" mode="inline" @select="onSelect"  :default-selected-keys="defaultKey" :open-keys.sync="openKey">
         <a-sub-menu v-for="menu in menuList" :key="menu.path">
           <span slot="title"><a-icon :type="menu.meta.icon||'form'" /><span>{{menu.name}}</span></span>
-            <a-menu-item v-show="!(sub.meta&&!sub.meta.isShowMenu)" v-for="sub in menu.children" :key="sub.path">
+            <a-menu-item v-show="!(sub.meta&&(sub.meta.isShowMenu==false))" v-for="sub in menu.children" :key="sub.path">
               <router-link :to="menu.path+sub.path">{{sub.name}}</router-link>
             </a-menu-item>        
         </a-sub-menu> 

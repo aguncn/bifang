@@ -34,6 +34,7 @@ function formatRoutes(routeConfig){
                         path: item.path + child.path,
                         name: child.name,
                         meta: {
+                            parent:item,
                             ...item.meta,
                             ...child.meta
                         },

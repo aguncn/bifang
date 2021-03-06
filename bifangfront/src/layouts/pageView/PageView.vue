@@ -33,18 +33,19 @@ export default {
           layout:'side'
       }
   },
-  props: {
-    title: {
-      type: [String, Boolean],
-      required: false
-    },
-    breadcrumb: {
-      type: Array,
-      required: false
-    }
-  },
   computed: {
     // ...mapState('setting', ['layout', 'showPageTitle', 'pageWidth'])
+    breadcrumb(){
+      const list = ["首页"]
+      if(this.$route.matched.length >1){
+        list.push(this.$route.matched[1].meta.parent.name)
+        list.push(this.$route.matched[1].name)
+      }
+      return list
+    },
+    title(){
+      return this.$route.matched.length>1?(this.$route.matched[1].meta.title || this.$route.matched[1].name):"标题"
+    }
   }
 }
 </script>
