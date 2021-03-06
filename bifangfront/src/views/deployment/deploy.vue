@@ -9,6 +9,7 @@
           <detail-list-item term="环境">{{ title.env_name }}</detail-list-item>
           <detail-list-item term="发布单">{{ title.name }}</detail-list-item>
           <detail-list-item term="发布描述">{{ title.description }}</detail-list-item>
+          <detail-list-item term="部署批次">{{ title.deploy_no }}</detail-list-item>
         </detail-list>
       </a-card>
       <a-table
@@ -36,6 +37,12 @@
           	<a-tag color='red' v-if="record.main_release_name!==title.name">{{ record.main_release_name }}</a-tag>
           </a-tooltip>
         </template>
+        
+        <template slot="server_log" slot-scope="text, record">
+          <a-button type="primary" @click="logShow(record)">
+            日志
+          </a-button>
+        </template>
       </a-table>
       <div class="alert">
         <a-alert type="info" style="line-height:2.4" :show-icon="true" v-if="selectedRow">
@@ -46,6 +53,44 @@
         </a-alert>
       </div>
     </div>
+    <a-modal
+      :visible="visiableLog"
+      title="服务器日志"
+      okText="确定"
+      cancelText="关闭"
+      @cancel="onLogReset"
+      @ok="onLogReset"
+    >
+      <a-card>
+        <a-timeline>
+          <div v-for="(item, index) in serverHistorySource" :key="item.id">
+            <a-timeline-item color="blue" v-if="item.server==selectServer">
+                <a-icon slot="dot" type="clock-circle-o" style="font-size: 16px;" />
+                <a-tag color='blue'>{{item.server}}</a-tag>
+                <a-tag >{{item.env}} {{item.release}} {{item.op_type}} {{item.action_type}}</a-tag><br/>
+                {{item.log}}<br/>
+                <a-tag color='green'>{{item.create_user}}</a-tag>
+                {{item.create_date}}
+            </a-timeline-item>
+          </div>
+        </a-timeline>    
+      </a-card>
+    </a-modal>
+    <a-modal
+      :visible="visiableDeploy"
+      title="部署"
+      okText="确定"
+      cancelText="关闭"
+      @cancel="onDeployReset"
+      @ok="onDeployReset"
+    >
+      <a-card>
+        服务器列表：{{this.selectedRow}}<br/>
+        <span v-if="deployResult === 'wait'">状态：部署中<a-icon type="sync"   :style="{ fontSize: '24px', color: '#00f' }" spin /><br/></span>
+        <span v-else-if="deployResult === 'success'">状态：部署完成<a-icon type="check"   :style="{ fontSize: '24px', color: '#000' }" /> <br/></span>
+        <span v-else>状态：部署出错，请查看服务器日志<a-icon type="close"   :style="{ fontSize: '24px', color: '#f00' }" /> <br/></span>
+      </a-card>
+    </a-modal>
   </a-card>
 </template>
 
@@ -74,6 +119,10 @@ const columns = [
     scopedSlots: { customRender: 'release_name' }
   },
   {
+    title: '部署日志',
+    scopedSlots: { customRender: 'server_log' }
+  },
+  {
     title: '更新时间',
     dataIndex: 'update_date',
     sorter: true,
@@ -86,13 +135,18 @@ export default {
   data () {
     return {
       total: 0,
+      visiableLog:false,
+      visiableDeploy:false,
       releaseId: "",
       appId: "",
       envId: "",
       title: "",
       columns: columns,
       dataSource: [],
+      serverHistorySource: [],
+      selectServer: "",
       selectedRow:[],
+      deployResult: "",
       params:{
         currentPage:1,
         pageSize:20,
@@ -104,11 +158,15 @@ export default {
     this.releaseId = this.$route.params.releaseId
     this.appId = this.$route.params.appId
     this.envId = this.$route.params.envId
-    this.fetchReleaseData()
-    this.fetchServerData()
-    
+    this.deployNo = this.$route.params.deployNo
+    this.fetchAllData()
   },
   methods: {
+    fetchAllData(){
+      this.fetchReleaseData()
+      this.fetchServerData()
+      this.fetchServerHistoryData()
+    },
     fetchReleaseData(){
       API.ReleaseDetail(this.releaseId).then((res)=>{
         let result = res.data
@@ -132,6 +190,35 @@ export default {
         }
       })
     },
+    fetchServerHistoryData(){
+      let params = {
+        release_id: this.releaseId,
+        env_id: this.envId,
+        log_no: this.deployNo,
+        pageSize: 200
+      }
+      API.ServerHistory(params).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          this.serverHistorySource =  result.data.results
+        }
+      })
+    },
+    logShow(data){
+      this.selectServer = data.name
+      this.visiableLog = true
+    },
+    deployShow(data){
+      this.selectServer = data.name
+      this.visiableLog = true
+    },
+    onLogReset(){
+      this.visiableLog = false
+    },
+    onDeployReset(){
+      this.fetchAllData()
+      this.visiableDeploy = false
+    },
     onPageChange(page,pageSize){
       this.params.currentPage = page
       this.params.pageSize = pageSize
@@ -146,7 +233,6 @@ export default {
       this.selectedRow = selectedRowKeys;
     },
     onDeploy(){
-      console.log(this.title, "@@@@@@@@@@@")
       let params = {
         target_list: this.selectedRow.toString(),
         user_id: this.title.create_user,
@@ -157,12 +243,13 @@ export default {
         deploy_type: 'deploy',
         op_type: 'deploy',
       }
-      console.log(params)
+      this.deployResult = "wait"
+      this.visiableDeploy = true
       API.Deploy(params).then((res)=>{
-        if(res.status == 200 ){
-          console.log(res, "ok!!!!!!!!!!!!")
+        if(res.data.code == 0 ){
+          this.deployResult = "success"
         } else {
-          console.log(res,"wrong!!!!!!!!!!")
+          this.deployResult = "failed"
         }
       })
     },

@@ -57,6 +57,11 @@ class ReleaseHistory(BaseModel):
                                    blank=True,
                                    null=True,
                                    verbose_name="部署类型")
+    # 发布单的次数和这里匹配，即可找到合适的历史记录。
+    log_no = models.IntegerField(blank=True,
+                                 null=True,
+                                 default=0,
+                                 verbose_name="部署批次")
     log = models.TextField(verbose_name="日志内容")
 
     class Meta:
@@ -95,6 +100,11 @@ class ServerHistory(BaseModel):
                                    blank=True,
                                    null=True,
                                    verbose_name="服务器操作类型")
+    # 发布单或app应用的次数和这里匹配，即可找到合适的历史记录。
+    log_no = models.IntegerField(blank=True,
+                                 null=True,
+                                 default=0,
+                                 verbose_name="部署启停批次")
     log = models.TextField(verbose_name="日志内容")
 
     class Meta:

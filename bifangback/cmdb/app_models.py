@@ -56,7 +56,7 @@ class App(BaseModel):
                                      null=True,
                                      verbose_name="执行用户组")
     # 如果bifang增加独立的服务器启停功能，日志单独数据表保存，但这里可以保存最近启停次数，用于定义日志
-    op_log_no = models.IntegerField(default=0, verbose_name="启停日志次数")
+    op_no = models.IntegerField(default=0, verbose_name="启停日志次数")
 
     class Meta:
         db_table = 'App'
