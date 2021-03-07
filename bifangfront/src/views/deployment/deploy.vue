@@ -177,9 +177,9 @@ export default {
     }
   },
   created(){
-    this.releaseId = this.$route.params.releaseId
-    this.appId = this.$route.params.appId
-    this.envId = this.$route.params.envId
+    this.releaseId = this.$route.query.releaseId
+    this.appId = this.$route.query.appId
+    this.envId = this.$route.query.envId
     this.fetchAllData()
   },
   methods: {

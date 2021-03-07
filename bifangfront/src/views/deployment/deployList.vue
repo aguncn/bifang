@@ -173,7 +173,7 @@ export default {
       this.advanced = !this.advanced
     },
     goDeploy(data){
-			this.$router.push({ name: '发布单部署', params: { releaseId: data.id,  appId: data.app, envId: data.env}});
+			this.$router.push({ path: '/deployment/deploy', query: { releaseId: data.id,  appId: data.app, envId: data.env}});
     },
     submitHandler(e){
       e.preventDefault()
