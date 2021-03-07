@@ -27,6 +27,7 @@ class AppHistoryAdmin(SimpleHistoryAdmin):
 
 
 admin.site.register(App, AppHistoryAdmin)
+admin.site.register(ServerStatus)
 
 
 class ServerHistoryAdmin(SimpleHistoryAdmin):

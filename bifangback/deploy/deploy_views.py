@@ -24,6 +24,7 @@ def deploy(request):
             "user_id":111,
             "release_name": "20210117132941344089GA",
             "deploy_type": "deploy",
+            "deploy_no": 1,
             "op_type": "deploy",
             "target_list": ["192.168.1.211", "192.168.1.212"]
         }
@@ -43,6 +44,8 @@ def deploy(request):
             op_type = ser_data['op_type']
             deploy_type = ser_data['deploy_type']
             target_list = ser_data['target_list']
+            # 部署批次是在当前发布单的部署批次上加1，然后，将这个批次分别传到部署历史和服务器历史中，以对应日志
+            deploy_no = int(ser_data['deploy_no']) + 1
             """
             # 前端开发完成后开启权限测试
             app = App.objects.get(name=app_name)
@@ -56,8 +59,8 @@ def deploy(request):
             if deploy_type == 'deploy' and op_type == 'deploy':
                 action_list = ['fetch', 'stop', 'stop_status', 'deploy', 'start', 'start_status', 'health_check']
                 # 更新发布单历史及状态
-                write_release_history(release_name, env_name, 'Ongoing', None, 'Ongoing', user_id)
-                update_release_status(release_name, 'Ongoing')
+                write_release_history(release_name, env_name, 'Ongoing', deploy_type, deploy_no, 'Ongoing', user_id)
+                update_release_status(release_name, deploy_no, 'Ongoing')
             # 回滚，只更新服务器操作历史及服务器主备发布单
             elif deploy_type == 'rollback' and op_type == 'deploy':
                 action_list = ['stop', 'stop_status', 'rollback', 'start', 'start_status', 'health_check']
@@ -74,7 +77,7 @@ def deploy(request):
             task_run(action_list, env_name,
                      app_name, service_port, release_name,
                      target_list, user_id,
-                     op_type, deploy_type)
+                     op_type, deploy_type, deploy_no)
 
             return_dict = build_ret_data(OP_SUCCESS, 'success')
             return render_json(return_dict)
@@ -86,7 +89,7 @@ def deploy(request):
 def task_run(action_list, env_name,
              app_name, service_port, release_name,
              target_list, user_id,
-             op_type, deploy_type):
+             op_type, deploy_type, deploy_no):
 
     try:
         for action in action_list:
@@ -95,21 +98,21 @@ def task_run(action_list, env_name,
             ret_data = cmd_run(env_name, app_name,
                                service_port,release_name,
                                target_list, action,
-                               user_id, op_type, deploy_type)
+                               user_id, op_type, deploy_type, deploy_no)
             if not ret_data:
                 # print('data_false: ', data)
                 # 有真正部署，出错时才需要更新发布单历史，其它情况，只更新服务器发布历史(暂不考虑回滚失败)
                 if deploy_type == 'deploy':
-                    write_release_history(release_name, env_name, 'Failed', deploy_type, 'Failed', user_id)
-                    update_release_status(release_name, 'Failed')
+                    write_release_history(release_name, env_name, 'Failed', deploy_type, deploy_no, 'Failed', user_id)
+                    update_release_status(release_name, deploy_no, 'Failed')
                 return_dict = build_ret_data(THROW_EXP, action)
                 return render_json(return_dict)
             # print('data_true: ', data)
         # 只有部署和回滚，才需要更新发布单历史和服务器主备发布单(回滚时，发布单参数并没有用上)
         if op_type == 'deploy':
-            write_release_history(release_name, env_name, 'Success', deploy_type, 'Success', user_id)
+            write_release_history(release_name, env_name, 'Success', deploy_type, deploy_no, 'Success', user_id)
             update_server_release(target_list, service_port, release_name, deploy_type)
-            update_release_status(release_name, 'Success')
+            update_release_status(release_name, deploy_no, 'Success')
         print("finish: ", action_list, env_name, app_name, release_name, target_list)
     except Exception as e:
         print(e)
@@ -119,7 +122,7 @@ def task_run(action_list, env_name,
 def cmd_run(env_name, app_name, service_port,
             release_name, target_list,
             action, user_id,
-            op_type, deploy_type):
+            op_type, deploy_type, deploy_no):
     env = Env.objects.get(name=env_name)
     app = App.objects.get(name=app_name)
     release = Release.objects.get(name=release_name)
@@ -139,13 +142,13 @@ def cmd_run(env_name, app_name, service_port,
                    zip_package_name, zip_package_url,
                    service_port, action)
     time.sleep(1)
-    # salt找不到服务器，则返回列表里字典都是空的，这一步要提前判断
-    if all(not item for item in ret):
+    # salt找不到服务器，则返回列表里字典中有一个必为空，这一步要提前判断
+    if any(not item for item in ret):
         return False
     for server in ret:
         for ip, detail in server.items():
             # 记录服务器操作历史
-            write_server_history(ip, service_port, release_name, env_name, op_type, action, detail['stdout'], user_id)
+            write_server_history(ip, service_port, release_name, env_name, op_type, action, deploy_no, detail['stdout'], user_id)
             # 部署脚本的每一个步骤，成功时必须返回success关键字
             if 'success' not in detail['stdout']:
                 return False

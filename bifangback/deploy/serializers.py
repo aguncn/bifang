@@ -7,6 +7,7 @@ class DeploySerializer(serializers.Serializer):
     service_port = serializers.CharField(max_length=8)
     release_name = serializers.CharField(max_length=64)
     env_name = serializers.CharField(max_length=16)
+    deploy_no = serializers.CharField(max_length=8)
     deploy_type = serializers.CharField(max_length=64)
     op_type = serializers.CharField(max_length=64)
     target_list = serializers.ListField(required=True, child=serializers.CharField(),)
