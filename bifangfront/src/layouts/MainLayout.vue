@@ -6,7 +6,7 @@
       <admin-header :style="headerStyle" :collapsed="collapsed" @toggleCollapse="toggleCollapse"/>
       <a-layout-content class="admin-layout-content" :style="`min-height: ${minHeight}px;`">
         <div style="position: relative">
-          <page-view title="标题" :breadcrumb="breadcrumb"></page-view>
+          <page-view></page-view>
         </div>
       </a-layout-content>
       <a-layout-footer style="padding: 0px">
@@ -31,9 +31,11 @@ export default {
   data () {
     return {
       minHeight: window.innerHeight - 64 - 122,
-      breadcrumb:["首页","二级","菜单"],
       collapsed: false
     }
+  },
+  created(){
+    console.log("MainLayout",this.$route.matched)
   },
   provide() {
     return {

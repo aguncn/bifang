@@ -21,6 +21,9 @@ const routeConfig = [
               {
                   path: '/releaseList',
                   name: '列表',
+                  meta:{
+                    title: "发布单列表"
+                  },
                   component: () => import('@/views/release/list')
               },
               {

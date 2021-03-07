@@ -101,7 +101,7 @@
 import CommonLayout from '@/layouts/CommonLayout'
 import API from '@/service'
 import {setAuthorization} from '@/utils/request'
-// import {mapMutations} from 'vuex'
+import {mapMutations} from 'vuex'
 
 export default {
   name: 'Login',
@@ -118,7 +118,7 @@ export default {
     }
   },
   methods: {
-    // ...mapMutations('account', ['setUser', 'setPermissions', 'setRoles']),
+    ...mapMutations(['setUser', 'setPermissions', 'setRoles']),
     onLogin (e) {
       e.preventDefault()
       this.loginForm.validateFields((err) => {
@@ -154,17 +154,14 @@ export default {
     onTabChange(key){
         this.activeKey = key
     },
-    setUser(user){
-
-    },
     afterLogin(res) {
       this.logging = false
       const loginRes = res.data
       if (loginRes.code == 0) {
         const {user, permissions, roles} = loginRes.data
         this.setUser(user)
-        // this.setPermissions(permissions)
-        // this.setRoles(roles)
+        this.setPermissions(permissions)
+        this.setRoles(roles)
         setAuthorization({token: loginRes.data.token, expireAt: new Date(loginRes.data.expireAt)})
         this.$router.push('/release/releaseList')
         // 获取路由配置

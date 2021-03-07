@@ -13,7 +13,7 @@
                 :filter-option="filterOption"
                 @change="handleChange"
                 style="width:200px"
-                v-decorator="['projectId', { rules: [{ required: false, message: '请选择项目!' }] }]"
+                v-decorator="['projectName', { rules: [{ required: false, message: '请选择项目!' }] }]"
               >
                 <a-select-option v-for="d in projectOption" :key="d">
                 {{ d }}
@@ -222,7 +222,7 @@ export default {
           }
           const rangeValue = fieldsValue['timePicker']
           this.params.name = fieldsValue["releaseNo"]
-          this.params.projectName = fieldsValue["projectId"]
+          this.params.project_name = fieldsValue["projectName"]
           this.params.appId = fieldsValue["appId"]
           this.params.begin_time = rangeValue?rangeValue[0].format("YYYY-MM-DD"):""
           this.params.end_time = rangeValue?rangeValue[1].format("YYYY-MM-DD"):""
