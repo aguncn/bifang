@@ -13,7 +13,7 @@
                 :filter-option="filterOption"
                 @change="handleChange"
                 style="width:200px"
-                v-decorator="['projectId', { rules: [{ required: false, message: '请选择项目!' }] }]"
+                v-decorator="['projectName', { rules: [{ required: false, message: '请选择项目!' }] }]"
               >
                 <a-select-option v-for="d in projectOption" :key="d">
                 {{ d }}
@@ -29,9 +29,9 @@
                 option-filter-prop="children"
                 :filter-option="filterOption"
                 style="width:200px"
-                v-decorator="['appId', { rules: [{ required: false, message: '请选择发布的组件!' }] }]"
+                v-decorator="['appName', { rules: [{ required: false, message: '请选择发布的组件!' }] }]"
               >
-                <a-select-option v-for="d in options" :key="d.value">
+                <a-select-option v-for="d in options" :key="d.label">
                 {{ d.label }}
                 </a-select-option>
               </a-select>
@@ -183,8 +183,8 @@ export default {
           }
           const rangeValue = fieldsValue['timePicker']
           this.params.name = fieldsValue["releaseNo"]
-          this.params.projectName = fieldsValue["projectId"]
-          this.params.appId = fieldsValue["appId"]
+          this.params.project_name = fieldsValue["projectName"]
+          this.params.app_name = fieldsValue["appName"]
           this.params.begin_time = rangeValue?rangeValue[0].format("YYYY-MM-DD"):""
           this.params.end_time = rangeValue?rangeValue[1].format("YYYY-MM-DD"):""
           this.fetchData()
@@ -224,7 +224,7 @@ export default {
     },
     handleChange(value) {
       this.form.setFieldsValue({
-        appId:""
+        appName:""
       })
       this.options = this.projects[value]
     },
