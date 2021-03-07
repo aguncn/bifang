@@ -27,6 +27,7 @@ class Command(BaseCommand):
         self.add_env()
         self.add_project()
         self.add_app()
+        self.add_server_status()
         self.add_server()
         self.add_release_status()
         self.add_release()
@@ -172,6 +173,20 @@ class Command(BaseCommand):
                                service_username='root',
                                service_group='root')
         self.stdout.write('App重建完成。')
+
+    # 新建服务器状态
+    def add_server_status(self):
+        ServerStatus.objects.all().delete()
+        print('delete all ServerStatus data')
+        create_user = User.objects.get(username=username)
+        status_list = ['Ready', 'Ongoing', 'Success', 'Failed']
+        status_value_list = ['准备部署', '部署中', '部署成功', '部署失败']
+        for status_name, status_value_name in zip(status_list, status_value_list):
+            ServerStatus.objects.create(name=status_name,
+                                        description=status_name,
+                                        create_user=create_user,
+                                        status_value=status_value_name)
+        self.stdout.write('ServerStatus重建完成。')
 
     # 新建server服务器
     def add_server(self):

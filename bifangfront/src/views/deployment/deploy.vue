@@ -92,6 +92,7 @@
                 {{item.log}}<br/>
                 <a-tag color='green'>{{item.create_user}}</a-tag>
                 {{item.create_date}}
+                <a-badge :count="item.log_no" />
             </a-timeline-item>
           </div>
         </a-timeline>    
@@ -179,20 +180,20 @@ export default {
     this.releaseId = this.$route.params.releaseId
     this.appId = this.$route.params.appId
     this.envId = this.$route.params.envId
-    this.deployNo = this.$route.params.deployNo
     this.fetchAllData()
   },
   methods: {
     fetchAllData(){
       this.fetchReleaseData()
       this.fetchServerData()
-      this.fetchServerHistoryData()
+      
     },
     fetchReleaseData(){
       API.ReleaseDetail(this.releaseId).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           this.title =  result.data;
+          this.fetchServerHistoryData()
         }
       })
     },
@@ -215,7 +216,8 @@ export default {
       let params = {
         release_id: this.releaseId,
         env_id: this.envId,
-        log_no: this.deployNo,
+        // 为了能演示此发布单在此环境的所有日志，注释掉部署批次，在详细服务器日志里识别
+        //log_no: this.title.deploy_no,
         pageSize: 200
       }
       API.ServerHistory(params).then((res)=>{
@@ -264,6 +266,7 @@ export default {
         service_port: this.title.service_port,
         env_name: this.title.env_name,
         release_name: this.title.name,
+        deploy_no: this.title.deploy_no,
         deploy_type: 'deploy',
         op_type: 'deploy',
       }

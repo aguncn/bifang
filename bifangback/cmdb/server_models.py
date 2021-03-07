@@ -10,7 +10,20 @@ SYSTEM_CHOICES = (
 )
 
 
+# 服务器状态，为了能动态管理，我觉得加个单独的表，有必要。
+class ServerStatus(BaseModel):
+    # ['Ready', 'Ongoing', 'Success', 'Failed']
+    # ['准备部署', '部署中', '部署成功', '部署失败']
+    status_value = models.CharField(max_length=1024, blank=True, verbose_name="状态值", default="Ready")
+
+    class Meta:
+        db_table = 'ServerStatus'
+        verbose_name = 'ServerStatus服务器状态'
+        verbose_name_plural = 'ServerStatus服务器状态'
+
+
 # 部署服务器，保证ip和port结合起来的唯一性，可以一个服务器上部署多个应用
+# （但不可以在同一个服务器的不同端口部署同一个应用，想想salt在执行同一批次执行到同一个服务器上的情况，会执行多次，也可以只一次详细考察target_list同为一个机器的情况吧）
 # 当然，能在同一个服务器上，部署多个相同的应用，这得益于将部署脚本让开发自己维护。
 # 真正的devops团队，是需要都有开发和运维的跨界实力的啦~
 class Server(BaseModel):
@@ -51,6 +64,14 @@ class Server(BaseModel):
                                      null=True,
                                      on_delete=models.SET_NULL,
                                      verbose_name='备份发布单')
+    # 记录各种状态用于前端显示
+    # 或发布进行中或完成的判断(主发布单和是否完成部署)
+    deploy_status = models.ForeignKey(ServerStatus,
+                                      related_name='ra_server',
+                                      blank=True,
+                                      null=True,
+                                      on_delete=models.SET_NULL,
+                                      verbose_name="服务器状态")
 
     class Meta:
         db_table = 'Server'

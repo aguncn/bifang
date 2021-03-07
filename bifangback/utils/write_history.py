@@ -11,9 +11,9 @@ User = get_user_model()
 
 
 # 更新发布单部署
-def update_release_status(release_name, deploy_status_name):
+def update_release_status(release_name, deploy_no, deploy_status_name):
     deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
-    release = Release.objects.filter(name=release_name).update(deploy_status=deploy_status)
+    release = Release.objects.filter(name=release_name).update(deploy_no=deploy_no, deploy_status=deploy_status)
 
 
 # 更新服务器的主备发布单
@@ -41,7 +41,7 @@ def update_server_release(target_list, service_port, release_name, deploy_type):
 # 更新发布单历史，这样可以串联起来发布单的操作历史，但操作服务器历史不在此之列，在下一个函数
 def write_release_history(release_name=None, env_name=None,
                           deploy_status_name=None, deploy_type=None,
-                          log=None, user_id=None):
+                          deploy_no=None, log=None, user_id=None):
     name = uuid.uuid1()
     deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
     release = Release.objects.get(name=release_name)
@@ -56,6 +56,7 @@ def write_release_history(release_name=None, env_name=None,
                                   env=env,
                                   deploy_status=deploy_status,
                                   deploy_type=deploy_type,
+                                  log_no=deploy_no,
                                   log=log,
                                   create_user=create_user)
 
@@ -63,7 +64,7 @@ def write_release_history(release_name=None, env_name=None,
 # 更新服务器操作历史，可用ajax展示具体部署过程，也可以查看一个具体服务器的操作历史
 def write_server_history(ip=None, service_port=None, release_name=None,
                          env_name=None, op_type=None,
-                         action_type=None, log=None,
+                         action_type=None, deploy_no=None, log=None,
                          user_id=None):
     name = uuid.uuid1()
     server = Server.objects.get(name='{}_{}'.format(ip, service_port))
@@ -82,5 +83,6 @@ def write_server_history(ip=None, service_port=None, release_name=None,
                                  server=server,
                                  op_type=op_type,
                                  action_type=action_type,
+                                 log_no=deploy_no,
                                  log=log,
                                  create_user=create_user)
