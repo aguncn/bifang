@@ -1,11 +1,9 @@
 import time
-import threading
 from django.contrib.auth import get_user_model
 from cmdb.models import App
 from utils.saltstack import salt_cmd
 from cmdb.models import Env
 from cmdb.models import Release
-from cmdb.models import Action
 from .serializers import DeploySerializer
 from utils.ret_code import *
 from utils.permission import is_right
@@ -54,14 +52,16 @@ def deploy(request):
                 return_dict = build_ret_data(THROW_EXP, '你无权限部署此应用！')
                 return render_json(return_dict)
             """
+            # op_type的deploy用来部署发布音，maintenance用来启停服务
             if deploy_type == 'deploy' and op_type == 'deploy':
                 action_list = ['fetch', 'stop', 'stop_status', 'deploy', 'start', 'start_status', 'health_check']
                 # 更新发布单历史及状态
                 write_release_history(release_name, env_name, 'Ongoing', None, 'Ongoing', user_id)
                 update_release_status(release_name, 'Ongoing')
-            # 回滚，只更新服务器操作历史及服务器主备发布单， 因为在异步视图中，都需要新开一个线程，或是同步转异步
+            # 回滚，只更新服务器操作历史及服务器主备发布单
             elif deploy_type == 'rollback' and op_type == 'deploy':
                 action_list = ['stop', 'stop_status', 'rollback', 'start', 'start_status', 'health_check']
+            # 之后的代码判断逻辑，可以用来处理单纯的服务器应用启停，而不需要部署发布单
             elif deploy_type == 'stop' and op_type == 'maintenance':
                 action_list = ['stop', 'stop_status']
             elif deploy_type == 'start' and op_type == 'maintenance':
@@ -100,11 +100,8 @@ def task_run(action_list, env_name,
                 # print('data_false: ', data)
                 # 有真正部署，出错时才需要更新发布单历史，其它情况，只更新服务器发布历史(暂不考虑回滚失败)
                 if deploy_type == 'deploy':
-                    threading.Thread(target=write_release_history, args=(release_name, env_name,
-                                                                         'Failed', deploy_type, 'Failed',
-                                                                         user_id)) \
-                        .start()
-                    threading.Thread(target=update_release_status, args=(release_name, 'Failed')).start()
+                    write_release_history(release_name, env_name, 'Failed', deploy_type, 'Failed', user_id)
+                    update_release_status(release_name, 'Failed')
                 return_dict = build_ret_data(THROW_EXP, action)
                 return render_json(return_dict)
             # print('data_true: ', data)
@@ -147,12 +144,8 @@ def cmd_run(env_name, app_name, service_port,
         return False
     for server in ret:
         for ip, detail in server.items():
-            # 记录服务器操作历史，因为在异步视图中，都需要新开一个线程，或是同步转异步
-            threading.Thread(target=write_server_history, args=(ip, service_port, release_name,
-                                                                env_name, op_type,
-                                                                action, detail['stdout'],
-                                                                user_id)) \
-                .start()
+            # 记录服务器操作历史
+            write_server_history(ip, service_port, release_name, env_name, op_type, action, detail['stdout'], user_id)
             # 部署脚本的每一个步骤，成功时必须返回success关键字
             if 'success' not in detail['stdout']:
                 return False

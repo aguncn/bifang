@@ -88,11 +88,14 @@
           </a-tooltip>
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a-button type="default" v-if="record.deploy_status_name != 'Create'" disabled>
-                已构建
+          <a-button type="primary" v-if="record.deploy_status_name == 'Create'" @click="buildShow(record)">
+            构建      
           </a-button>
-          <a-button type="primary" v-else @click="buildShow(record)">
-                构建
+          <a-button type="primary" v-else-if="record.deploy_status_name == 'BuildFailed'" @click="buildShow(record)">
+            构建
+          </a-button>
+          <a-button type="default" v-else  disabled>
+            已构建   
           </a-button>
         </div>
         <template slot="git_branch" slot-scope="{text,record}">
@@ -122,9 +125,21 @@
         <p>git地址: {{this.modelData.git_url}}/{{this.modelData.project_name}}/{{this.modelData.app_name}}</p>
         <p>git 项目ID: {{this.modelData.git_app_id}}</p>
         <p>代码分支: {{this.modelData.git_branch}}</p>
-        <p>编译状态: {{this.buildStatus}}</p>
-        <a-button type="danger" @click="onBuild">开始构建</a-button>
-        <a-button type="danger" @click="onSwitch">环境流转</a-button>
+        <div v-if="buildStatus == 'notBegin'">
+          <p>编译状态: 尚未开始</p>
+          <a-button type="danger" @click="onBuild">开始构建</a-button>
+        </div>
+        <div v-else-if="buildStatus == 'building'">
+          <p>编译状态: 编译中，请等候<a-icon type="sync" :style="{ fontSize: '24px', color: '#00f' }" spin /></p>
+        </div>
+        <div v-else-if="buildStatus == 'failed'">
+          <p>编译状态: 编译失败，请调整后重试。<a-icon type="close" :style="{ fontSize: '24px', color: '#f00' }" /></p>
+          <a-button type="danger" @click="onBuild">开始构建</a-button>
+        </div>
+        <div v-else>
+          <p>编译状态: 编译完成，如有权限，可操作流转。<a-icon type="check" :style="{ fontSize: '24px', color: '#000' }" /></p>
+          <a-button type="danger" @click="onSwitch">快速环境流转</a-button>
+        </div>
       </a-card>
     </a-modal>
   </a-card>
@@ -178,7 +193,7 @@ export default {
       visiable:false,
       modelData: {},
       buildTimer: null, 
-      buildStatus: "",
+      buildStatus: "notBegin",
       advanced: true,
       columns: columns,
       dataSource: [],
@@ -318,13 +333,13 @@ export default {
             } else {
               let resData = res.data.data
               if(resData == "ing" ){
-                this.buildStatus = '正在构建。。。'
+                this.buildStatus = 'building'
               } else if (resData == "success" ) {
-                this.buildStatus = '构建完成！'
+                this.buildStatus = 'success'
                 console.log(resData)
                 this.buildTimer && this.clearBuildTimer();
               } else {
-                this.buildStatus = '构建出错！！！'
+                this.buildStatus = 'failed'
                 console.log(resData)
                 this.buildTimer && this.clearBuildTimer();
               }
