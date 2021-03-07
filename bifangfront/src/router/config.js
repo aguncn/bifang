@@ -68,11 +68,6 @@ const routeConfig = [
                     component: () => import('@/views/deployment/deployList')
                 },
                 {
-                    path: '/startup',
-                    name: '服务启停',
-                    component: () => import('@/views/deployment/startup')
-                },
-                {
                   path: '/deploy',
                   name: '发布单部署',
                   meta:{

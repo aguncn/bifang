@@ -126,18 +126,18 @@
         <p>git 项目ID: {{this.modelData.git_app_id}}</p>
         <p>代码分支: {{this.modelData.git_branch}}</p>
         <div v-if="buildStatus == 'notBegin'">
-          <p>编译状态: 尚未开始</p>
+          <p>构建状态: 尚未开始</p>
           <a-button type="danger" @click="onBuild">开始构建</a-button>
         </div>
         <div v-else-if="buildStatus == 'building'">
-          <p>编译状态: 编译中，请等候<a-icon type="sync" :style="{ fontSize: '24px', color: '#00f' }" spin /></p>
+          <p>构建状态: 构建中，请等候<a-icon type="sync" :style="{ fontSize: '24px', color: '#00f' }" spin /></p>
         </div>
         <div v-else-if="buildStatus == 'failed'">
-          <p>编译状态: 编译失败，请调整后重试。<a-icon type="close" :style="{ fontSize: '24px', color: '#f00' }" /></p>
+          <p>构建状态: 构建失败，请调整后重试。<a-icon type="close" :style="{ fontSize: '24px', color: '#f00' }" /></p>
           <a-button type="danger" @click="onBuild">开始构建</a-button>
         </div>
         <div v-else>
-          <p>编译状态: 编译完成，如有权限，可操作流转。<a-icon type="check" :style="{ fontSize: '24px', color: '#000' }" /></p>
+          <p>构建状态: 构建完成，如有权限，可操作流转。<a-icon type="check" :style="{ fontSize: '24px', color: '#000' }" /></p>
           <a-button type="danger" @click="onSwitch">快速环境流转</a-button>
         </div>
       </a-card>

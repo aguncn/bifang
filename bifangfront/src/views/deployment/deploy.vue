@@ -47,8 +47,29 @@
       <div class="alert">
         <a-alert type="info" style="line-height:2.4" :show-icon="true" v-if="selectedRow">
           <div class="message" slot="message">
-            已选择&nbsp;<a>{{selectedRow.length}}</a>&nbsp;项 
-            <a-button type="danger" style="float:right" @click="onDeploy">部署</a-button>
+            <a-row>
+              <a-col :span="2">
+                已选择&nbsp;<a>{{selectedRow.length}}</a>&nbsp;项 
+              </a-col>
+              <a-col :span="22">
+                <a-popconfirm
+                  title="确定执行回滚操作么？"
+                  ok-text="是"
+                  cancel-text="否"
+                  @confirm="confirmRollback"
+                >
+                  <a-button type="primary" :disabled="selectedRow.length == 0" style="float:left">回滚</a-button>
+                </a-popconfirm>
+                <a-popconfirm
+                  title="确定执行部署操作么？"
+                  ok-text="是"
+                  cancel-text="否"
+                  @confirm="confirmDeploy"
+                >
+                  <a-button type="danger" :disabled="selectedRow.length == 0" style="float:right">部署</a-button>
+                </a-popconfirm>
+              </a-col>
+            </a-row>
           </div>
         </a-alert>
       </div>
@@ -232,6 +253,9 @@ export default {
     onSelectChange(selectedRowKeys,selectedRows) {
       this.selectedRow = selectedRowKeys;
     },
+    confirmDeploy(e) {
+      this.onDeploy()
+    },
     onDeploy(){
       let params = {
         target_list: this.selectedRow.toString(),
@@ -252,6 +276,22 @@ export default {
           this.deployResult = "failed"
         }
       })
+    },
+    confirmRollback(e) {
+      this.onRollback()
+    },
+    onRollback(){
+      let params = {
+        target_list: this.selectedRow.toString(),
+        user_id: this.title.create_user,
+        app_name: this.title.app_name,
+        service_port: this.title.service_port,
+        env_name: this.title.env_name,
+        release_name: this.title.name,
+        deploy_type: 'deploy',
+        op_type: 'deploy',
+      }
+      console.log(params)
     },
     onChange(pagination, filters, sorter) {
        console.log('Various parameters', pagination, filters, sorter);
