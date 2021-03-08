@@ -12,6 +12,23 @@ const routeConfig = [
       redirect: '/release/releaseList',
       children:[
         {
+          path: '/dashboard',
+          name: 'Dashboard',
+          meta:{
+            icon: 'dashboard'
+          },
+          children:[
+            {
+              path: '/workspace',
+              name: '工作台',
+              meta:{
+                title: "工作台"
+              },
+              component: () => import('@/views/dashboard/workspace')
+            }
+          ]
+        },
+        {
             path: '/release',
             name: '发布单',
             meta: {
