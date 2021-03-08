@@ -43,12 +43,6 @@
           placeholder="请输入发布单"
           v-decorator="['releaseNo', { rules: [{ required: false, message: 'Please input your note!' }] }]" />
         </a-form-item>
-        <a-form-item
-          label="时间"
-        >
-          <a-range-picker
-          v-decorator="['timePicker', {rules: [{ type: 'array', required: false }]}]" />
-        </a-form-item>
         <a-form-item>
           <a-button type="primary" html-type="submit">
             查询
@@ -149,8 +143,6 @@ export default {
         name:"",
         currentPage:1,
         pageSize:20,
-        begin_time:"",
-        end_time:"",
         deploy_status: 'Build,Ready,Success',
         sort:""
       }
@@ -190,8 +182,6 @@ export default {
             this.params.name = fieldsValue["releaseNo"]
             this.params.projectName = fieldsValue["projectId"]
             this.params.appId = fieldsValue["appId"]
-            this.params.begin_time = rangeValue?rangeValue[0].format("YYYY-MM-DD"):""
-            this.params.end_time = rangeValue?rangeValue[1].format("YYYY-MM-DD"):""
             API.ReleaseList(this.params).then((res)=>{
                 let result = res.data
                 if(res.status == 200 && result.code == 0){
@@ -299,7 +289,7 @@ export default {
 
 <style lang="less" scoped>
   .search{
-    margin-bottom: 54px;
+    margin-bottom: 10px;
   }
   .fold{
     width: calc(100% - 216px);

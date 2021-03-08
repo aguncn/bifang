@@ -100,7 +100,7 @@
     </a-modal>
     <a-modal
       :visible="visiableDeploy"
-      title="部署"
+      :title="deployTitle"
       okText="确定"
       cancelText="关闭"
       @cancel="onDeployReset"
@@ -168,6 +168,8 @@ export default {
       serverHistorySource: [],
       selectServer: "",
       selectedRow:[],
+      deployTitle: "",
+      deployType: "",
       deployResult: "",
       params:{
         currentPage:1,
@@ -256,6 +258,13 @@ export default {
       this.selectedRow = selectedRowKeys;
     },
     confirmDeploy(e) {
+      this.deployTitle = "部署"
+      this.deployType = "deploy"
+      this.onDeploy()
+    },
+    confirmRollback(e) {
+      this.deployTitle = "回滚"
+      this.deployType = "rollback"
       this.onDeploy()
     },
     onDeploy(){
@@ -267,7 +276,7 @@ export default {
         env_name: this.title.env_name,
         release_name: this.title.name,
         deploy_no: this.title.deploy_no,
-        deploy_type: 'deploy',
+        deploy_type: this.deployType,
         op_type: 'deploy',
       }
       this.deployResult = "wait"
@@ -279,22 +288,6 @@ export default {
           this.deployResult = "failed"
         }
       })
-    },
-    confirmRollback(e) {
-      this.onRollback()
-    },
-    onRollback(){
-      let params = {
-        target_list: this.selectedRow.toString(),
-        user_id: this.title.create_user,
-        app_name: this.title.app_name,
-        service_port: this.title.service_port,
-        env_name: this.title.env_name,
-        release_name: this.title.name,
-        deploy_type: 'deploy',
-        op_type: 'deploy',
-      }
-      console.log(params)
     },
     onChange(pagination, filters, sorter) {
        console.log('Various parameters', pagination, filters, sorter);

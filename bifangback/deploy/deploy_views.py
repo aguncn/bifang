@@ -72,7 +72,8 @@ def deploy(request):
             elif deploy_type == 'restart' and op_type == 'maintenance':
                 action_list = ['stop', 'stop_status', 'start', 'start_status']
             else:
-                pass
+                return_dict = build_ret_data(THROW_EXP, '异常流程参数')
+                return render_json(return_dict)
 
             task_run(action_list, env_name,
                      app_name, service_port, release_name,
@@ -96,7 +97,7 @@ def task_run(action_list, env_name,
             print('action: ', action)
 
             ret_data = cmd_run(env_name, app_name,
-                               service_port,release_name,
+                               service_port, release_name,
                                target_list, action,
                                user_id, op_type, deploy_type, deploy_no)
             if not ret_data:

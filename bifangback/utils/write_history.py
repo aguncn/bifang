@@ -24,13 +24,13 @@ def update_server_release(target_list, service_port, release_name, deploy_type):
         # 真正部署时，将服务器的主发布单放到备用发布单，用新发布单填充主发布单
         if deploy_type == 'deploy':
             release = Release.objects.get(name=release_name)
-            if server.main_release:
+            # 如果存在部署，且不是重复部署
+            if server.main_release and release != server.main_release:
                 back_release = server.main_release
-            else:
-                back_release = None
+                server.back_release = back_release
             server.main_release = release
-            server.back_release = back_release
             server.save()
+
         # 如果是回滚，则将主备发布单都设置为备用发布单即可，因为只支持一次回滚。多次回滚，不如重新发布咯~~
         else:
             release = server.back_release
