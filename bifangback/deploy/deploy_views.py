@@ -11,6 +11,7 @@ from utils.write_history import update_release_status
 from utils.write_history import write_release_history
 from utils.write_history import write_server_history
 from utils.write_history import update_server_release
+from utils.write_history import update_server_status
 
 User = get_user_model()
 
@@ -60,7 +61,7 @@ def deploy(request):
                 action_list = ['fetch', 'stop', 'stop_status', 'deploy', 'start', 'start_status', 'health_check']
                 # 更新发布单历史及状态
                 write_release_history(release_name, env_name, 'Ongoing', deploy_type, deploy_no, 'Ongoing', user_id)
-                update_release_status(release_name, deploy_no, 'Ongoing')
+                update_release_status(release_name, app_name, env_name, deploy_no, 'Ongoing')
             # 回滚，只更新服务器操作历史及服务器主备发布单
             elif deploy_type == 'rollback' and op_type == 'deploy':
                 action_list = ['stop', 'stop_status', 'rollback', 'start', 'start_status', 'health_check']
@@ -72,15 +73,21 @@ def deploy(request):
             elif deploy_type == 'restart' and op_type == 'maintenance':
                 action_list = ['stop', 'stop_status', 'start', 'start_status']
             else:
-                pass
+                return_dict = build_ret_data(THROW_EXP, '异常流程参数')
+                return render_json(return_dict)
 
-            task_run(action_list, env_name,
-                     app_name, service_port, release_name,
-                     target_list, user_id,
-                     op_type, deploy_type, deploy_no)
-
-            return_dict = build_ret_data(OP_SUCCESS, 'success')
-            return render_json(return_dict)
+            # 以True或False的返回值，来判断任务的成功或失败
+            # 而写入成功或失败的记录，放在真正执行的函数中
+            ret_data = task_run(action_list, env_name,
+                                app_name, service_port, release_name,
+                                target_list, user_id,
+                                op_type, deploy_type, deploy_no)
+            if ret_data:
+                return_dict = build_ret_data(OP_SUCCESS, 'success')
+                return render_json(return_dict)
+            else:
+                return_dict = build_ret_data(THROW_EXP, '执行失败')
+                return render_json(return_dict)
         else:
             return_dict = build_ret_data(THROW_EXP, '序列化条件不满足')
             return render_json(return_dict)
@@ -96,26 +103,39 @@ def task_run(action_list, env_name,
             print('action: ', action)
 
             ret_data = cmd_run(env_name, app_name,
-                               service_port,release_name,
+                               service_port, release_name,
                                target_list, action,
                                user_id, op_type, deploy_type, deploy_no)
+            # 如果其中任务一个步骤执行出错，则先记录失败，再返回False
             if not ret_data:
                 # print('data_false: ', data)
                 # 有真正部署，出错时才需要更新发布单历史，其它情况，只更新服务器发布历史(暂不考虑回滚失败)
                 if deploy_type == 'deploy':
+                    # 更新服务器状态
+                    update_server_status(target_list, service_port, deploy_no, "Failed")
+                    # 写入部署历史
                     write_release_history(release_name, env_name, 'Failed', deploy_type, deploy_no, 'Failed', user_id)
-                    update_release_status(release_name, deploy_no, 'Failed')
-                return_dict = build_ret_data(THROW_EXP, action)
-                return render_json(return_dict)
+                    # 更新发布单状态
+                    update_release_status(release_name, app_name, env_name, deploy_no, 'Failed')
+
+                return False
             # print('data_true: ', data)
+        # 这里是for循环完成后，表示任务已成功执行，可以集中更新数据库记录
         # 只有部署和回滚，才需要更新发布单历史和服务器主备发布单(回滚时，发布单参数并没有用上)
         if op_type == 'deploy':
-            write_release_history(release_name, env_name, 'Success', deploy_type, deploy_no, 'Success', user_id)
+            # 当成功之后，更新相关数据表,先更新服务器状态，然后，更新发布单状态时，先判断服务器状态。有先后顺序
+            update_server_status(target_list, service_port, deploy_no, "Success")
             update_server_release(target_list, service_port, release_name, deploy_type)
-            update_release_status(release_name, deploy_no, 'Success')
+            write_release_history(release_name, env_name, 'Success', deploy_type, deploy_no, 'Success', user_id)
+            # 当某一次部署完成之后，还需要判断是不是所有服务器都已部署完成，所以传入的不是Success，而是Check，
+            # 然后，在update_release_status函数再判断
+            update_release_status(release_name, app_name, env_name, deploy_no, 'Check')
+
         print("finish: ", action_list, env_name, app_name, release_name, target_list)
+        return True
     except Exception as e:
         print(e)
+        return False
 
 
 # cmd_run函数是在每一个线程当中运行的
