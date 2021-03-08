@@ -64,6 +64,11 @@ class Server(BaseModel):
                                      null=True,
                                      on_delete=models.SET_NULL,
                                      verbose_name='备份发布单')
+    # 如果一个发布单部署了多次，或是分批在服务器部署，就有这个记录的必要性了。用于判断服务器部署是否完成
+    deploy_no = models.IntegerField(blank=True,
+                                    null=True,
+                                    default=0,
+                                    verbose_name="部署次数")
     # 记录各种状态用于前端显示
     # 或发布进行中或完成的判断(主发布单和是否完成部署)
     deploy_status = models.ForeignKey(ServerStatus,

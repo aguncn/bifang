@@ -1,7 +1,9 @@
 import uuid
 from django.contrib.auth import get_user_model
 from cmdb.models import ReleaseStatus
+from cmdb.models import ServerStatus
 from cmdb.models import Release
+from cmdb.models import App
 from cmdb.models import Env
 from cmdb.models import Server
 from cmdb.history_models import ReleaseHistory
@@ -10,10 +12,36 @@ from cmdb.history_models import ServerHistory
 User = get_user_model()
 
 
-# 更新发布单部署
-def update_release_status(release_name, deploy_no, deploy_status_name):
-    deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
-    release = Release.objects.filter(name=release_name).update(deploy_no=deploy_no, deploy_status=deploy_status)
+# 更新发布单状态
+def update_release_status(release_name, app_name, env_name, deploy_no, deploy_status_name):
+    if deploy_status_name != 'Check':
+        # 如果是进行中或失败，直接写入
+        deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
+        release = Release.objects.filter(name=release_name).update(deploy_no=deploy_no, deploy_status=deploy_status)
+    else:
+        # 如果是只是完成其中一次的成功部署，Check时，则要判断同一个应用同一个环境的所有服务器的状态
+        # 判断条件有两个：服务器上的主发布单与部署一致，所有服务器的部署状态为成功
+        release = Release.objects.get(name=release_name)
+        server_deploy_status = ServerStatus.objects.get(name='Success')
+        release_deploy_status = ReleaseStatus.objects.get(name='Success')
+        app = App.objects.get(name=app_name)
+        env = Env.objects.get(name=env_name)
+        servers = Server.objects.filter(app=app, env=env)
+        for server in servers:
+            if server.main_release != release or server.deploy_status != server_deploy_status:
+                print("not meet")
+                return
+        print("all meet")
+        release = Release.objects.filter(name=release_name).update(deploy_no=deploy_no,
+                                                                   deploy_status=release_deploy_status)
+
+
+# 更新服务器状态
+def update_server_status(target_list, service_port, deploy_no, deploy_status_name):
+    for ip in target_list:
+        server_name = '{}_{}'.format(ip, service_port)
+        deploy_status = ServerStatus.objects.get(name=deploy_status_name)
+        server = Server.objects.filter(name=server_name).update(deploy_no=deploy_no, deploy_status=deploy_status)
 
 
 # 更新服务器的主备发布单

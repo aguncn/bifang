@@ -193,6 +193,7 @@ class Command(BaseCommand):
         Server.objects.all().delete()
         print('delete all Server data')
         create_user = User.objects.get(username=username)
+        deploy_status = ServerStatus.objects.get(name="Ready")
         for number in range(50):
             ip = '192.168.1.{}'.format(number)
             port = random.randint(10000, 100000)
@@ -205,6 +206,7 @@ class Command(BaseCommand):
                                   port=port,
                                   app=app,
                                   env=env,
+                                  deploy_status=deploy_status,
                                   system_type=random.choice(['WINDOWS', 'LINUX']))
         app_name_list = ['ProductPage', 'Details', 'Reviews', 'Ratings']
         service_port_list = [8001, 8002, 8003, 8004]
@@ -220,6 +222,7 @@ class Command(BaseCommand):
                                       port=service_port,
                                       app=app,
                                       env=env,
+                                      deploy_status=deploy_status,
                                       system_type='LINUX')
         app_name_list = ['go-demo']
         service_port_list = [9090]
@@ -235,6 +238,7 @@ class Command(BaseCommand):
                                       port=service_port,
                                       app=app,
                                       env=env,
+                                      deploy_status=deploy_status,
                                       system_type='LINUX')
         self.stdout.write('Server重建完成。')
 
