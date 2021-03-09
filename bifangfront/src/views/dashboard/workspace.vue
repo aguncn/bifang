@@ -7,28 +7,32 @@
           <head-info title="发布单数量" content="6572个"/>
       </div>
     </a-card>
+        
         <a-row style="margin-top:20px">
             <a-col style="padding-right:2px" :xl="16" :lg="24" :md="24" :sm="24" :xs="24">
-            <a-card class="project-list" style="margin-bottom: 24px;" :bordered="false" title="进度" :body-style="{padding: 0}">
-                <a slot="extra">全部项目</a>
-                <div>
-                <a-card-grid :key="i" v-for="(item, i) in projects">
-                    <a-card :bordered="false" :body-style="{padding: 0}">
-                    <a-card-meta :description="item.desc">
-                        <div slot="title" class="card-title">
-                        <a-avatar size="small" :src="item.logo" />
-                        <span>Alipay</span>
+                <a-card title="全景图" :bordered="false">
+                    <my-echarts />
+                </a-card>
+                <a-card class="project-list" style="margin: 12px 0;" :bordered="false" title="进度" :body-style="{padding: 0}">
+                    <a slot="extra">全部项目</a>
+                    <div>
+                    <a-card-grid :key="i" v-for="(item, i) in projects">
+                        <a-card :bordered="false" :body-style="{padding: 0}">
+                        <a-card-meta :description="item.desc">
+                            <div slot="title" class="card-title">
+                            <a-avatar size="small" :src="item.logo" />
+                            <span>Alipay</span>
+                            </div>
+                        </a-card-meta>
+                        <div class="project-item">
+                            <a class="group" href="/#/">科学搬砖组</a>
+                            <span class="datetime">9小时前</span>
                         </div>
-                    </a-card-meta>
-                    <div class="project-item">
-                        <a class="group" href="/#/">科学搬砖组</a>
-                        <span class="datetime">9小时前</span>
+                        </a-card>
+                    </a-card-grid>
                     </div>
-                    </a-card>
-                </a-card-grid>
-                </div>
-            </a-card>
-            <a-card title="全部项目" :bordered="false">
+                </a-card>
+                <a-card title="全部项目" :bordered="false">
                 <a-list>
                 <a-list-item :key="index" v-for="(item, index) in activities">
                     <a-list-item-meta>
@@ -38,7 +42,7 @@
                     </a-list-item-meta>
                 </a-list-item>
                 </a-list>
-            </a-card>
+                </a-card>
             </a-col>
             <a-col style="padding-left: 12px" :xl="8" :lg="24" :md="24" :sm="24" :xs="24">
             <a-card title="快捷入口" style="margin-bottom: 24px" :bordered="false" :body-style="{padding: 0}">
@@ -91,6 +95,7 @@
 </template>
 <script>
 import HeadInfo from '@/components/tool/headInfo'
+import MyEcharts from '@/components/tool/myEcharts'
 
 const projects = [
     {
@@ -158,7 +163,7 @@ const teams = [
 ]
 export default {
     name:"dashboard",
-    components: {HeadInfo},
+    components: {HeadInfo,MyEcharts},
     data(){
         return {
             projects:projects,

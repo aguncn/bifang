@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import Antd from 'ant-design-vue'
+import echarts from 'echarts'
 import 'ant-design-vue/dist/antd.less'
 import './theme/index.less'
 import '@/mock'
@@ -12,6 +13,7 @@ Vue.config.productionTip = false;
 
 Vue.use(Antd);
 Vue.prototype.$request = request;
+Vue.prototype.$echarts = echarts;
 initInterceptor(Vue.prototype.$message,router)
 
 new Vue({

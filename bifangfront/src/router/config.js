@@ -9,7 +9,7 @@ const routeConfig = [
       path: '/',
       name: 'Home',
       component: MainLayout,
-      redirect: '/release/releaseList',
+      redirect: '/dashboard/workspace',
       children:[
         {
           path: '/dashboard',
