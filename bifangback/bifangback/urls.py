@@ -58,6 +58,7 @@ urlpatterns += [
     path('cmdb/', include('cmdb.urls')),
     path('deploy/', include('deploy.urls')),
     path('env/', include('env.urls')),
+    path('gitapp/', include('gitapp.urls')),
     path('history/', include('history.urls')),
     path('release/', include('release.urls')),
     path('server/', include('server.urls')),

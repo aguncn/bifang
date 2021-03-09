@@ -34,6 +34,7 @@ class ProjectCreateView(CreateAPIView):
         """
         req_data = request.data
         data = dict()
+        data['project_id'] = req_data['project_id']
         data['name'] = req_data['name']
         data['description'] = req_data['description']
         data['cn_name'] = req_data['cn_name']

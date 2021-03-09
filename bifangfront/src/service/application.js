@@ -2,18 +2,6 @@ import {request,METHOD } from '@/utils/request'
 import {urlFormat} from '@/utils/util'
 import {API} from './api'
 
-/**
- * 获取应用列表
- * @param {*} params 
- */
-async function AppList(params){
-
-    return request(
-        API.APPLICATIONLIST, 
-        METHOD.GET,
-        params
-    )
-}
 
 /**
  * 获取项目列表
@@ -22,7 +10,58 @@ async function AppList(params){
 async function ProjectList(params){
 
     return request(
-        API.PROJECTIST, 
+        API.PROJECTLIST, 
+        METHOD.GET,
+        params
+    )
+}
+
+/**
+ * 新增项目
+ * @param {*} params 
+ */
+async function CreateProject(params){
+
+    return request(
+        API.CREATEPROJECT, 
+        METHOD.POST,
+        params
+    )
+}
+
+/**
+ * 删除项目
+ * @param {*} params 
+ */
+async function DeleteProject(params){
+    const url = urlFormat(API.DELETEPROJECT, params)
+    return request(
+        url, 
+        METHOD.DELETE
+    )
+}
+
+/**
+ * 更新项目
+ * @param {*} params 
+ */
+async function UpdateProject(params){
+    const url = urlFormat(API.UPDATEPROJECT, params)
+    return request(
+        url, 
+        METHOD.PUT,
+        params
+    )
+}
+
+/**
+ * 获取应用列表
+ * @param {*} params 
+ */
+async function AppList(params){
+
+    return request(
+        API.APPLICATIONLIST, 
         METHOD.GET,
         params
     )
@@ -68,8 +107,12 @@ async function UpdateApplication(params){
 
 export default {
     AppList,
-    ProjectList,
     DeleteApplication,
     CreateApplication,
     UpdateApplication,
+    ProjectList,
+    CreateProject,
+    DeleteProject,
+    UpdateProject
+    
 }

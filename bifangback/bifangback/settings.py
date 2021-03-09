@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'cmdb.apps.CmdbConfig',
     'deploy.apps.DeployConfig',
     'env.apps.EnvConfig',
+    'gitapp.apps.GitappConfig',
     'history.apps.HistoryConfig',
     'release.apps.ReleaseConfig',
     'server.apps.ServerConfig',
