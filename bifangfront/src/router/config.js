@@ -85,9 +85,9 @@ const routeConfig = [
             },
             children:[
                 {
-                    path: '/subject',
+                    path: '/project',
                     name: '项目',
-                    component: () => import('@/views/application/subject')
+                    component: () => import('@/views/application/project')
                   },
                   {
                     path: '/app',

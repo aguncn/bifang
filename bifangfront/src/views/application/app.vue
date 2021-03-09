@@ -49,12 +49,21 @@
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a style="margin-right: 8px" @click.prevent="onShowEdit(record)">
-            <a-icon type="edit"/>编辑
-          </a>
-          <a style="margin-right: 8px" @click.prevent="onDelete(record)">
-            <a-icon type="delete"/>删除
-          </a>
+          <a-button-group>
+            <a-button type="primary" @click.prevent="onShowEdit(record)">
+              编辑      
+            </a-button>
+            <a-popconfirm
+              title="确定执行删除操作么？"
+              ok-text="是"
+              cancel-text="否"
+              @confirm="onDelete(record)"
+            >
+              <a-button type="danger">
+                删除      
+              </a-button>
+            </a-popconfirm>
+          </a-button-group>
         </div>
         <template slot="statusTitle">
           <a-icon @click.native="onStatusTitleClick" type="info-circle" />
@@ -85,17 +94,12 @@ const columns = [
     dataIndex: 'project_name',
   },
   {
-    title: '服务名称',
+    title: '启动用户',
     dataIndex: 'service_username'
   },
   {
     title: '服务端口',
     dataIndex: 'service_port'
-  },
-  {
-    title: '状态',
-    dataIndex: 'base_status',
-    customRender: (status) => {return status == true?'已发布': ' 未发布'}
   },
   {
     title: '更新时间',
@@ -231,7 +235,7 @@ export default {
 
 <style lang="less" scoped>
   .search{
-    margin-bottom: 54px;
+    margin-bottom: 10px;
   }
   .fold{
     width: calc(100% - 216px);

@@ -45,16 +45,31 @@
           showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
         }"
       >
-        <div slot="description" slot-scope="{text}">
-          {{text}}
+        <div slot="cn_name" slot-scope="{text, record}">
+          <a-tooltip>
+          	<template slot="title">
+          		{{record.description}}
+          	</template>
+          	  {{text}}
+          </a-tooltip>
         </div>
+
         <div slot="action" slot-scope="{text, record}">
-          <a style="margin-right: 8px" @click.prevent="onShowEdit(record)">
-            <a-icon type="edit"/>编辑
-          </a>
-          <a style="margin-right: 8px" @click.prevent="onDelete(record)">
-            <a-icon type="delete"/>删除
-          </a>
+          <a-button-group>
+            <a-button type="primary" @click.prevent="onShowEdit(record)">
+              编辑      
+            </a-button>
+            <a-popconfirm
+              title="确定执行删除操作么？"
+              ok-text="是"
+              cancel-text="否"
+              @confirm="onDelete(record)"
+            >
+              <a-button type="danger">
+                删除      
+              </a-button>
+            </a-popconfirm>
+          </a-button-group>
         </div>
         <template slot="statusTitle">
           <a-icon @click.native="onStatusTitleClick" type="info-circle" />
@@ -66,7 +81,7 @@
       :title="isEdit?'编辑项目':'新增项目'"
       :okText="isEdit?'更新':'新建'"
       @cancel="onReset"
-      @ok="isEdit?onUpdateSubject():onCreateSubject()"
+      @ok="isEdit?onUpdateProject():onCreateProject()"
     >
       <a-form layout='vertical' :form="formDialog">
         <a-form-item
@@ -75,6 +90,17 @@
         >
           <a-input placeholder="自动生成" 
             v-decorator="['id']"
+          />
+        </a-form-item>
+        <a-form-item label='项目ID'>
+          <a-input
+            :disabled="isEdit?true:false"
+            v-decorator="[
+              'projectId',
+              {
+                rules: [{ required: true, message: '请输入项目ID' }],
+              }
+            ]"
           />
         </a-form-item>
         <a-form-item label='英文名称'>
@@ -124,12 +150,8 @@ const columns = [
   },
   {
     title: '中文名',
-    dataIndex: 'cn_name'
-  },
-  {
-    title: '状态',
-    dataIndex: 'base_status',
-    customRender: (status) => {return status == true?'已发布': ' 未发布'}
+    dataIndex: 'cn_name',
+    scopedSlots: {customRender: 'cn_name'} 
   },
   {
     title: '更新时间',
@@ -144,7 +166,7 @@ const columns = [
 ]
 
 export default {
-  name: 'subject',
+  name: 'project',
   components: {BfTable},
   data () {
     return {
@@ -243,26 +265,29 @@ export default {
       this.$nextTick(()=>{
         this.formDialog.setFieldsValue({
           id:record.id,
+          projectId:record.project_id,
           name:record.name,
           cnname:record.cn_name,
           description:record.description
         })
       })
     },
-    onCreateSubject () {
+    onCreateProject () {
       this.formDialog.validateFields((err, fieldsValue) => {
           if (err) {
             return;
           }
-          let name = fieldsValue["name"],
+          let project_id = fieldsValue["projectId"],
+              name = fieldsValue["name"],
               cn_name = fieldsValue["cnname"],
               description = fieldsValue["description"]||""
           let data = {
+            project_id,
             name,
             cn_name,
             description
           }
-          API.CreateSubject(data).then((res)=>{
+          API.CreateProject(data).then((res)=>{
             let result = res.data
             if(res.status == 200 && result.code == 0){
               this.$message.success("项目新增成功~")
@@ -275,22 +300,24 @@ export default {
           })
         })
     },
-    onUpdateSubject(){
+    onUpdateProject(){
       this.formDialog.validateFields((err, fieldsValue) => {
           if (err) {
             return;
           }
           let id = fieldsValue["id"],
+              project_id = fieldsValue["projectId"],
               name = fieldsValue["name"],
               cn_name = fieldsValue["cnname"],
               description = fieldsValue["description"]||""
           let data = {
             id,
+            project_id,
             name,
             cn_name,
             description
           }
-          API.UpdateSubject(data).then((res)=>{
+          API.UpdateProject(data).then((res)=>{
             let result = res.data
             if(res.status == 200){
               this.$message.success("项目更新成功~")
@@ -309,7 +336,7 @@ export default {
         this.$message.error("操作参数非法！")
         return false
       }
-      API.DeleteSubject({id}).then((res)=>{
+      API.DeleteProject({id}).then((res)=>{
         let result = res.data
         if(res.status == 200 && result.code == 0){
           this.$message.success("删除成功~")
@@ -334,7 +361,7 @@ export default {
 
 <style lang="less" scoped>
   .search{
-    margin-bottom: 54px;
+    margin-bottom: 10px;
   }
   .fold{
     width: calc(100% - 216px);
