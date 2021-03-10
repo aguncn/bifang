@@ -49,16 +49,22 @@
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a style="margin-right: 8px" @click.prevent="onShowEdit(record)">
-            <a-icon type="edit"/>编辑
-          </a>
-          <a style="margin-right: 8px" @click.prevent="onDelete(record)">
-            <a-icon type="delete"/>删除
-          </a>
+          <a-button-group>
+            <a-button type="primary" @click.prevent="onShowEdit(record)">
+              编辑      
+            </a-button>
+            <a-popconfirm
+              title="确定执行删除操作么？"
+              ok-text="是"
+              cancel-text="否"
+              @confirm="onDelete(record)"
+            >
+              <a-button type="danger">
+                删除      
+              </a-button>
+            </a-popconfirm>
+          </a-button-group>
         </div>
-        <template slot="statusTitle">
-          <a-icon @click.native="onStatusTitleClick" type="info-circle" />
-        </template>
       </bf-table>
     </div>
     <a-modal
@@ -70,19 +76,11 @@
     >
       <a-form layout='vertical' :form="formDialog">
         <a-form-item
-          label="名称"
+          label="id"
           v-show="false"
         >
           <a-input placeholder="自动生成" 
             v-decorator="['id']"
-          />
-        </a-form-item>
-        <a-form-item
-          label="名称"
-          v-show="isEdit"
-        >
-          <a-input placeholder="自动生成" 
-            v-decorator="['serverName']"
           />
         </a-form-item>
         <a-form-item label='服务器IP'>
@@ -116,9 +114,25 @@
             option-filter-prop="children"
             style="min-width: 200px;width:100%"
             :filter-option="filterOption"
-            v-decorator="['appId', { rules: [{ required: true, message: '请选择发布的组件!' }] }]"
+            v-decorator="['appId', { rules: [{ required: true, message: '请选择所属的组件!' }] }]"
           >
             <a-select-option v-for="d in options" :key="d.value">
+            {{ d.label }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item
+          label="环境选择"
+        >
+          <a-select
+            show-search
+            placeholder="请选择组件"
+            option-filter-prop="children"
+            style="min-width: 200px;width:100%"
+            :filter-option="filterOption"
+            v-decorator="['envId', { rules: [{ required: true, message: '请选择所属的环境!' }] }]"
+          >
+            <a-select-option v-for="d in envOptions" :key="d.value">
             {{ d.label }}
             </a-select-option>
           </a-select>
@@ -167,12 +181,11 @@ const columns = [
   },
   {
     title: '所属应用',
-    dataIndex: 'app'
+    dataIndex: 'app_name'
   },
   {
-    title: '发布状态',
-    dataIndex: 'base_status',
-    customRender: (status) => {return status == true?'已发布': ' 未发布'}
+    title: '环境',
+    dataIndex: 'env_name'
   },
   {
     title: '更新时间',
@@ -198,6 +211,7 @@ export default {
       selectedRows: [],
       visible:false,
       options:[],
+      envOptions:[],
       isEdit:false,
       params:{
         name:"",
@@ -217,6 +231,7 @@ export default {
   created(){
     this.fetchData()
     this.fetchComponentList()
+    this.fetchEnv()
   },
   methods: {
     toggleAdvanced () {
@@ -251,17 +266,33 @@ export default {
         }
       })
     },
+    fetchEnv(){
+      API.EnvList({}).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          result.data.results.forEach(item=>{
+            this.envOptions.push({
+              label:item.name,
+              value:item.id
+            })
+          })
+        }
+        else{
+          this.$message,error("无法获取环境列表~")
+        }
+      })
+    },
     onShowEdit(record){
       this.visible = true
       this.isEdit = true
       this.$nextTick(()=>{
         this.formDialog.setFieldsValue({
           id:record.id,
-          serverName:record.name,
           ip:record.ip,
           port:record.port,
           system:record.system_type,
           appId:record.app,
+          envId:record.env,
           description:record.description
         })
       })
@@ -272,18 +303,18 @@ export default {
             return;
           }
           let id = fieldsValue["id"],
-              name = fieldsValue["serverName"],
               ip = fieldsValue["ip"],
               port = fieldsValue["port"],
               app_id = fieldsValue["appId"],
+              env_id = fieldsValue["envId"],
               system_type = fieldsValue["system"],
               description = fieldsValue["description"]||""
           let data = {
             id,
-            name,
             ip,
             port,
             app_id,
+            env_id,
             system_type,
             description
           }
@@ -385,13 +416,14 @@ export default {
           let ip = fieldsValue["ip"],
               port = fieldsValue["port"],
               app_id = fieldsValue["appId"],
+              env_id = fieldsValue["envId"],
               system_type = fieldsValue["system"],
               description = fieldsValue["description"]||""
           let data = {
-            name:[ip,'-', port].join(''),
             ip,
             port,
             app_id,
+            env_id,
             system_type,
             description
           }

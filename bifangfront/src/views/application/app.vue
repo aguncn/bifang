@@ -65,9 +65,6 @@
             </a-popconfirm>
           </a-button-group>
         </div>
-        <template slot="statusTitle">
-          <a-icon @click.native="onStatusTitleClick" type="info-circle" />
-        </template>
       </bf-table>
     </div>
   </a-card>

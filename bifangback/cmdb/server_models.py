@@ -22,6 +22,11 @@ class ServerStatus(BaseModel):
         verbose_name_plural = 'ServerStatus服务器状态'
 
 
+# 为外键设置默认值
+def get_server_status():
+    return ServerStatus.objects.get_or_create(name='Ready')[0].id
+
+
 # 部署服务器，保证ip和port结合起来的唯一性，可以一个服务器上部署多个应用
 # （但不可以在同一个服务器的不同端口部署同一个应用，想想salt在执行同一批次执行到同一个服务器上的情况，会执行多次，也可以只一次详细考察target_list同为一个机器的情况吧）
 # 当然，能在同一个服务器上，部署多个相同的应用，这得益于将部署脚本让开发自己维护。
@@ -73,6 +78,7 @@ class Server(BaseModel):
     # 或发布进行中或完成的判断(主发布单和是否完成部署)
     deploy_status = models.ForeignKey(ServerStatus,
                                       related_name='ra_server',
+                                      default=get_server_status,
                                       blank=True,
                                       null=True,
                                       on_delete=models.SET_NULL,

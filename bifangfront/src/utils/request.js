@@ -12,7 +12,8 @@ const METHOD = {
   GET: 'get',
   POST: 'post',
   DELETE: 'delete',
-  PUT: 'put'
+  PUT: 'put',
+  PATCH: 'patch'
 }
 
 /**
@@ -32,6 +33,8 @@ async function request(url, method, params) {
       return axios.delete(url, params)
     case METHOD.PUT:
       return axios.put(url, params)
+    case METHOD.PATCH:
+        return axios.patch(url, params)
     default:
       return axios.get(url, {params})
   }

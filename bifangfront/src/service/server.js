@@ -48,7 +48,7 @@ async function UpdateServer(params){
     const url = urlFormat(API.UPDATESERVER, params)
     return request(
         url, 
-        METHOD.PUT,
+        METHOD.PATCH,
         params
     )
 }

@@ -114,5 +114,4 @@ export default {
     CreateProject,
     DeleteProject,
     UpdateProject
-    
 }
