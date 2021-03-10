@@ -9,8 +9,25 @@ const routeConfig = [
       path: '/',
       name: 'Home',
       component: MainLayout,
-      redirect: '/release/releaseList',
+      redirect: '/dashboard/workspace',
       children:[
+        {
+          path: '/dashboard',
+          name: 'Dashboard',
+          meta:{
+            icon: 'dashboard'
+          },
+          children:[
+            {
+              path: '/workspace',
+              name: '工作台',
+              meta:{
+                title: "工作台"
+              },
+              component: () => import('@/views/dashboard/workspace')
+            }
+          ]
+        },
         {
             path: '/release',
             name: '发布单',
