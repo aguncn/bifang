@@ -65,7 +65,7 @@
           :filter-option="filterOption"
           v-decorator="['project_id', { rules: [{ required: true, message: '请选择归属项目!' }] }]"
         >
-          <a-select-option v-for="d in projectOptions" :key="d.value">
+          <a-select-option v-for="d in projectOptions" :key="d.value" :value="d.value">
           {{ d.label }}
           </a-select-option>
         </a-select>
@@ -174,6 +174,7 @@ export default {
   data () {
     return {
       isEdit:false,
+      type:"build",
       value: 1,
       fetching:false,
       projectOptions:[],
@@ -186,11 +187,19 @@ export default {
   beforeCreate() {
     this.form = this.$form.createForm(this, { name: 'applicaitonDetail' });
   },
+  computed:{
+    onSubmit(){
+    }
+  },
   created(){
     this.fetchProjectList()
     this.fetchGitList()
+    // if(this.$route.query.type){
+    //     this.type = this.$route.query.type
+    //     this.type == 'edit'?this.btnDesc = "更新":this.btnDesc = "确定"
+    // }
     if(this.$route.query.id){
-        this.isEdit=true
+        this.isEdit = true
         this.btnDesc = "更新"
     }
     
@@ -266,11 +275,12 @@ export default {
         });
     },
     onUpdateApplication(){
+      let self = this
       this.form.validateFields((err, fieldsValue) => {
           if (err) {
             return;
           }
-          let project = this.options.find(item=>item.id == fieldsValue["project"])
+          let project = self.projectList.find(item=>item.id == fieldsValue["project_id"])
           let data = {
             ...fieldsValue,
             project_name:project.name
@@ -279,6 +289,7 @@ export default {
             let result = res.data
             if(res.status == 200){
               this.$message.success("应用更新成功~")
+              this.$router.push('/application/app')
             }
             else{
               this.$message.error("应用更新失败:"+result.message)

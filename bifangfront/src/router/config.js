@@ -113,7 +113,7 @@ const routeConfig = [
                   },
                   {
                     path: '/appDetail',
-                    name: '新建',
+                    name: '应用详情',
                     meta: {
                       isShowMenu: false
                     },

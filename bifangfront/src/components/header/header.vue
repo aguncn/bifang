@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import {mapState} from 'vuex'
+import {mapState,mapGetters} from 'vuex'
 import {logout} from '@/utils/request'
 
 export default {
@@ -45,7 +45,9 @@ export default {
     }
   },
   computed: {
-    ...mapState(['user']),
+    ...mapGetters({
+      'user':'getUser'
+    }),
   },
   methods: {
     toggleCollapse () {
