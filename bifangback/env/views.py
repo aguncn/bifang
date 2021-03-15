@@ -26,7 +26,7 @@ class EnvExchangeView(APIView):
     环境流转
 
     参数:
-    env_name
+    env_id
     release_name
     """
     def post(self, request):
@@ -36,17 +36,17 @@ class EnvExchangeView(APIView):
             ser_data = serializer.validated_data
             user = request.user
             release_name = ser_data['release_name']
-            env_name = ser_data['env_name']
-            env = Env.objects.get(name=env_name)
+            env_id = ser_data['env_id']
+            env = Env.objects.get(id=env_id)
             deploy_status_name = 'Ready'
             deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
             release = Release.objects.filter(name=release_name).update(env=env,
                                                                        deploy_status=deploy_status)
             write_release_history(release_name=release_name,
-                                  env_name=env_name,
+                                  env_name=env.name,
                                   deploy_status_name=deploy_status_name,
                                   deploy_type=None,
-                                  log='target env is {}.'.format(env_name),
+                                  log='target env is {}.'.format(env.name),
                                   user_id=user.id)
 
             return_dict = build_ret_data(OP_SUCCESS, 'env exchange is ok.')

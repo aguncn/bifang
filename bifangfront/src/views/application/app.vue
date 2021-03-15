@@ -45,8 +45,8 @@
           showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
         }"
       >
-        <div slot="description" slot-scope="{text}">
-          {{text}}
+        <div slot="permission" slot-scope="{text, record}">
+          <a-button @click.prevent="showPermission(record)">授权</a-button>
         </div>
         <div slot="action" slot-scope="{text, record}">
           <a-button-group>
@@ -67,11 +67,92 @@
         </div>
       </bf-table>
     </div>
+    
+    <!---->
+    <div>
+      <a-drawer
+        :title="`更新组件${selectApp}的权限`"
+        :width="720"
+        :visible="visible"
+        :body-style="{ paddingBottom: '80px' }"
+        @close="onClose"
+      >
+        <a-form :form="formPermission" layout="vertical" hide-required-mark>
+          <a-row :gutter="16">
+            <a-col :span="12">
+              <a-form-item label="用户">
+                <a-select
+                  show-search
+                  placeholder="用户"
+                  option-filter-prop="children"
+                  style="width: 320px"
+                  @change="handleChange"
+                  v-decorator="['selectUser', { rules: [{ required: true, message: '请选择授权用户!' }] }]"
+                >
+                  <a-select-option v-for="d in userOptions" :key="d.value">
+                  {{ d.label }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item label="操作">
+                <a-button type="primary" @click.prevent="onCreatePermission('Create')" >
+                  新建
+                </a-button>
+                <a-button @click.prevent="onCreatePermission('Env')">流转</a-button>
+                <a-button type="danger" @click.prevent="onCreatePermission('Deploy')">
+                  部署
+                </a-button>
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <a-row :gutter="16">
+            <a-col :span="24">
+              <a-form-item label="新建权限">
+                {{createPermissionUser}}
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="流转权限">
+                {{envPermissionUser}}
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="部署权限">
+                {{deployPermissionUser}}
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+        <div
+          :style="{
+            position: 'absolute',
+            right: 0,
+            bottom: 0,
+            width: '100%',
+            borderTop: '1px solid #e9e9e9',
+            padding: '10px 16px',
+            background: '#fff',
+            textAlign: 'right',
+            zIndex: 1,
+          }"
+        >
+          <a-button type="primary" @click="onClose">
+            关闭
+          </a-button>
+        </div>
+      </a-drawer>
+    </div>
+    <!---->
+    
   </a-card>
 </template>
 
 <script>
+import moment from 'moment'
 import BfTable from '@/components/table/table'
+import envExchange from '@/components/tool/envExchange'
 import API from '@/service'
 const columns = [
   {
@@ -101,7 +182,12 @@ const columns = [
   {
     title: '更新时间',
     dataIndex: 'update_date',
-    sorter: true
+    sorter: true,
+    customRender: (date) =>{ return moment(date).format("YYYY-MM-DD hh:mm")}
+  },
+  {
+    title: '权限',
+    scopedSlots: { customRender: 'permission' }
   },
   {
     title: '操作',
@@ -110,14 +196,22 @@ const columns = [
 ]
 
 export default {
-  name: 'module',
+  name: 'app',
   components: {BfTable},
   data () {
     return {
       total:0,
+      visible: false,
       advanced: true,
       columns: columns,
       dataSource: [],
+      userOptions: [],
+      selectUser: "",
+      selectApp: "",
+      permissionDataSource: [],
+      createPermissionUser: [],
+      envPermissionUser: [],
+      deployPermissionUser: [],
       selectedRows: [],
       params:{
         name:"",
@@ -132,6 +226,7 @@ export default {
   },
   beforeCreate() {
     this.form = this.$form.createForm(this, { name: 'moduleList' });
+    this.formPermission = this.$form.createForm(this, { name: 'permissionModuleList' });
   },
   created(){
     this.fetchData()
@@ -169,6 +264,71 @@ export default {
         }
       })
     },
+    fetchPermissionData(){
+      let params = {
+        "app": this.selectApp
+      }
+      API.PermissionList(params).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.data.count > 0){
+          this.total = result.data.count
+          this.permissionDataSource = result.data.results;
+           // 获取到所有APP的权限用户后，先清空，再按不同的权限，放入不同的用户列表中
+          this.createPermissionUser = []
+          this.envPermissionUser = []
+          this.deployPermissionUser = []
+          for (let elem of this.permissionDataSource.values()) {
+            if (elem.action_name === "Create") {
+              this.createPermissionUser.push(elem.pm_username)
+            }
+            if (elem.action_name === "Env") {
+              this.envPermissionUser.push(elem.pm_username)
+            }
+            if (elem.action_name === "Deploy") {
+              this.deployPermissionUser.push(elem.pm_username)
+            }
+          }
+          console.log(this.permissionDataSource)
+        } else {
+          this.permissionDataSource = []
+        }
+      })
+    },
+    onCreatePermission (param) {
+      let action = param,
+          user_id = this.selectUser,
+          app_name = this.selectApp
+      let data = {
+        action,
+        user_id,
+        app_name
+      }
+      API.CreatePermission(data).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          this.$message.success("权限新增成功~")
+          this.fetchPermissionData()
+        }
+        else{
+          this.$message.error("权限新增失败:"+result.message)
+        }
+      })
+    },
+		fetchUser(){
+		  API.UserList({}).then((res)=>{
+		    let result = res.data
+		    if(res.status == 200 && result.count > 0){
+		      result.results.forEach(item=>{
+		        this.userOptions.push({
+		          label:item.username,
+		          value:item.id
+		        })
+		      })
+		    } else {
+		      this.$message,error("无法获取用户列表~")
+		    }
+		  })
+		},
     onPageChange(page,pageSize){
       this.params.currentPage = page
       this.params.pageSize = pageSize
@@ -225,6 +385,18 @@ export default {
           this.$message.error("操作错误~:"+result.message)
         }
       })
+    },
+    onClose() {
+      this.visible = false;
+    },
+    handleChange(value) {
+      this.selectUser = value
+    },
+    showPermission(record) {
+      this.selectApp = record.name
+      this.fetchUser()
+      this.fetchPermissionData()
+      this.visible = true
     }
   }
 }

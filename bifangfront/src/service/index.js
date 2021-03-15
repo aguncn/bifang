@@ -7,6 +7,7 @@ import release from './release'
 import deploy from './deploy'
 import server from './server'
 import history from './history'
+import permission from './permission'
 import {API} from './api'
 
 requestWhitelistConfig([
@@ -22,5 +23,6 @@ export default {
     ...release,
     ...deploy,
     ...server,
-    ...history
+    ...history,
+    ...permission
 }

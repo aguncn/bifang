@@ -10,7 +10,7 @@ class EnvSerializer(serializers.ModelSerializer):
 
 class EnvExchangeSerializer(serializers.Serializer):
     release_name = serializers.CharField(max_length=100)
-    env_name = serializers.CharField(max_length=64)
+    env_id = serializers.CharField(max_length=64)
 
     def create(self, validated_data):
         pass

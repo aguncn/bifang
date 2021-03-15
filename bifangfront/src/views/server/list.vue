@@ -45,9 +45,9 @@
           showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
         }"
       >
-        <div slot="description" slot-scope="{text}">
-          {{text}}
-        </div>
+        <template slot="env_name" slot-scope="{text,record}">
+          <a-tag color='blue'>{{text}}</a-tag>
+        </template>
         <div slot="action" slot-scope="{text, record}">
           <a-button-group>
             <a-button type="primary" @click.prevent="onShowEdit(record)">
@@ -185,7 +185,8 @@ const columns = [
   },
   {
     title: '环境',
-    dataIndex: 'env_name'
+    dataIndex: 'env_name',
+    scopedSlots: { customRender: 'env_name' }
   },
   {
     title: '更新时间',
@@ -410,35 +411,35 @@ export default {
     },
     onCreateServer () {
       this.formDialog.validateFields((err, fieldsValue) => {
-          if (err) {
-            return;
+        if (err) {
+          return;
+        }
+        let ip = fieldsValue["ip"],
+            port = fieldsValue["port"],
+            app_id = fieldsValue["appId"],
+            env_id = fieldsValue["envId"],
+            system_type = fieldsValue["system"],
+            description = fieldsValue["description"]||""
+        let data = {
+          ip,
+          port,
+          app_id,
+          env_id,
+          system_type,
+          description
+        }
+        API.CreateServer(data).then((res)=>{
+          let result = res.data
+          if(res.status == 200 && result.code == 0){
+            this.$message.success("服务器新增成功~")
+            this.visible = false
+            this.fetchData()
           }
-          let ip = fieldsValue["ip"],
-              port = fieldsValue["port"],
-              app_id = fieldsValue["appId"],
-              env_id = fieldsValue["envId"],
-              system_type = fieldsValue["system"],
-              description = fieldsValue["description"]||""
-          let data = {
-            ip,
-            port,
-            app_id,
-            env_id,
-            system_type,
-            description
+          else{
+            this.$message.error("服务器新增失败:"+result.message)
           }
-          API.CreateServer(data).then((res)=>{
-            let result = res.data
-            if(res.status == 200 && result.code == 0){
-              this.$message.success("服务器新增成功~")
-              this.visible = false
-              this.fetchData()
-            }
-            else{
-              this.$message.error("服务器新增失败:"+result.message)
-            }
-          })
         })
+      })
     }
   }
 }
@@ -446,7 +447,7 @@ export default {
 
 <style lang="less" scoped>
   .search{
-    margin-bottom: 54px;
+    margin-bottom: 10px;
   }
   .fold{
     width: calc(100% - 216px);

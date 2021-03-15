@@ -39,14 +39,13 @@ class ServerCreateView(CreateAPIView):
         data['description'] = req_data['description']
         data['ip'] = req_data['ip']
         data['port'] = req_data['port']
+        # 名称是自动维护的，不用前端传过来
         data['name'] = '{}_{}'.format(req_data['ip'], req_data['port'])
         data['app'] = req_data['app_id']
         data['env'] = req_data['env_id']
         data['system_type'] = req_data['system_type']
         # 从drf的request中获取用户(对django的request作了扩展的)
         data['create_user'] = request.user.id
-        print(req_data, "@@@@@@@@@@@@")
-        print(data, "###################")
         serializer = ServerSerializer(data=data)
         if serializer.is_valid() is False:
             return_dict = build_ret_data(THROW_EXP, str(serializer.errors))
@@ -77,7 +76,6 @@ class ServerUpdateView(UpdateAPIView):
     # 前端使用patch方法，到达这里
     def patch(self, request, *args, **kwargs):
         req_data = request.data
-        print(req_data, "@@@@@@@@@@@@@@@@@@")
         pid = req_data['id']
         ip = req_data['ip']
         port = req_data['port']

@@ -49,12 +49,21 @@
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a style="margin-right: 8px" @click.prevent="onShowEdit(record)">
-            <a-icon type="edit"/>编辑
-          </a>
-          <a style="margin-right: 8px" @click.prevent="onDelete(record)">
-            <a-icon type="delete"/>删除
-          </a>
+          <a-button-group>
+            <a-button type="primary" @click.prevent="onShowEdit(record)">
+              编辑      
+            </a-button>
+            <a-popconfirm
+              title="确定执行删除操作么？"
+              ok-text="是"
+              cancel-text="否"
+              @confirm="onDelete(record)"
+            >
+              <a-button type="danger">
+                删除      
+              </a-button>
+            </a-popconfirm>
+          </a-button-group>
         </div>
         <template slot="statusTitle">
           <a-icon @click.native="onStatusTitleClick" type="info-circle" />
@@ -297,7 +306,7 @@ export default {
 
 <style lang="less" scoped>
   .search{
-    margin-bottom: 54px;
+    margin-bottom: 10px;
   }
   .fold{
     width: calc(100% - 216px);

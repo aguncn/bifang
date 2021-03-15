@@ -45,16 +45,25 @@
           showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
         }"
       >
-        <div slot="description" slot-scope="{text}">
-          {{text}}
-        </div>
+        <template slot="email" slot-scope="{text,record}">
+          <a-tag color='blue'>{{text}}</a-tag>
+        </template>
         <div slot="action" slot-scope="{text, record}">
-          <a style="margin-right: 8px" @click.prevent="onShowEdit(record)">
-            <a-icon type="edit"/>编辑
-          </a>
-          <a style="margin-right: 8px" @click.prevent="onDelete(record)">
-            <a-icon type="delete"/>删除
-          </a>
+          <a-button-group>
+            <a-button type="primary" @click.prevent="onShowEdit(record)">
+              编辑      
+            </a-button>
+            <a-popconfirm
+              title="确定执行删除操作么？"
+              ok-text="是"
+              cancel-text="否"
+              @confirm="onDelete(record)"
+            >
+              <a-button type="danger">
+                删除      
+              </a-button>
+            </a-popconfirm>
+          </a-button-group>
         </div>
         <template slot="statusTitle">
           <a-icon @click.native="onStatusTitleClick" type="info-circle" />
@@ -133,7 +142,8 @@ const columns = [
   },
   {
     title: '邮箱',
-    dataIndex: 'email'
+    dataIndex: 'email',
+    scopedSlots: { customRender: 'email' }
   },
   {
     title: '操作',
@@ -200,6 +210,7 @@ export default {
         if(res.status == 200 ){
           this.total = result.count
           this.dataSource = result.results;
+          console.log(this.dataSource)
         }
         else{
           this.dataSource = []
@@ -247,7 +258,7 @@ export default {
         this.$message.error("操作参数非法！")
         return false
       }
-      API.API.DeleteUser({id}).then((res)=>{
+      API.DeleteUser({id}).then((res)=>{
         let result = res.data
         if(res.status == 204){
           this.$message.success("删除成功~")
@@ -343,7 +354,7 @@ export default {
 
 <style lang="less" scoped>
   .search{
-    margin-bottom: 54px;
+    margin-bottom: 10px;
   }
   .fold{
     width: calc(100% - 216px);

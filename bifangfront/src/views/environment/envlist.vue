@@ -203,7 +203,7 @@ export default {
           result.data.results.forEach(item=>{
             this.envOptions.push({
               label:item.name,
-              value:item.name
+              value:item.id
             })
           })
         }
@@ -271,7 +271,7 @@ export default {
     },
     envExchange(record,env) {
       let params = {
-        env_name: env,
+        env_id: env,
         release_name: record.name
       }
       console.log(params)

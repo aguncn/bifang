@@ -3,10 +3,10 @@ from cmdb.models import Permission
 
 
 class PermissionSerializer(serializers.ModelSerializer):
-    app = serializers.CharField(source='app.name')
-    action = serializers.CharField(source='action.name')
-    create_user = serializers.CharField(source='create_user.username')
-    pm_user = serializers.CharField(source='pm_user.username')
+    app_name = serializers.CharField(source='app.name', read_only=True)
+    action_name = serializers.CharField(source='action.name', read_only=True)
+    create_username = serializers.CharField(source='create_user.username', read_only=True)
+    pm_username = serializers.CharField(source='pm_user.username', read_only=True)
 
     class Meta:
         model = Permission
