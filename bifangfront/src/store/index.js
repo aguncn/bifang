@@ -9,7 +9,7 @@ const ROLES_KEY = "bifang.roles"
 
 export default new Vuex.Store({
   state: {
-    user: {},
+    user: null,
     permissions: null,
     roles: null,
   },
