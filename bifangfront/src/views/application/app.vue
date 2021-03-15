@@ -332,6 +332,9 @@ export default {
           }
         } else {
           this.permissionDataSource = []
+          this.createPermissionUser = []
+          this.envPermissionUser = []
+          this.deployPermissionUser = []
         }
       })
     },
