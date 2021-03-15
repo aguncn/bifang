@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import CreateAPIView
+from rest_framework.generics import DestroyAPIView
 from cmdb.models import App
 from cmdb.models import Action
 from cmdb.models import Permission
@@ -34,7 +35,6 @@ class PermissionCreateView(CreateAPIView):
         }
         """
         req_data = request.data
-        print(req_data, "@@@@@@@@@@@@")
         data = dict()
         user = User.objects.get(id=req_data['user_id'])
         app = App.objects.get(name=req_data['app_name'])
@@ -48,14 +48,26 @@ class PermissionCreateView(CreateAPIView):
         # 从drf的request中获取用户(对django的request作了扩展的)
         data['create_user'] = request.user.id
         serializer = PermissionSerializer(data=data)
-        print(serializer)
         if serializer.is_valid() is False:
-            print("!!!!!!!!!!!!!!!")
             return_dict = build_ret_data(THROW_EXP, str(serializer.errors))
             return render_json(return_dict)
         data = serializer.validated_data
-        print(data, "&&&&&&&&&&&&&&&&&&&&")
         Permission.objects.create(**data)
         return_dict = build_ret_data(OP_SUCCESS, serializer.data)
         return render_json(return_dict)
+
+
+class PermissionDestroyView(DestroyAPIView):
+    queryset = Permission.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            res = super().destroy(self, request, *args, **kwargs)
+            return_dict = build_ret_data(OP_SUCCESS, str(res))
+            return render_json(return_dict)
+        except Exception as e:
+            print(e)
+            return_dict = build_ret_data(THROW_EXP, str(e))
+            return render_json(return_dict)
+
 

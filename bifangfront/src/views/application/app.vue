@@ -98,9 +98,9 @@
             <a-col :span="12">
               <a-form-item label="操作">
                 <a-button type="primary" @click.prevent="onCreatePermission('Create')" >
-                  新建
+                  新建发布单
                 </a-button>
-                <a-button @click.prevent="onCreatePermission('Env')">流转</a-button>
+                <a-button @click.prevent="onCreatePermission('Env')">环境流转</a-button>
                 <a-button type="danger" @click.prevent="onCreatePermission('Deploy')">
                   部署
                 </a-button>
@@ -109,19 +109,52 @@
           </a-row>
           <a-row :gutter="16">
             <a-col :span="24">
-              <a-form-item label="新建权限">
-                {{createPermissionUser}}
-              </a-form-item>
+              <a-alert message="新建发布单权限" type="success" /><br/>
+              <a-tag color="blue" v-for="item in createPermissionUser">
+                <a-popconfirm
+                    title="删除此用户权限?"
+                    ok-text="确定"
+                    cancel-text="否"
+                    @confirm="confirmDeleteUser(item.id)"
+                    @cancel="cancelDeleteUser"
+                  >
+                  {{item.name}}
+                </a-popconfirm>
+              </a-tag>
+              <br/>
+              <br/>
             </a-col>
             <a-col :span="24">
-              <a-form-item label="流转权限">
-                {{envPermissionUser}}
-              </a-form-item>
+              <a-alert message="环境流转权限" type="success" /><br/>
+              <a-tag color="blue" v-for="item in envPermissionUser">
+                <a-popconfirm
+                    title="删除此用户权限?"
+                    ok-text="确定"
+                    cancel-text="否"
+                    @confirm="confirmDeleteUser(item.id)"
+                    @cancel="cancelDeleteUser"
+                  >
+                  {{item.name}}
+                </a-popconfirm>
+              </a-tag>
+              <br/>
+              <br/>
             </a-col>
             <a-col :span="24">
-              <a-form-item label="部署权限">
-                {{deployPermissionUser}}
-              </a-form-item>
+              <a-alert message="部署权限" type="success" /><br/>
+              <a-tag color="blue" v-for="item in deployPermissionUser">
+                <a-popconfirm
+                    title="删除此用户权限?"
+                    ok-text="确定"
+                    cancel-text="否"
+                    @confirm="confirmDeleteUser(item.id)"
+                    @cancel="cancelDeleteUser"
+                  >
+                  {{item.name}}
+                </a-popconfirm>
+              </a-tag>
+              <br/>
+              <br/>
             </a-col>
           </a-row>
         </a-form>
@@ -279,16 +312,24 @@ export default {
           this.deployPermissionUser = []
           for (let elem of this.permissionDataSource.values()) {
             if (elem.action_name === "Create") {
-              this.createPermissionUser.push(elem.pm_username)
+              this.createPermissionUser.push({
+                'id': elem.id,
+                'name': elem.pm_username
+              })
             }
             if (elem.action_name === "Env") {
-              this.envPermissionUser.push(elem.pm_username)
+              this.envPermissionUser.push({
+                'id': elem.id,
+                'name': elem.pm_username
+              })
             }
             if (elem.action_name === "Deploy") {
-              this.deployPermissionUser.push(elem.pm_username)
+              this.deployPermissionUser.push({
+                'id': elem.id,
+                'name': elem.pm_username
+              })
             }
           }
-          console.log(this.permissionDataSource)
         } else {
           this.permissionDataSource = []
         }
@@ -397,7 +438,23 @@ export default {
       this.fetchUser()
       this.fetchPermissionData()
       this.visible = true
-    }
+    },
+    confirmDeleteUser(data) {
+      let params = {"id": data}
+      API.DeletePermission(params).then((res)=>{
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
+          this.$message.success("用户删除成功~")
+          this.fetchPermissionData()
+        }
+        else{
+          this.$message.error("用户删除操作错误~:"+result.message)
+        }
+      })
+    },
+    cancelDeleteUser() {
+      this.$message.info('取消操作');
+    },
   }
 }
 </script>

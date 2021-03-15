@@ -33,10 +33,10 @@ async function CreatePermission(params){
  * @param {*} params 
  */
 async function DeletePermission(params){
+    const url = urlFormat(API.DELETEPERMISSION, params)
     return request(
-        API.DELETEPERMISSION, 
-        METHOD.POST,
-        params
+        url, 
+        METHOD.DELETE
     )
 }
 

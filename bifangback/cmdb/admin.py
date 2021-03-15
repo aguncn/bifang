@@ -69,5 +69,14 @@ class ServerHistoryHistoryAdmin(SimpleHistoryAdmin):
 
 
 admin.site.register(ServerHistory, ServerHistoryHistoryAdmin)
+
+
+class PermissionHistoryAdmin(SimpleHistoryAdmin):
+    list_display = ['id', 'name',  'app', 'action', 'pm_user']
+    history_list_display = ["status"]
+    search_fields = ['name', 'app', 'action']
+    readonly_fields = ('create_date', 'update_date')
+
+
 admin.site.register(Action)
-admin.site.register(Permission, SimpleHistoryAdmin)
+admin.site.register(Permission, PermissionHistoryAdmin)

@@ -36,7 +36,7 @@ const API = {
     UPDATEUSER: `${REAL_URL}/account/users/{{id}}/`,
     PERMISSIONLIST: `${REAL_URL}/permission/list/`,
     CREATEPERMISSION: `${REAL_URL}/permission/create/`,
-    DELETEPERMISSION: `${REAL_URL}/permission/delete/`,
+    DELETEPERMISSION: `${REAL_URL}/permission/delete/{{id}}/`,
 }
 
 export {
