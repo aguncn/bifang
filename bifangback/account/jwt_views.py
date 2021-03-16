@@ -10,6 +10,7 @@ from rest_framework_jwt.views import RefreshJSONWebToken
 from rest_framework_jwt.views import VerifyJSONWebToken
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
+from django.contrib.auth.models import Group
 
 User = get_user_model()
 
@@ -34,6 +35,16 @@ def jwt_response_payload_handler(token, user=None, expiration=None):
     """
     自定义jwt认证成功返回数据
     """
+    # 向前端请求返回用户角色列表，admin为管理员角色，其它为非管理员角色。
+    # 如果用户属于多个用户组，只要其中一个为admin组，就为管理员角色。
+    # permissions仅为demo演示，在本项目中，未使用
+    # is_superuser为是否能登陆django admin后台管理界面。
+    roles = list()
+    user_groups = Group.objects.filter(user=user)
+    for user_group in user_groups:
+        roles.append({
+            'id': user_group.name
+        })
     data = {
         'token': token,
         'expireAt': expiration,
@@ -44,8 +55,8 @@ def jwt_response_payload_handler(token, user=None, expiration=None):
             'email': user.email,
             'avatar': ''},
         'is_superuser': user.is_superuser,
-        'permissions': [{'id': 'queryForm', 'operation': ['add', 'edit']}],
-        'roles': [{'id': 'admin', 'operation': ['add', 'edit', 'delete']}],
+        'permissions': [{'id': 'demo', 'operation': ['demo']}],
+        'roles': roles,
     }
     return {'code': 0, 'message': '欢迎回来', 'data': data}
 

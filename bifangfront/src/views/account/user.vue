@@ -45,6 +45,19 @@
           showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
         }"
       >
+        <div slot="username" slot-scope="{text, record}">
+          <a-tooltip>
+          	<template slot="title">
+          		{{record.url}}
+          	</template>
+          	  {{text}}
+          </a-tooltip>
+        </div>
+        <template slot="groups_names" slot-scope="{text,record}">
+          <a-tag color="blue" v-for="item in text">
+            {{item.name}}
+          </a-tag>
+        </template>
         <template slot="email" slot-scope="{text,record}">
           <a-tag color='blue'>{{text}}</a-tag>
         </template>
@@ -134,11 +147,13 @@ import API from '@/service'
 const columns = [
   {
     title: '用户名',
-    dataIndex: 'username'
+    dataIndex: 'username',
+    scopedSlots: {customRender: 'username'} 
   },
   {
-    title: '链接',
-    dataIndex: 'url'
+    title: '所属用户组',
+    dataIndex: 'groups_names',
+    scopedSlots: {customRender: 'groups_names'} 
   },
   {
     title: '邮箱',
