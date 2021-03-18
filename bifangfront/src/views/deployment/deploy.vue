@@ -5,7 +5,15 @@
       <a-card type="inner" title="发布单信息">
         <detail-list size="small">
           <detail-list-item term="项目">{{ title.project_name }}</detail-list-item>
-          <detail-list-item term="应用">{{ title.app_name }}</detail-list-item>
+          <detail-list-item term="应用">
+            {{ title.app_name }}
+            <a :href="title.deploy_script_url" target="_blank">
+              <a-tag color="blue">Build</a-tag>
+            </a>
+            <a :href="title.deploy_script_url" target="_blank">
+              <a-tag color="green">Deploy</a-tag>
+            </a>
+          </detail-list-item>
           <detail-list-item term="环境">{{ title.env_name }}</detail-list-item>
           <detail-list-item term="发布单">{{ title.name }}</detail-list-item>
           <detail-list-item term="发布描述">{{ title.description }}</detail-list-item>
@@ -111,6 +119,7 @@
         <span v-if="deployResult === 'wait'">状态：部署中<a-icon type="sync"   :style="{ fontSize: '24px', color: '#00f' }" spin /><br/></span>
         <span v-else-if="deployResult === 'success'">状态：部署完成<a-icon type="check"   :style="{ fontSize: '24px', color: '#000' }" /> <br/></span>
         <span v-else>状态：部署出错，请查看服务器日志<a-icon type="close"   :style="{ fontSize: '24px', color: '#f00' }" /> <br/></span>
+        输出记录：<span> {{deployLog}} <br/></span>
       </a-card>
     </a-modal>
   </a-card>
@@ -171,6 +180,7 @@ export default {
       deployTitle: "",
       deployType: "",
       deployResult: "",
+      deployLog: "",
       params:{
         currentPage:1,
         pageSize:20,
@@ -242,7 +252,10 @@ export default {
     },
     onDeployReset(){
       this.fetchAllData()
+      this.deployResult = ""
+      this.deployLog = ""
       this.visiableDeploy = false
+      
     },
     onPageChange(page,pageSize){
       this.params.currentPage = page
@@ -282,11 +295,13 @@ export default {
       this.deployResult = "wait"
       this.visiableDeploy = true
       API.Deploy(params).then((res)=>{
+        console.log(res)
         if(res.data.code == 0 ){
           this.deployResult = "success"
         } else {
           this.deployResult = "failed"
         }
+        this.deployLog = res.data.data
       })
     },
     onChange(pagination, filters, sorter) {

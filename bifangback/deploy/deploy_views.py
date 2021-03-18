@@ -4,6 +4,7 @@ from cmdb.models import App
 from utils.saltstack import salt_cmd
 from cmdb.models import Env
 from cmdb.models import Release
+from cmdb.models import Action
 from .serializers import DeploySerializer
 from utils.ret_code import *
 from utils.permission import is_right
@@ -47,15 +48,16 @@ def deploy(request):
             target_list = ser_data['target_list']
             # 部署批次是在当前发布单的部署批次上加1，然后，将这个批次分别传到部署历史和服务器历史中，以对应日志
             deploy_no = int(ser_data['deploy_no']) + 1
-            """
+
             # 前端开发完成后开启权限测试
             app = App.objects.get(name=app_name)
             user = request.user
             action = Action.objects.get(name='Deploy')
+            print(app.id, action.id, user, "@@@@@@@@@@@@@@")
             if not is_right(app.id, action.id, user):
                 return_dict = build_ret_data(THROW_EXP, '你无权限部署此应用！')
                 return render_json(return_dict)
-            """
+
             # op_type的deploy用来部署发布音，maintenance用来启停服务
             if deploy_type == 'deploy' and op_type == 'deploy':
                 action_list = ['fetch', 'stop', 'stop_status', 'deploy', 'start', 'start_status', 'health_check']
@@ -78,15 +80,15 @@ def deploy(request):
 
             # 以True或False的返回值，来判断任务的成功或失败
             # 而写入成功或失败的记录，放在真正执行的函数中
-            ret_data = task_run(action_list, env_name,
-                                app_name, service_port, release_name,
-                                target_list, user_id,
-                                op_type, deploy_type, deploy_no)
-            if ret_data:
-                return_dict = build_ret_data(OP_SUCCESS, 'success')
+            (ret_bool, ret_msg) = task_run(action_list, env_name,
+                                           app_name, service_port, release_name,
+                                           target_list, user_id,
+                                           op_type, deploy_type, deploy_no)
+            if ret_bool:
+                return_dict = build_ret_data(OP_SUCCESS, ret_msg)
                 return render_json(return_dict)
             else:
-                return_dict = build_ret_data(THROW_EXP, '执行失败')
+                return_dict = build_ret_data(THROW_EXP, ret_msg)
                 return render_json(return_dict)
         else:
             return_dict = build_ret_data(THROW_EXP, '序列化条件不满足')
@@ -102,12 +104,12 @@ def task_run(action_list, env_name,
         for action in action_list:
             print('action: ', action)
 
-            ret_data = cmd_run(env_name, app_name,
-                               service_port, release_name,
-                               target_list, action,
-                               user_id, op_type, deploy_type, deploy_no)
+            (ret_bool, ret_msg) = cmd_run(env_name, app_name,
+                                          service_port, release_name,
+                                          target_list, action,
+                                          user_id, op_type, deploy_type, deploy_no)
             # 如果其中任务一个步骤执行出错，则先记录失败，再返回False
-            if not ret_data:
+            if not ret_bool:
                 # print('data_false: ', data)
                 # 有真正部署，出错时才需要更新发布单历史，其它情况，只更新服务器发布历史(暂不考虑回滚失败)
                 if deploy_type == 'deploy':
@@ -118,7 +120,7 @@ def task_run(action_list, env_name,
                     # 更新发布单状态
                     update_release_status(release_name, app_name, env_name, deploy_no, 'Failed')
 
-                return False
+                return False, "{}: {}".format(action, ret_msg)
             # print('data_true: ', data)
         # 这里是for循环完成后，表示任务已成功执行，可以集中更新数据库记录
         # 只有部署和回滚，才需要更新发布单历史和服务器主备发布单(回滚时，发布单参数并没有用上)
@@ -132,10 +134,10 @@ def task_run(action_list, env_name,
             update_release_status(release_name, app_name, env_name, deploy_no, 'Check')
 
         print("finish: ", action_list, env_name, app_name, release_name, target_list)
-        return True
+        return True, "task_run success: {}".format(str(action_list))
     except Exception as e:
         print(e)
-        return False
+        return False, "task_run error: {}".format(str(e))
 
 
 # cmd_run函数是在每一个线程当中运行的
@@ -164,19 +166,22 @@ def cmd_run(env_name, app_name, service_port,
     time.sleep(1)
     # salt找不到服务器，则返回列表里字典中有一个必为空，这一步要提前判断
     if any(not item for item in ret):
-        return False
+        return False, "找不到salt minion客户端：" + str(ret)
     for server in ret:
         for ip, detail in server.items():
-            # 记录服务器操作历史
-            write_server_history(ip, service_port, release_name, env_name, op_type, action, deploy_no, detail['stdout'], user_id)
-            # 部署脚本的每一个步骤，成功时必须返回success关键字
-            if 'success' not in detail['stdout']:
-                return False
-            """
             print('ip: ', ip)
             print('retcode: ', detail['retcode'])
             print('stdout: ', detail['stdout'])
             print('stderr: ', detail['stderr'])
             print('pid: ', detail['pid'])
-            """
-    return True
+            # 记录服务器操作历史
+            write_server_history(ip, service_port, release_name, env_name, op_type, action, deploy_no,
+                                 detail['stdout'] + detail['stderr'], user_id)
+
+            # 部署脚本的每一个步骤，成功时必须返回success关键字
+            if 'success' not in detail['stdout']:
+                return False, "脚本执行完成，但没有success关键字：" + detail['stdout']
+            if len(detail['stderr']) > 0:
+                return False, "脚本执行完成，有stderr错误：" + detail['stderr']
+
+    return True, "脚本执行完成：" + detail['stdout']

@@ -8,14 +8,14 @@ from cmdb.models import Permission
 # 判断是否为管理员组
 def is_admin_group(user):
     try:
-        user_group = Group.objects.get(user=user)
+        user_groups = Group.objects.filter(user=user)
     except ObjectDoesNotExist as e:
         print(e)
         return False
-    if user_group == 'admin':
-        return True
-    else:
-        return False
+    for user_group in user_groups:
+        if user_group == 'admin':
+            return True
+    return False
 
 
 # 判断是否为Project管理员
