@@ -1,5 +1,6 @@
 import time
 from django.contrib.auth import get_user_model
+from rest_framework_jwt.utils import jwt_decode_handler
 from cmdb.models import App
 from utils.saltstack import salt_cmd
 from cmdb.models import Env
@@ -33,6 +34,11 @@ def deploy(request):
         """
         req_data = json.loads(request.body.decode('utf-8'))
         req_data['target_list'] = req_data['target_list'].split(',')
+        # 由于这个视图函数不是由DRF直接提供的（APIVIEW），而是自己手写的，所以获取用户和用户ID的参数，也要自己手动获取
+        token = request.META.get('HTTP_AUTHORIZATION').split(' ')[1]  # Bearer [token值]
+        token_user = jwt_decode_handler(token)
+        user_id = token_user['user_id']
+        user = User.objects.get(id=user_id)
         # 序列化前端数据，并判断是否有效
         serializer = DeploySerializer(data=req_data)
         if serializer.is_valid():
@@ -41,7 +47,6 @@ def deploy(request):
             service_port = ser_data['service_port']
             release_name = ser_data['release_name']
             env_name = ser_data['env_name']
-            user_id = ser_data['user_id']
             # op_type用于定义是部署应用，还是服务器启停，deploy_type用于定义操作指令
             op_type = ser_data['op_type']
             deploy_type = ser_data['deploy_type']
@@ -51,11 +56,9 @@ def deploy(request):
 
             # 前端开发完成后开启权限测试
             app = App.objects.get(name=app_name)
-            user = request.user
             action = Action.objects.get(name='Deploy')
-            print(app.id, action.id, user, "@@@@@@@@@@@@@@")
             if not is_right(app.id, action.id, user):
-                return_dict = build_ret_data(NOT_PERMISSION, '你无权在此应用下新建发布单！')
+                return_dict = build_ret_data(NOT_PERMISSION, '你没有此发布单的部署权限！')
                 return render_json(return_dict)
 
             # op_type的deploy用来部署发布音，maintenance用来启停服务

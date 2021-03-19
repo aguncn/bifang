@@ -47,7 +47,7 @@ class ReleaseCreateView(CreateAPIView):
         # 前端开发完成后开启权限测试
         action = Action.objects.get(name='Create')
         if not is_right(app_id, action.id, user):
-            return_dict = build_ret_data(NOT_PERMISSION, '你无权在此应用下新建发布单！')
+            return_dict = build_ret_data(NOT_PERMISSION, '你无此应用的新建及建构发布单权限！')
             return render_json(return_dict)
 
         data = dict()

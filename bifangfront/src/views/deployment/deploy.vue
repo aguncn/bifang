@@ -8,9 +8,6 @@
           <detail-list-item term="应用">
             {{ title.app_name }}
             <a :href="title.deploy_script_url" target="_blank">
-              <a-tag color="blue">Build</a-tag>
-            </a>
-            <a :href="title.deploy_script_url" target="_blank">
               <a-tag color="green">Deploy</a-tag>
             </a>
           </detail-list-item>
@@ -118,6 +115,7 @@
         服务器列表：{{this.selectedRow}}<br/>
         <span v-if="deployResult === 'wait'">状态：部署中<a-icon type="sync"   :style="{ fontSize: '24px', color: '#00f' }" spin /><br/></span>
         <span v-else-if="deployResult === 'success'">状态：部署完成<a-icon type="check"   :style="{ fontSize: '24px', color: '#000' }" /> <br/></span>
+        <span v-else-if="deployResult === 'noPermission'">状态：无部署权限<a-icon type="close"   :style="{ fontSize: '24px', color: '#f00' }" /> <br/></span>
         <span v-else>状态：部署出错，请查看服务器日志<a-icon type="close"   :style="{ fontSize: '24px', color: '#f00' }" /> <br/></span>
         输出记录：<span> {{deployLog}} <br/></span>
       </a-card>
@@ -295,10 +293,12 @@ export default {
       this.deployResult = "wait"
       this.visiableDeploy = true
       API.Deploy(params).then((res)=>{
-        console.log(res)
-        if(res.data.code == 0 ){
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
           this.deployResult = "success"
-        } else {
+        } else if(res.status == 200 && result.code == 2000){
+					this.deployResult = "noPermission"
+				} else {
           this.deployResult = "failed"
         }
         this.deployLog = res.data.data
