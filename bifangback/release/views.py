@@ -44,13 +44,11 @@ class ReleaseCreateView(CreateAPIView):
         user = request.user
         app_id = req_data['app_id']
 
-        """
         # 前端开发完成后开启权限测试
         action = Action.objects.get(name='Create')
         if not is_right(app_id, action.id, user):
-            return_dict = build_ret_data(THROW_EXP, '你无权在此应用下新建发布单！')
+            return_dict = build_ret_data(NOT_PERMISSION, '你无权在此应用下新建发布单！')
             return render_json(return_dict)
-        """
 
         data = dict()
         random_letter = ''.join(random.sample(string.ascii_letters, 2))

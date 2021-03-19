@@ -55,7 +55,7 @@ def deploy(request):
             action = Action.objects.get(name='Deploy')
             print(app.id, action.id, user, "@@@@@@@@@@@@@@")
             if not is_right(app.id, action.id, user):
-                return_dict = build_ret_data(THROW_EXP, '你无权限部署此应用！')
+                return_dict = build_ret_data(NOT_PERMISSION, '你无权在此应用下新建发布单！')
                 return render_json(return_dict)
 
             # op_type的deploy用来部署发布音，maintenance用来启停服务

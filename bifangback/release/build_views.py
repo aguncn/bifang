@@ -1,6 +1,7 @@
 import os
 from django.conf import settings
 from cmdb.models import App
+from cmdb.models import Action
 from utils.gitlab import gitlab_trigger
 from utils.gitlab import pipeline_status
 from cmdb.models import Release
@@ -9,6 +10,7 @@ from .serializers import ReleaseBuildSerializer
 from .serializers import ReleaseBuildStatusSerializer
 from rest_framework.views import APIView
 from utils.ret_code import *
+from utils.permission import is_right
 from utils.write_history import write_release_history
 
 
@@ -30,7 +32,6 @@ class ReleaseBuildView(APIView):
             app_name = ser_data['app_name']
             release_name = ser_data['release_name']
             git_branch = ser_data['git_branch']
-            print(app_name, git_branch, release_name)
             app = App.objects.get(name=app_name)
             git_url = app.git.git_url
             git_access_token = app.git.git_token
@@ -39,6 +40,13 @@ class ReleaseBuildView(APIView):
             build_script = app.build_script
             deploy_script = app.deploy_script
             file_up_server = settings.FILE_UP_SERVER
+
+            # 前端开发完成后开启权限测试
+            action = Action.objects.get(name='Create')
+            if not is_right(app.id, action.id, user):
+                return_dict = build_ret_data(NOT_PERMISSION, '你无权在此应用下新建发布单！')
+                return render_json(return_dict)
+
             # 先触发编译，但由于编译时间较长，为防连接过期，异步一下，先返回id，再获取编译状态
             try:
                 pipeline = gitlab_trigger(git_url, git_access_token,

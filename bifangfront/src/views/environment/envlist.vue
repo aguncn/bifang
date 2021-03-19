@@ -272,14 +272,18 @@ export default {
     envExchange(record,env) {
       let params = {
         env_id: env,
-        release_name: record.name
+        release_name: record.name,
+        app_id: record.app
       }
       console.log(params)
       API.EnvExchange(params).then((res)=>{
-        if(res.status == 200 ){
+        let result = res.data
+        if(res.status == 200 && result.code == 0){
           this.$message.success("环境流转完成，此发布单可以在指定环境进行部署。")
           this.fetchData()
-        } else {
+        } else if(res.status == 200 && result.code == 2000){
+					this.$message.error("你没有此发布单的流转环境权限！")
+				} else {
           this.$message.error("环境流转错误，请联系系统管理员~")
         }
       })

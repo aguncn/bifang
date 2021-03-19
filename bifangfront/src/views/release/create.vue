@@ -148,8 +148,9 @@ export default {
             if(res.status == 200 && result.code == 0){
               this.$message.success("发布单创建成功~")
               this.$router.push("releaseList")
-            }
-            else{
+            } else if(res.status == 200 && result.code == 2000){
+              this.$message.error("你没有创建此应用发布单的权限！")
+            } else {
               this.$message.error("无法获取应用列表~")
             }
           })

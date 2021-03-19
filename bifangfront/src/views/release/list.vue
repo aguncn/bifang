@@ -302,10 +302,13 @@ export default {
         git_branch: this.modelData.git_branch
       }
       API.BuildRelease(params).then((res)=>{
-        if(res.status == 200 ){
+				let result = res.data
+        if(res.status == 200 && result.code == 0){
           this.$message.success("开始构建......")
           this.getBuildStatus()
-        } else {
+        } else if(res.status == 200 && result.code == 2000){
+					this.$message.error("你没有构建此发布单的权限！")
+				} else {
           this.$message.error("构建请求失败~")
         }
       })

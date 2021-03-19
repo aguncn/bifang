@@ -1,5 +1,6 @@
 from cmdb.models import Env
 from cmdb.models import Release
+from cmdb.models import Action
 from cmdb.models import ReleaseStatus
 from .serializers import EnvSerializer
 from rest_framework.views import APIView
@@ -7,6 +8,7 @@ from rest_framework.generics import ListAPIView
 from utils.ret_code import *
 from .serializers import EnvExchangeSerializer
 from .filters import EnvFilter
+from utils.permission import is_right
 from utils.write_history import write_release_history
 
 
@@ -28,6 +30,7 @@ class EnvExchangeView(APIView):
     参数:
     env_id
     release_name
+    app_id
     """
     def post(self, request):
         # 序列化前端数据，并判断是否有效
@@ -38,6 +41,13 @@ class EnvExchangeView(APIView):
             release_name = ser_data['release_name']
             env_id = ser_data['env_id']
             env = Env.objects.get(id=env_id)
+            app_id = ser_data['app_id']
+            # 前端开发完成后开启权限测试
+            action = Action.objects.get(name='Env')
+            if not is_right(app_id, action.id, user):
+                return_dict = build_ret_data(NOT_PERMISSION, '你无权在此应用下新建发布单！')
+                return render_json(return_dict)
+
             deploy_status_name = 'Ready'
             deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
             release = Release.objects.filter(name=release_name).update(env=env,

@@ -9,11 +9,12 @@ from cmdb.models import Permission
 def is_admin_group(user):
     try:
         user_groups = Group.objects.filter(user=user)
+        print("user groups, ", user_groups)
     except ObjectDoesNotExist as e:
         print(e)
         return False
     for user_group in user_groups:
-        if user_group == 'admin':
+        if user_group.name == 'admin':
             return True
     return False
 
@@ -58,12 +59,11 @@ def is_right(app_id, action_id, user):
     filter_dict['app__id'] = app_id
     filter_dict['action__id'] = action_id
     try:
-        permission_set = Permission.objects.get(**filter_dict)
-        user_set = permission_set.pm_user.all()
-        if user in user_set:
-            return True
-        else:
-            return False
+        permission_set = Permission.objects.filter(**filter_dict)
+        for permission in permission_set:
+            if user == permission.pm_user:
+                return True
+        return False
     except Permission.DoesNotExist as e:
         print(e)
         return False

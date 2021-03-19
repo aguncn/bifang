@@ -9,6 +9,7 @@ CHECK_PARAM_FAILED = 1002
 FILE_FORMAT_ERR = 1003
 NOT_POST = 1004
 NOT_GET = 1005
+NOT_PERMISSION = 2000
 
 ERR_CODE = {
     0: '操作成功',
@@ -18,6 +19,7 @@ ERR_CODE = {
     1003: "文件格式有误",
     1004: "非post请求",
     1005: "非get请求",
+    2000: "无权限"
 }
 
 
