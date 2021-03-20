@@ -33,6 +33,7 @@ class ReleaseBuildView(APIView):
             release_name = ser_data['release_name']
             git_branch = ser_data['git_branch']
             app = App.objects.get(name=app_name)
+            zip_package_name = app.zip_package_name
             git_url = app.git.git_url
             git_access_token = app.git.git_token
             git_trigger_token = app.git_trigger_token
@@ -52,7 +53,8 @@ class ReleaseBuildView(APIView):
                 pipeline = gitlab_trigger(git_url, git_access_token,
                                           project_id, app_name, release_name,
                                           git_branch, git_trigger_token,
-                                          build_script, deploy_script, file_up_server)
+                                          build_script, deploy_script,
+                                          zip_package_name, file_up_server)
             except Exception as e:
                 print(e)
                 return_dict = build_ret_data(THROW_EXP, 'gitlab触发错误，请确认gitlab连接，运行及配置正确')
