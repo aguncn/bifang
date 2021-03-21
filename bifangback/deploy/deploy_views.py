@@ -184,7 +184,7 @@ def cmd_run(env_name, app_name, service_port,
             # 部署脚本的每一个步骤，成功时必须返回success关键字
             if 'success' not in detail['stdout']:
                 return False, "脚本执行完成，但没有success关键字：" + detail['stdout']
-            if len(detail['stderr']) > 0:
+            if len(detail['stderr']) > 0 and detail['retcode'] != 0:
                 return False, "脚本执行完成，有stderr错误：" + detail['stderr']
 
     return True, "脚本执行完成：" + detail['stdout']
