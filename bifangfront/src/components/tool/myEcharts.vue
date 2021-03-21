@@ -19,67 +19,48 @@ export default {
 
 		  // 指定图表的配置项和数据
 		  var option = {
-            tooltip: {
-                trigger: 'axis',
-                axisPointer: {            // Use axis to trigger tooltip
-                    type: 'shadow'        // 'shadow' as default; can also be 'line' or 'shadow'
-                }
-            },
-            legend: {
-                data: ['Direct', 'Mail Ad', 'Affiliate Ad', 'Video Ad', 'Search Engine']
-            },
-            grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '3%',
-                containLabel: true
-            },
-            xAxis: {
-                type: 'value'
-            },
-            yAxis: {
-                type: 'category',
-                data: ['Mon', 'Tue', 'Wed', 'Thu']
-            },
-            series: [
-                {
-                    name: 'Direct',
-                    type: 'bar',
-                    stack: 'total',
-                    label: {
-                        show: true
-                    },
-                    emphasis: {
-                        focus: 'series'
-                    },
-                    data: [320, 302, 301, 334, 390, 330, 320]
+                title: {
+                    //top:"bottom",
+                    subtext: '发布单统计图',
+                    left: 'center',
                 },
-                {
-                    name: 'Mail Ad',
-                    type: 'bar',
-                    stack: 'total',
-                    label: {
-                        show: true
-                    },
-                    emphasis: {
-                        focus: 'series'
-                    },
-                    data: [120, 132, 101, 134, 90, 230, 210]
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // Use axis to trigger tooltip
+                        type: 'shadow'        // 'shadow' as default; can also be 'line' or 'shadow'
+                    }
                 },
-                {
-                    name: 'Affiliate Ad',
-                    type: 'bar',
-                    stack: 'total',
-                    label: {
-                        show: true
-                    },
-                    emphasis: {
-                        focus: 'series'
-                    },
-                    data: [220, 182, 191, 234, 290, 330, 310]
-                }
-            ]
-        };
+                // legend: {
+                //     left: 'right',
+                //     data: ['发布单量']
+                // },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value'
+                },
+                yAxis: {
+                    type: 'category',
+                    data: ['A组件', 'B组件', 'C组件', 'D组件', 'E组件']
+                },
+                series: [
+                    {
+                        name: '发布单量',
+                        type: 'bar',
+                        label: {
+                            show: true
+                        },
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: [32, 12, 9, 11, 37]
+                    }
+                ]
+            };
 
 		  // 使用刚指定的配置项和数据显示图表。
 		  myChart.setOption(option);
@@ -90,16 +71,22 @@ export default {
 
 		  // 指定图表的配置项和数据
 		  var option1 = {
+                title: {
+                    //top:"bottom",
+                    left: 'center',
+                    subtext: '发布单失败统计'
+                },
                 tooltip: {
                     trigger: 'item'
                 },
                 legend: {
                     top: '5%',
-                    left: 'center'
+                    left: 'center',
+                    top:"bottom"
                 },
                 series: [
                     {
-                        name: '访问来源',
+                        name: '发布单失败比例',
                         type: 'pie',
                         radius: ['40%', '70%'],
                         avoidLabelOverlap: false,
@@ -123,9 +110,9 @@ export default {
                             show: false
                         },
                         data: [
-                            {value: 1048, name: '搜索引擎'},
-                            {value: 735, name: '直接访问'},
-                            {value: 580, name: '邮件营销'}
+                            {value: 1048, name: 'A组件'},
+                            {value: 735, name: 'B组件'},
+                            {value: 580, name: 'C组件'}
                         ]
                     }
                 ]

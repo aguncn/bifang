@@ -8,7 +8,7 @@ class ProjectFilter(FilterSet):
     name = filters.CharFilter(field_name='name', lookup_expr='icontains',)
     begin_time = filters.DateTimeFilter(field_name='create_date', lookup_expr='gte',)
     end_time = filters.DateTimeFilter(field_name='create_date', lookup_expr='lte',)
-    sort = OrderingFilter(fields=('create_date',))
+    sort = OrderingFilter(fields=('create_date','update_date'))
 
     class Meta:
         model = Project

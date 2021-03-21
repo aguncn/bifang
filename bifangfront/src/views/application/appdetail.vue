@@ -60,14 +60,12 @@
         <a-select
           show-search
           placeholder="请选择项目"
-          option-filter-prop="children"
+          option-label-prop="children"
           style="width: 100%"
+          :options="projectOptions"
           :filter-option="filterOption"
           v-decorator="['project_id', { rules: [{ required: true, message: '请选择归属项目!' }] }]"
         >
-          <a-select-option v-for="d in projectOptions" :key="d.value" :value="d.value">
-          {{ d.label }}
-          </a-select-option>
         </a-select>
       </a-form-item>
       <a-form-item
@@ -158,8 +156,6 @@
           v-decorator="['service_port', { rules: [{ required: true, message: '请输入服务端口!' }] }]"
         />
       </a-form-item>
-      </a-form-item>
-      </a-form-item>
       <a-form-item style="margin-top: 24px" :wrapperCol="{span: 10, offset: 7}">
         <a-button type="primary" html-type="submit">{{btnDesc}}</a-button>
       </a-form-item>
@@ -187,10 +183,6 @@ export default {
   beforeCreate() {
     this.form = this.$form.createForm(this, { name: 'applicaitonDetail' });
   },
-  computed:{
-    onSubmit(){
-    }
-  },
   created(){
     this.fetchProjectList()
     this.fetchGitList()
@@ -205,7 +197,7 @@ export default {
     
   },
   mounted(){
-      console.log(this.$route.query)
+      console.log(typeof(this.$route.query["project"]))
     if(this.isEdit){
         this.$nextTick(()=>{
             this.form.setFieldsValue({
@@ -225,7 +217,7 @@ export default {
           result.data.results.forEach(item=>{
             this.projectOptions.push({
               label:item.cn_name,
-              value:item.id
+              key:item.id.toString()
             })
           })
         }
@@ -242,7 +234,7 @@ export default {
           result.data.results.forEach(item=>{
             this.gitOptions.push({
               label:item.name,
-              value:item.id
+              value:item.id.toString()
             })
           })
         }

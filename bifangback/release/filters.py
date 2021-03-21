@@ -9,7 +9,7 @@ class ReleaseFilter(FilterSet):
     name = filters.CharFilter(field_name='name', lookup_expr='icontains',)
     begin_time = filters.DateTimeFilter(field_name='create_date', lookup_expr='gte',)
     end_time = filters.DateTimeFilter(field_name='create_date', lookup_expr='lte',)
-    sort = OrderingFilter(fields=('create_date',))
+    sort = OrderingFilter(fields=('create_date','update_date'))
     # 自定义过滤方法
     deploy_status = filters.CharFilter(field_name='deploy_status', method='deploy_status_filter')
     project_name = filters.CharFilter(field_name='project_name', method='project_name_filter')

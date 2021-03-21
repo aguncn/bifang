@@ -2,9 +2,9 @@
 <div>
     <a-card :bordered="false">
       <div style="display: flex; flex-wrap: wrap">
-          <head-info title="项目数量" content="25个" :bordered="true"/>
+          <head-info title="项目数量" :content="projectTotal+'个'" :bordered="true"/>
           <head-info title="应用数量" content="108个" :bordered="true"/>
-          <head-info title="发布单数量" content="6572个"/>
+          <head-info title="发布单数量" :content="releaseTotal+'个'"/>
       </div>
     </a-card>
         
@@ -13,20 +13,20 @@
                 <a-card title="全景图" :bordered="false">
                     <my-echarts />
                 </a-card>
-                <a-card class="project-list" style="margin: 12px 0;" :bordered="false" title="进度" :body-style="{padding: 0}">
-                    <a slot="extra">全部项目</a>
+                <a-card class="project-list" style="margin: 12px 0;" :bordered="false" title="项目" :body-style="{padding: 0}">
+                    <a href="#/application/project" slot="extra">全部项目</a>
                     <div>
-                    <a-card-grid :key="i" v-for="(item, i) in projects">
+                    <a-card-grid :key="i" v-for="(item, i) in projectData">
                         <a-card :bordered="false" :body-style="{padding: 0}">
-                        <a-card-meta :description="item.desc">
+                        <a-card-meta :description="item.description">
                             <div slot="title" class="card-title">
                             <a-avatar size="small" :src="item.logo" />
-                            <span>Alipay</span>
+                            <span>{{item.cn_name}}</span>
                             </div>
                         </a-card-meta>
                         <div class="project-item">
-                            <a class="group" href="/#/">科学搬砖组</a>
-                            <span class="datetime">9小时前</span>
+                            <a class="group" href="/#/">{{item.create_user_name}}</a>
+                            <span class="datetime">{{item.time}}</span>
                         </div>
                         </a-card>
                     </a-card-grid>
@@ -34,11 +34,11 @@
                 </a-card>
                 <a-card title="全部项目" :bordered="false">
                 <a-list>
-                <a-list-item :key="index" v-for="(item, index) in activities">
+                <a-list-item :key="index" v-for="(item, index) in releaseData">
                     <a-list-item-meta>
                     <a-avatar slot="avatar" :src="item.avatar" />
-                    <div slot="title" v-html="item.template" />
-                    <div slot="description">9小时前</div>
+                    <div slot="title" v-html="item.action" />
+                    <div slot="description">{{item.time}}</div>
                     </a-list-item-meta>
                 </a-list-item>
                 </a-list>
@@ -48,30 +48,30 @@
             <a-card title="快捷入口" style="margin-bottom: 24px" :bordered="false" :body-style="{padding: 0}">
                 <div class="item-group">
                 <a-tag color="red">
-                    <a>发布单列表</a>
+                    <a href="#/release/releaseList">发布单列表</a>
                 </a-tag>
                 <a-tag color="green">
-                    <a>创建发布单</a>
+                    <a href="#/release/createRelease">创建发布单</a>
                 </a-tag>
                 <a-tag color="blue">
-                    <a>服务部署</a>
+                    <a href="#/deployment/deploy">服务部署</a>
                 </a-tag>
                 <a-tag color="green">
-                    <a>添加项目</a>
+                    <a href="#/application/project">添加项目</a>
                 </a-tag>
                 <a-tag color="green">
-                    <a>用户权限</a>
+                    <a href="#/account/user">用户权限</a>
                 </a-tag>
                 </div>
             </a-card>
             <a-card title="运行动态" style="margin-bottom: 24px" :bordered="false">
                 <div style="min-height: 400px;">
                 <a-list>
-                <a-list-item :key="index" v-for="(item, index) in activities">
+                <a-list-item :key="index" v-for="(item, index) in releaseData">
                     <a-list-item-meta>
                     <a-avatar slot="avatar" :src="item.avatar" />
-                    <div slot="title" v-html="item.template" />
-                    <div slot="description">9小时前</div>
+                    <div slot="title" v-html="item.action" />
+                    <div slot="description">{{item.time}}</div>
                     </a-list-item-meta>
                 </a-list-item>
                 </a-list>
@@ -96,20 +96,13 @@
 <script>
 import HeadInfo from '@/components/tool/headInfo'
 import MyEcharts from '@/components/tool/myEcharts'
+import API from '@/service'
+import moment from 'moment'
 
-const projects = [
-    {
-        logo:'https://gw.alipayobjects.com/zos/rmsportal/WdGqmHpayyMjiEhcKoVE.png',
-        desc:'这是一个发布最多的项目咋滴啊 不服啊'
-    },
-    {
-        logo:'https://gw.alipayobjects.com/zos/rmsportal/zOsKZmFRdUtvpqCImOVY.png',
-        desc:'这是一个最牛逼的的项目咋滴啊 不服啊 来啊 单挑啊'
-    },
-    {
-        logo:'https://gw.alipayobjects.com/zos/rmsportal/dURIMkkrRFpPgTuzkwnB.png',
-        desc:'这是一个吹的最多的的的项目咋滴啊 不服啊 来啊 单挑啊'
-    }
+const projectIcons = [
+    'https://gw.alipayobjects.com/zos/rmsportal/WdGqmHpayyMjiEhcKoVE.png',
+    'https://gw.alipayobjects.com/zos/rmsportal/zOsKZmFRdUtvpqCImOVY.png',
+    'https://gw.alipayobjects.com/zos/rmsportal/dURIMkkrRFpPgTuzkwnB.png'
 ]
 
 const avatars = [
@@ -164,12 +157,115 @@ const teams = [
 export default {
     name:"dashboard",
     components: {HeadInfo,MyEcharts},
+    created(){
+        this.fetchReleaseData()
+        this.fetchProjectData()
+    },
     data(){
         return {
-            projects:projects,
             activities:activities,
-            teams:teams
+            teams:teams,
+            releaseTotal:0,
+            projectTotal:0,
+            releaseData:[],
+            projectData:[]
         }
+    },
+    methods:{
+      fetchProjectData(){
+        let param = {
+            currentPage: 1,
+            pageSize: 6,
+            sort: '-update_date'
+        }
+        API.ProjectList(param).then((res)=>{
+            let result = res.data
+            if(res.status == 200 && result.code == 0){
+                this.projectTotal = result.data.count
+                result.data.results.forEach(item=>{
+                    this.projectData.push({
+                        ...item,
+                        logo: projectIcons[Math.floor(Math.random()*10)%3],
+                        time:this.formatTime(item.update_date)
+                    })
+                })
+            }
+            else{
+                this.projectData = []
+            }
+        })
+      },
+      fetchReleaseData(){
+        let params = {
+            currentPage:1,
+            pageSize:10,
+            sort:"-update_date"
+        }
+        API.ReleaseList(params).then((res)=>{
+            let result = res.data
+            if(res.status == 200 && result.code == 0){
+                this.releaseTotal = result.data.count
+                result.data.results.forEach(item=>{
+                    this.releaseData.push({
+                        avatar: avatars[Math.floor(Math.random()*10)%4],
+                        user:item.create_user_name,
+                        name:item.name,
+                        action:this.actionTranformer(item.create_user_name,item.deploy_status_name,item.name),
+                        time: this.formatTime(item.update_date)
+                    })
+                })
+            } else {
+                this.releaseData = []
+            }
+        })
+      },
+      formatTime(time){
+          let str = "";
+          let current = moment(),
+              date = moment(time),
+              du = moment.duration(current-date,'ms'),
+              days = du.get('days'),
+              hours = du.get('hours'),
+              mins = du.get('minutes');
+          if(days > 0){
+              str = days+"天之前"
+          }
+          else if(hours > 0){
+              str = hours+"小时之前"
+          }
+          else{
+              str = mins+"分钟之前"
+          }
+          return str
+      },
+      actionTranformer(username,status,releaseNo){
+          let action=""
+          let release = `<a href="#/release/releaseList">${releaseNo}</a>`
+          switch(status.toLowerCase()){
+              case "create":
+                  action=`${username} 新建发布单${release}`
+                  break;
+              case "build":
+                  action=`${username} 构建发布单${release}`
+                  break;
+              case "ready":
+                  action=`${username} 扭转发布单${release}`
+                  break;
+              case "success":
+                  action=`${username} 部署发布单${release}成功`
+                  break;
+              case "failed":
+                  action=`${username} 部署发布单${release}失败`
+                  break;
+              case "ongoing":
+                  action=`${username} 发布单${release}部署中`
+                  break;
+              default:
+                  action=`${username} 操作发布单${release}`
+                  break;
+          }
+          return action
+      }
     }
 }
 </script>

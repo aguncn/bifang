@@ -8,4 +8,5 @@ urlpatterns = [
     path('detail/<pk>/', views.ReleaseRetrieveView.as_view(), name='detail'),
     path('build/', build_views.ReleaseBuildView.as_view(), name='build'),
     path('build_status/', build_views.ReleaseBuildStatusView.as_view(), name='build_status'),
+    path('statistics/', views.ReleaseStatisticsView.as_view(), name='statistics')
 ]

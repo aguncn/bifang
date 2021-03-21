@@ -7,6 +7,7 @@ from cmdb.models import ReleaseStatus
 from cmdb.models import Action
 from .serializers import ReleaseSerializer
 from .serializers import ReleaseCreateSerializer
+from .serializers import ReleaseStatisticsSerializer
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.generics import CreateAPIView
@@ -16,6 +17,7 @@ from utils.ret_code import *
 from .filters import ReleaseFilter
 from utils.permission import is_right
 from utils.write_history import write_release_history
+from django.db.models import Count,Sum
 
 
 class ReleaseListView(ListAPIView):
@@ -28,6 +30,14 @@ class ReleaseListView(ListAPIView):
         return_dict = build_ret_data(OP_SUCCESS, res.data)
         return render_json(return_dict)
 
+class ReleaseStatisticsView(ListAPIView):
+    queryset = Release.objects.values('app_id').annotate(release_count=Count('name')).order_by('-release_count')
+    serializer_class = ReleaseStatisticsSerializer
+
+    def get(self, request, *args, **kwargs):
+        res = super().get(self, request, *args, **kwargs)
+        return_dict = build_ret_data(OP_SUCCESS, res.data)
+        return render_json(return_dict)
 
 class ReleaseCreateView(CreateAPIView):
     serializer_class = ReleaseCreateSerializer

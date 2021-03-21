@@ -50,6 +50,9 @@
         </div>
         <div slot="action" slot-scope="{text, record}">
           <a-button-group>
+            <a-button @click.prevent="onShowDetail(record)">
+              查看      
+            </a-button>
             <a-button type="primary" @click.prevent="onShowEdit(record)">
               编辑      
             </a-button>
@@ -178,6 +181,56 @@
       </a-drawer>
     </div>
     <!---->
+    <!--详情弹出框-->
+    <a-modal
+      :visible="detailVisible"
+      :title="'应用详情'"
+      :dialog-style="{ top: '30px' }"
+      width="50%"
+      okText="确定"
+      :footer="null"
+      @cancel="onDetailModalClose"
+    >
+      <a-card :border="false">
+        <detail-list title="基础信息">
+          <detail-list-item term="应用ID">{{detailRecord.app_id}}</detail-list-item>
+          <detail-list-item term="应用名称">{{detailRecord.name}}</detail-list-item>
+          <detail-list-item term="中文名">{{detailRecord.cn_name}}</detail-list-item>
+          <detail-list-item term="归属项目">{{detailRecord.project_name}}</detail-list-item>
+          <detail-list-item term="更新时间">{{dateTransformer(detailRecord.update_date)}}</detail-list-item>
+          <a-row>
+            <a-col :span="24">
+              <detail-list-item term="应用描述">{{detailRecord.description}}</detail-list-item>
+            </a-col>
+          </a-row>
+        </detail-list>
+        <detail-list title="部署相关" >
+          <detail-list-item term="GIT服务器">{{detailRecord.git_name}}</detail-list-item>
+          <detail-list-item term="GIT项目ID">{{detailRecord.git_app_id}}</detail-list-item>
+          <detail-list-item term="启动用户">{{detailRecord.service_username}}</detail-list-item>
+          <detail-list-item term="服务端口">{{detailRecord.service_port}}</detail-list-item>
+          <a-row>
+            <a-col :span="24">
+              <detail-list-item term="应用描述">{{detailRecord.description}}</detail-list-item>
+            </a-col>
+            <a-col :span="24">
+              <detail-list-item term="Git Trigger Token">{{detailRecord.git_trigger_token}}</detail-list-item>
+            </a-col>
+            <a-col :span="24">
+              <detail-list-item term="编译脚本">{{detailRecord.build_script}}</detail-list-item>
+            </a-col>
+            <a-col :span="24">
+              <detail-list-item term="部署脚本">{{detailRecord.deploy_script}}</detail-list-item>
+            </a-col>
+            <a-col :span="24">
+              <detail-list-item term="应用压缩包">{{detailRecord.zip_package_name}}</detail-list-item>
+            </a-col>
+          </a-row>
+        </detail-list>
+      </a-card>
+    </a-modal>
+    
+    <!---->
     
   </a-card>
 </template>
@@ -185,8 +238,10 @@
 <script>
 import moment from 'moment'
 import BfTable from '@/components/table/table'
-import envExchange from '@/components/tool/envExchange'
+import DetailList from '@/components/tool/DetailList'
 import API from '@/service'
+
+const DetailListItem = DetailList.Item
 const columns = [
   {
     title: '应用ID',
@@ -230,7 +285,7 @@ const columns = [
 
 export default {
   name: 'app',
-  components: {BfTable},
+  components: {BfTable,DetailList,DetailListItem},
   data () {
     return {
       total:0,
@@ -246,6 +301,23 @@ export default {
       envPermissionUser: [],
       deployPermissionUser: [],
       selectedRows: [],
+      detailVisible:false,
+      detailRecord:{
+        app_id:null,
+        name:null,
+        cn_name:null,
+        project_name:null,
+        description:null,
+        git_name:null,
+        git_app_id:null,
+        git_trigger_token:null,
+        build_script:null,
+        deploy_script:null,
+        zip_package_name:null,
+        service_username:null,
+        service_port:null,
+        update_date:null
+      },
       params:{
         name:"",
         currentPage:1,
@@ -271,6 +343,9 @@ export default {
     remove () {
       this.dataSource = this.dataSource.filter(item => this.selectedRows.findIndex(row => row.key === item.key) === -1)
       this.selectedRows = []
+    },
+    dateTransformer(date){
+      return moment(date).format("YYYY-MM-DD hh:mm")
     },
     submitHandler(e){
       e.preventDefault()
@@ -412,6 +487,13 @@ export default {
         path:"/application/appdetail",
         query:record
       })
+    },
+    onShowDetail(record){
+      Object.assign(this.detailRecord,record)
+      this.detailVisible = true
+    },
+    onDetailModalClose(){
+      this.detailVisible = false
     },
     onDelete(record){
       let {id} = record;

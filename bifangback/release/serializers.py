@@ -18,6 +18,12 @@ class ReleaseSerializer(serializers.ModelSerializer):
         model = Release
         fields = '__all__'
 
+class ReleaseStatisticsSerializer(serializers.ModelSerializer):
+    app_name = serializers.CharField(source='app.name', default="None")
+    release_count = serializers.CharField()
+    class Meta:
+        model = Release
+        fields = ['app_id','app_name','release_count']
 
 class ReleaseCreateSerializer(serializers.ModelSerializer):
     class Meta:

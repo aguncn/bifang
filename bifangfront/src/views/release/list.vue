@@ -170,6 +170,8 @@ const columns = [
     title: '更新时间',
     dataIndex: 'update_date',
     sorter: true,
+    defaultSortOrder: 'descend',
+    sortDirections: ['descend', 'ascend'],
     customRender: (date) =>{ return moment(date).format("YYYY-MM-DD hh:mm")}
   },
   {
@@ -369,7 +371,15 @@ export default {
        } = sorter
        this.params.currentPage = current
        this.params.pageSize = pageSize
-       this.params.sorter = (field?field:"")
+       console.log("sort order",order)
+       if(!order){
+         field = ""
+       }
+       else if(order == 'descend'){
+         field = '-'+field
+       }
+       else{}
+       this.params.sort = field
        this.fetchData()
     },
     onCreateRelease(){

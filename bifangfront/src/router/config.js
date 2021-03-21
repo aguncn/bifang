@@ -147,7 +147,8 @@ const routeConfig = [
             path: '/account',
             name: '账户',
             meta: {
-              icon: 'appstore'
+              icon: 'appstore',
+              role: ['admin']
             },
             children:[
                 {

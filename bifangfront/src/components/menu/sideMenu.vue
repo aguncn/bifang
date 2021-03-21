@@ -7,72 +7,18 @@
       </router-link>
     </div>
     <a-menu theme="dark" mode="inline" @select="onSelect"  :default-selected-keys="defaultKey" :open-keys.sync="openKey">
-        <a-sub-menu v-for="menu in menuList" :key="menu.path">
+        <a-sub-menu v-for="menu in menuList" v-if="isVisible(menu.meta.role||[])" :key="menu.path">
           <span slot="title"><a-icon :type="menu.meta.icon||'form'" /><span>{{menu.name}}</span></span>
             <a-menu-item v-show="!(sub.meta&&(sub.meta.isShowMenu==false))" v-for="sub in menu.children" :key="sub.path">
               <router-link :to="menu.path+sub.path">{{sub.name}}</router-link>
             </a-menu-item>        
-        </a-sub-menu> 
-        <!--<a-sub-menu key="/release">
-          <span slot="title"><a-icon type="profile" /><span>发布单</span></span>
-          <a-menu-item key="/releaseList">
-            <router-link to="/release/releaseList">列表</router-link>
-          </a-menu-item>
-          <a-menu-item key="/createRelease">
-            <router-link to="/release/createRelease">新建</router-link>
-          </a-menu-item>
         </a-sub-menu>
-        <a-sub-menu key="sub2">
-          <span slot="title"><a-icon type="apartment" /><span>环境</span></span>
-          <a-menu-item key="3">
-            <router-link to="/transfer">流转</router-link>
-          </a-menu-item>
-          <a-menu-item key="4">
-            <router-link to="/envlist">列表</router-link>
-          </a-menu-item>
-        </a-sub-menu>
-        <a-sub-menu key="sub3">
-          <span slot="title"><a-icon type="cloud-upload" /><span>部署</span></span>
-          <a-menu-item key="5">
-            <router-link to="/deploy">服务部署</router-link>
-          </a-menu-item>
-          <a-menu-item key="6">
-            <router-link to="/startup">服务启停</router-link>
-          </a-menu-item>
-        </a-sub-menu>
-        <a-sub-menu key="sub4">
-          <span slot="title"><a-icon type="appstore" /><span>项目应用</span></span>
-          <a-menu-item key="7">
-            <router-link to="/subject">项目</router-link>
-          </a-menu-item>
-          <a-menu-item key="8">
-            <router-link to="/application">应用</router-link>
-          </a-menu-item>
-        </a-sub-menu>
-        <a-sub-menu key="sub5">
-          <span slot="title"><a-icon type="cluster" /><span>服务器</span></span>
-          <a-menu-item key="9">
-            <router-link to="/serverlist">列表</router-link>
-          </a-menu-item>
-          <a-menu-item key="10">
-            <router-link to="/addserver">新增</router-link>
-          </a-menu-item> 
-        </a-sub-menu>
-        <a-sub-menu key="sub6">
-          <span slot="title"><a-icon type="appstore" /><span>账户</span></span>
-          <a-menu-item key="10">
-            <router-link to="/group">用户组</router-link>
-          </a-menu-item>
-          <a-menu-item key="11">
-            <router-link to="/user">用户</router-link>
-          </a-menu-item>
-        </a-sub-menu>-->
     </a-menu>
   </a-layout-sider>
 </template>
 
 <script>
-// import {mapState} from 'vuex'
+import {mapGetters} from 'vuex'
 import {routeConfig} from '@/router/config'
 export default {
   name: 'SideMenu',
@@ -84,6 +30,11 @@ export default {
       openKey:['/release']
     }
   },
+  computed:{
+    ...mapGetters({
+      'userRole':'getRoles'
+    }),
+  },
   created(){
     
      let match = this.$route.path.slice(1).split('/')
@@ -93,6 +44,7 @@ export default {
      }
      let item = routeConfig.find(item=>item.path == '/')
      this.menuList = item?item.children:[]
+     console.log('menu',this.menuList)
      console.log('route',this.openKey,this.defaultKey)
   },
   props: {
@@ -113,6 +65,16 @@ export default {
     // }
   },
   methods: {
+    isVisible(roleList){
+      if(roleList.length == 0) return true;
+      let isVisible = false
+      console.log(roleList)
+      this.userRole.forEach((item)=>{
+        roleList.indexOf(item.id) > -1?isVisible=true:""
+      })
+      
+      return isVisible
+    },
     onSelect (obj) {
       console.log("select",obj)
       this.$emit('menuSelect', obj)
