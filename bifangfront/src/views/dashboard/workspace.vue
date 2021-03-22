@@ -2,9 +2,9 @@
 <div>
     <a-card :bordered="false">
       <div style="display: flex; flex-wrap: wrap">
-          <head-info title="项目数量" :content="projectTotal+'个'" :bordered="true"/>
-          <head-info title="应用数量" content="108个" :bordered="true"/>
-          <head-info title="发布单数量" :content="releaseTotal+'个'"/>
+          <head-info title="项目数量" :content="allCount.projectCount+'个'" :bordered="true"/>
+          <head-info title="应用数量" :content="allCount.appCount+'个'" :bordered="true"/>
+          <head-info title="发布单数量" :content="allCount.releaseCount+'个'"/>
       </div>
     </a-card>
         
@@ -32,17 +32,6 @@
                     </a-card-grid>
                     </div>
                 </a-card>
-                <a-card title="全部项目" :bordered="false">
-                <a-list>
-                <a-list-item :key="index" v-for="(item, index) in releaseData">
-                    <a-list-item-meta>
-                    <a-avatar slot="avatar" :src="item.avatar" />
-                    <div slot="title" v-html="item.action" />
-                    <div slot="description">{{item.time}}</div>
-                    </a-list-item-meta>
-                </a-list-item>
-                </a-list>
-                </a-card>
             </a-col>
             <a-col style="padding-left: 12px" :xl="8" :lg="24" :md="24" :sm="24" :xs="24">
             <a-card title="快捷入口" style="margin-bottom: 24px" :bordered="false" :body-style="{padding: 0}">
@@ -55,12 +44,12 @@
                 </a-tag>
                 <a-tag color="blue">
                     <a href="#/deployment/deploy">服务部署</a>
+                </a-tag><br/>
+                <a-tag color="blue">
+                    <a href="#/application/app">添加组件</a>
                 </a-tag>
                 <a-tag color="green">
                     <a href="#/application/project">添加项目</a>
-                </a-tag>
-                <a-tag color="green">
-                    <a href="#/account/user">用户权限</a>
                 </a-tag>
                 </div>
             </a-card>
@@ -75,18 +64,6 @@
                     </a-list-item-meta>
                 </a-list-item>
                 </a-list>
-                </div>
-            </a-card>
-            <a-card title="团队" :bordered="false">
-                <div class="members">
-                <a-row>
-                    <a-col :span="12" v-for="(item, index) in teams" :key="index">
-                    <a>
-                        <a-avatar size="small" :src="item.avatar" />
-                        <span class="member">{{item.name}}</span>
-                    </a>
-                    </a-col>
-                </a-row>
                 </div>
             </a-card>
             </a-col>
@@ -114,64 +91,35 @@ const avatars = [
   'https://gw.alipayobjects.com/zos/rmsportal/jZUIxmJycoymBprLOUbT.png'
 ]
 
-const activities = [
-    {
-        avatar: avatars[0],
-        template: 'XXXX创建了发布单'
-    },
-    {
-        avatar: avatars[1],
-        template: 'XXXX创建了发布单'
-    },
-    {
-        avatar: avatars[2],
-        template: 'XXXX创建了发布单'
-    },
-    {
-        avatar: avatars[3],
-        template: 'XXXX创建了发布单'
-    },
-    {
-        avatar: avatars[4],
-        template: 'XXXX创建了发布单'
-    },
-]
-const teams = [
-    {
-        avatar: avatars[0],
-        name: 'FED天团'
-    },
-    {
-        avatar: avatars[1],
-        name: 'FED天团'
-    },
-    {
-        avatar: avatars[2],
-        name: 'FED天团'
-    },
-    {
-        avatar: avatars[3],
-        name: 'FED天团'
-    },
-]
 export default {
     name:"dashboard",
     components: {HeadInfo,MyEcharts},
     created(){
         this.fetchReleaseData()
         this.fetchProjectData()
+        this.fetchAllCount()
     },
     data(){
         return {
-            activities:activities,
-            teams:teams,
-            releaseTotal:0,
-            projectTotal:0,
+            allCount:{},
             releaseData:[],
             projectData:[]
         }
     },
     methods:{
+      fetchAllCount(){
+        API.AllCount().then((res)=>{
+            let result = res.data
+            if(res.status == 200 && result.code == 0){
+              // 后端传过来的是一个Json对象
+              this.allCount.projectCount = result.data.project
+              this.allCount.appCount = result.data.app
+              this.allCount.releaseCount = result.data.release
+            } else {
+                this.allCount = {}
+            }
+        })
+      },
       fetchProjectData(){
         let param = {
             currentPage: 1,
@@ -198,7 +146,7 @@ export default {
       fetchReleaseData(){
         let params = {
             currentPage:1,
-            pageSize:10,
+            pageSize:5,
             sort:"-update_date"
         }
         API.ReleaseList(params).then((res)=>{

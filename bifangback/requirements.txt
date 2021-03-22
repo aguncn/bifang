@@ -21,6 +21,7 @@ inflection==0.5.1
 itypes==1.2.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
+mysqlclient @ file:///D:/mariadb/mysqlclient-1.4.6-cp38-cp38-win_amd64.whl
 packaging==20.8
 PyJWT==1.7.1
 pyparsing==2.4.7

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'release.apps.ReleaseConfig',
     'server.apps.ServerConfig',
     'permission.apps.PermissionConfig',
+    'stats.apps.StatsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -97,6 +98,24 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+"""
+# 安装好mysqlclient之后(使用whl文件安装)，可以切换为mysql数据库
+DATABASES = {
+ 'default': {
+  'ENGINE': 'django.db.backends.mysql',
+  'NAME': 'bifang',
+  'USER': 'root',
+  'PASSWORD': 'password',
+  'HOST': '127.0.0.1',
+  'PORT': '3306',
+  'OPTIONS': {
+    'charset': 'utf8mb4',
+    # 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+  }
+ }
+}
+"""
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/

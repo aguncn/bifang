@@ -37,6 +37,7 @@ const API = {
     PERMISSIONLIST: `${REAL_URL}/permission/list/`,
     CREATEPERMISSION: `${REAL_URL}/permission/create/`,
     DELETEPERMISSION: `${REAL_URL}/permission/delete/{{id}}/`,
+    ALLCOUNT: `${REAL_URL}/stats/all_count/`,
 }
 
 export {

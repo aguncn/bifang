@@ -292,7 +292,7 @@ export default {
               this.fetchData()
             }
             else{
-              this.$message.error("项目新增失败:"+result.message)
+              this.$message.error("项目新增失败:"+result.message+result.data)
             }
           })
         })

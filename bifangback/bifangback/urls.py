@@ -63,4 +63,5 @@ urlpatterns += [
     path('release/', include('release.urls')),
     path('server/', include('server.urls')),
     path('permission/', include('permission.urls')),
+    path('stats/', include('stats.urls')),
 ]

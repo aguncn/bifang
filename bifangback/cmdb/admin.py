@@ -42,7 +42,7 @@ admin.site.register(ReleaseStatus)
 
 
 class ReleaseHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ['id', 'name', 'env', 'deploy_status', 'deploy_no', 'create_user',  'create_date',  'update_date', ]
+    list_display = ['id', 'name', 'env', 'app', 'deploy_status', 'deploy_no', 'create_user',  'create_date',  'update_date', ]
     history_list_display = ["status"]
     search_fields = ['name']
     readonly_fields = ('create_date', 'update_date')
