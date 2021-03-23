@@ -10,121 +10,134 @@
 </template>
 
 <script>
+import API from '@/service'
+
+// 指定图表的配置项和数据
+const releaseTop5Option = {
+    title: {
+        //top:"bottom",
+        subtext: '发布单统计图',
+        left: 'center',
+    },
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {            // Use axis to trigger tooltip
+            type: 'shadow'        // 'shadow' as default; can also be 'line' or 'shadow'
+        }
+    },
+    // legend: {
+    //     left: 'right',
+    //     data: ['发布单量']
+    // },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: {
+        type: 'value'
+    }
+};
+const faiedTop5Option = {
+    title: {
+        //top:"bottom",
+        left: 'center',
+        subtext: '发布单失败统计'
+    },
+    tooltip: {
+        trigger: 'item'
+    },
+    legend: {
+        top: '5%',
+        left: 'center',
+        top:"bottom"
+    },
+    series: [
+        {
+            name: '发布单失败数量',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+                borderRadius: 10,
+                borderColor: '#fff',
+                borderWidth: 2
+            },
+            label: {
+                show: false,
+            },
+            labelLine: {
+                show: false
+            },
+            data: []
+        }
+    ]
+};
+
 export default {
   name: 'Echarts',
-  methods:{
-	  myEcharts(){
-		  // 基于准备好的dom，初始化echarts实例
-		  var myChart = this.$echarts.init(this.$refs['main']);
-
-		  // 指定图表的配置项和数据
-		  var option = {
-                title: {
-                    //top:"bottom",
-                    subtext: '发布单统计图',
-                    left: 'center',
-                },
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: {            // Use axis to trigger tooltip
-                        type: 'shadow'        // 'shadow' as default; can also be 'line' or 'shadow'
-                    }
-                },
-                // legend: {
-                //     left: 'right',
-                //     data: ['发布单量']
-                // },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'value'
-                },
-                yAxis: {
-                    type: 'category',
-                    data: ['A组件', 'B组件', 'C组件', 'D组件', 'E组件']
-                },
-                series: [
-                    {
-                        name: '发布单量',
-                        type: 'bar',
-                        label: {
-                            show: true
-                        },
-                        emphasis: {
-                            focus: 'series'
-                        },
-                        data: [32, 12, 9, 11, 37]
-                    }
-                ]
-            };
-
-		  // 使用刚指定的配置项和数据显示图表。
-		  myChart.setOption(option);
-	 },
-     myEcharts1(){
-		  // 基于准备好的dom，初始化echarts实例
-		  var myChart1 = this.$echarts.init(this.$refs['main1']);
-
-		  // 指定图表的配置项和数据
-		  var option1 = {
-                title: {
-                    //top:"bottom",
-                    left: 'center',
-                    subtext: '发布单失败统计'
-                },
-                tooltip: {
-                    trigger: 'item'
-                },
-                legend: {
-                    top: '5%',
-                    left: 'center',
-                    top:"bottom"
-                },
-                series: [
-                    {
-                        name: '发布单失败比例',
-                        type: 'pie',
-                        radius: ['40%', '70%'],
-                        avoidLabelOverlap: false,
-                        itemStyle: {
-                            borderRadius: 10,
-                            borderColor: '#fff',
-                            borderWidth: 2
-                        },
-                        label: {
-                            show: false,
-                            position: 'center'
-                        },
-                        emphasis: {
-                            label: {
-                                show: true,
-                                fontSize: '40',
-                                fontWeight: 'bold'
-                            }
-                        },
-                        labelLine: {
-                            show: false
-                        },
-                        data: [
-                            {value: 1048, name: 'A组件'},
-                            {value: 735, name: 'B组件'},
-                            {value: 580, name: 'C组件'}
-                        ]
-                    }
-                ]
-            };
-
-		  // 使用刚指定的配置项和数据显示图表。
-          myChart1.setOption(option1);
-	 }
+  created(){
+      this.fetchReleaseTop5()
+      this.fetchReleaseFailedTop5()
   },
-  mounted() {
-  	this.myEcharts();
-    this.myEcharts1();
+  methods:{
+	  releaseTop5Chart(option){
+		  // 基于准备好的dom，初始化echarts实例
+		  var top5Chart = this.$echarts.init(this.$refs['main']);
+          Object.assign(releaseTop5Option,option)
+		  // 使用刚指定的配置项和数据显示图表。
+		  top5Chart.setOption(releaseTop5Option);
+	 },
+     failedTop5Chart(){
+		  // 基于准备好的dom，初始化echarts实例
+		  var failedChart = this.$echarts.init(this.$refs['main1']);
+		  // 使用刚指定的配置项和数据显示图表。
+          failedChart.setOption(faiedTop5Option);
+	 },
+     fetchReleaseTop5(){
+        API.ReleaseTop5().then((res)=>{
+            let result = res.data
+            if(res.status == 200 && result.code == 0){
+                console.log(result)
+                this.releaseTop5Chart({
+                    yAxis: {
+                        type: 'category',
+                        data: result.data.app_name.reverse()
+                    },
+                    series: [
+                        {
+                            name: '发布单量',
+                            type: 'bar',
+                            label: {
+                                show: true
+                            },
+                            emphasis: {
+                                focus: 'series'
+                            },
+                            data: result.data.release_count.reverse()
+                        }
+                    ]
+                });
+            }
+        })
+      },
+      fetchReleaseFailedTop5(){
+        API.ReleaseFailedTop5().then((res)=>{
+            let result = res.data
+            if(res.status == 200 && result.code == 0){
+                let series_data = []
+                result.data["app_name"].forEach((item,index)=>{
+                    series_data.push({
+                        value:result.data["release_count"][index],
+                        name:String(item)
+                    })
+                })
+                faiedTop5Option.series[0].data = series_data
+                this.failedTop5Chart()
+            }
+        })
+      }
   }
 }
 </script>

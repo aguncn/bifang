@@ -38,6 +38,8 @@ const API = {
     CREATEPERMISSION: `${REAL_URL}/permission/create/`,
     DELETEPERMISSION: `${REAL_URL}/permission/delete/{{id}}/`,
     ALLCOUNT: `${REAL_URL}/stats/all_count/`,
+    RELEASETOP5: `${REAL_URL}/stats/release_top5/`,
+    RELEASEFAILEDTOP5: `${REAL_URL}/stats/release_failed_top5/`
 }
 
 export {

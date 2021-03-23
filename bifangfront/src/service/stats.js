@@ -12,6 +12,22 @@ async function AllCount(){
   )
 }
 
+async function ReleaseTop5(){
+  return request(
+      API.RELEASETOP5, 
+      METHOD.GET,
+  )
+}
+
+async function ReleaseFailedTop5(){
+  return request(
+      API.RELEASEFAILEDTOP5, 
+      METHOD.GET,
+  )
+}
+
 export default {
-  AllCount
+  AllCount,
+  ReleaseTop5,
+  ReleaseFailedTop5
 }
