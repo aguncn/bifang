@@ -145,7 +145,7 @@ const routeConfig = [
         },
         {
             path: '/account',
-            name: '账户',
+            name: '管理',
             meta: {
               icon: 'appstore',
               role: ['admin']
@@ -153,7 +153,7 @@ const routeConfig = [
             children:[
                 {
                     path: '/group',
-                    name: '账户组',
+                    name: '用户组',
                     component: () => import('@/views/account/group')
                 },
                 {
