@@ -160,7 +160,7 @@ def cmd_run(env_name, app_name, service_port,
     deploy_script_url = release.deploy_script_url
     zip_package_name = app.zip_package_name
     zip_package_url = release.zip_package_url
-    # 使用saltypie来获取返回值，不自己更写Http请求，更容易解析结果
+    # 使用saltypie来获取返回值，不自己写Http请求，更容易解析结果
     ret = salt_cmd(salt_url, salt_user, salt_pwd, eauth,
                    target_list, deploy_script_url,
                    app_name, release, env,
