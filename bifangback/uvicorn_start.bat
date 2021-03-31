@@ -1,1 +1,0 @@
-uvicorn bifangback.asgi:application --reload
