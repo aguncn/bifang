@@ -112,9 +112,9 @@
           <a-timeline>
             <a-timeline-item color="blue" v-for="(item, index) in historyDataSource" :key="item.id">
               <a-icon slot="dot" type="clock-circle-o" style="font-size: 16px;" />
-              <a-tag color='blue'>{{item.deploy_status_name}}</a-tag>
+              <a-tag color='blue'>{{item.release_status_name}}</a-tag>
               
-              <span v-show="item.deploy_status_name == 'Ready'">{{item.log}}</span>
+              <span v-show="item.release_status_name == 'Ready'">{{item.log}}</span>
               <a-tag>{{item.create_user}}</a-tag>
               {{item.create_date}} 
             </a-timeline-item>

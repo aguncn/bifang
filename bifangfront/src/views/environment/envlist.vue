@@ -143,7 +143,7 @@ export default {
         name:"",
         currentPage:1,
         pageSize:20,
-        deploy_status: 'Build,Ready,Success',
+        release_status: 'Build,Ready,Success',
         sort:""
       }
       

@@ -82,10 +82,10 @@
           </a-tooltip>
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a-button type="primary" v-if="record.deploy_status_name == 'Create'" @click="buildShow(record)">
+          <a-button type="primary" v-if="record.release_status_name == 'Create'" @click="buildShow(record)">
             构建      
           </a-button>
-          <a-button type="primary" v-else-if="record.deploy_status_name == 'BuildFailed'" @click="buildShow(record)">
+          <a-button type="primary" v-else-if="record.release_status_name == 'BuildFailed'" @click="buildShow(record)">
             构建
           </a-button>
           <a-button type="default" v-else  disabled>

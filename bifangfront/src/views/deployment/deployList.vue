@@ -71,7 +71,7 @@
           showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，总计 ${total} 条`
         }"
       >
-        <template slot="deploy_status_name" slot-scope="{text,record}">
+        <template slot="release_status_name" slot-scope="{text,record}">
           <a-tooltip>
           	<template slot="title">
           		{{record.description}}
@@ -123,8 +123,8 @@ const columns = [
   },
   {
     title: '状态',
-    dataIndex: 'deploy_status_name',
-    scopedSlots: { customRender: 'deploy_status_name' }
+    dataIndex: 'release_status_name',
+    scopedSlots: { customRender: 'release_status_name' }
   },
   {
     title: '操作',
@@ -148,7 +148,7 @@ export default {
         name:"",
         currentPage:1,
         pageSize:20,
-        deploy_status: 'Ready,Ongoing,Failed,Success',
+        release_status: 'Ready,Ongoing,Failed,Success',
         sort:""
       }
     }
