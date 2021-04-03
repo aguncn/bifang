@@ -48,13 +48,13 @@ class EnvExchangeView(APIView):
                 return_dict = build_ret_data(NOT_PERMISSION, '你无权在此应用下新建发布单！')
                 return render_json(return_dict)
 
-            deploy_status_name = 'Ready'
-            deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
+            release_status_name = 'Ready'
+            release_status = ReleaseStatus.objects.get(name=release_status_name)
             release = Release.objects.filter(name=release_name).update(env=env,
-                                                                       deploy_status=deploy_status)
+                                                                       release_status=release_status)
             write_release_history(release_name=release_name,
                                   env_name=env.name,
-                                  deploy_status_name=deploy_status_name,
+                                  release_status_name=release_status_name,
                                   deploy_type=None,
                                   log='target env is {}.'.format(env.name),
                                   user_id=user.id)

@@ -42,7 +42,7 @@ admin.site.register(ReleaseStatus)
 
 
 class ReleaseHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ['id', 'name', 'env', 'app', 'deploy_status', 'deploy_no', 'create_user',  'create_date',  'update_date', ]
+    list_display = ['id', 'name', 'env', 'app', 'release_status', 'deploy_no', 'create_user',  'create_date',  'update_date', ]
     history_list_display = ["status"]
     search_fields = ['name']
     readonly_fields = ('create_date', 'update_date')
@@ -52,7 +52,7 @@ admin.site.register(Release, ReleaseHistoryAdmin)
 
 
 class ReleaseHistoryHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ['id', 'name', 'release', 'env', 'deploy_status', 'deploy_type', 'log_no', 'log']
+    list_display = ['id', 'name', 'release', 'env', 'release_status', 'deploy_type', 'log_no', 'log']
     history_list_display = ["status"]
     search_fields = ['name', 'release', 'log']
     readonly_fields = ('create_date', 'update_date')

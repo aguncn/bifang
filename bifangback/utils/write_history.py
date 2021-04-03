@@ -13,35 +13,35 @@ User = get_user_model()
 
 
 # 更新发布单状态
-def update_release_status(release_name, app_name, env_name, deploy_no, deploy_status_name):
-    if deploy_status_name != 'Check':
+def update_release_status(release_name, app_name, env_name, deploy_no, release_status_name):
+    if release_status_name != 'Check':
         # 如果是进行中或失败，直接写入
-        deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
-        release = Release.objects.filter(name=release_name).update(deploy_no=deploy_no, deploy_status=deploy_status)
+        release_status = ReleaseStatus.objects.get(name=release_status_name)
+        release = Release.objects.filter(name=release_name).update(deploy_no=deploy_no, release_status=release_status)
     else:
         # 如果是只是完成其中一次的成功部署，Check时，则要判断同一个应用同一个环境的所有服务器的状态
         # 判断条件有两个：服务器上的主发布单与部署一致，所有服务器的部署状态为成功
         release = Release.objects.get(name=release_name)
-        server_deploy_status = ServerStatus.objects.get(name='Success')
-        release_deploy_status = ReleaseStatus.objects.get(name='Success')
+        server_status = ServerStatus.objects.get(name='Success')
+        release_status = ReleaseStatus.objects.get(name='Success')
         app = App.objects.get(name=app_name)
         env = Env.objects.get(name=env_name)
         servers = Server.objects.filter(app=app, env=env)
         for server in servers:
-            if server.main_release != release or server.deploy_status != server_deploy_status:
+            if server.main_release != release or server.server_status != server_status:
                 print("not meet")
                 return
         print("all meet")
         release = Release.objects.filter(name=release_name).update(deploy_no=deploy_no,
-                                                                   deploy_status=release_deploy_status)
+                                                                   release_status=release_status)
 
 
 # 更新服务器状态
-def update_server_status(target_list, service_port, deploy_no, deploy_status_name):
+def update_server_status(target_list, service_port, deploy_no, server_status_name):
     for ip in target_list:
         server_name = '{}_{}'.format(ip, service_port)
-        deploy_status = ServerStatus.objects.get(name=deploy_status_name)
-        server = Server.objects.filter(name=server_name).update(deploy_no=deploy_no, deploy_status=deploy_status)
+        server_status = ServerStatus.objects.get(name=server_status_name)
+        server = Server.objects.filter(name=server_name).update(deploy_no=deploy_no, server_status=server_status)
 
 
 # 更新服务器的主备发布单
@@ -68,10 +68,10 @@ def update_server_release(target_list, service_port, release_name, deploy_type):
 
 # 更新发布单历史，这样可以串联起来发布单的操作历史，但操作服务器历史不在此之列，在下一个函数
 def write_release_history(release_name=None, env_name=None,
-                          deploy_status_name=None, deploy_type=None,
+                          release_status_name=None, deploy_type=None,
                           deploy_no=None, log=None, user_id=None):
     name = uuid.uuid1()
-    deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
+    release_status = ReleaseStatus.objects.get(name=release_status_name)
     release = Release.objects.get(name=release_name)
     create_user = None
     if user_id is not None:
@@ -82,7 +82,7 @@ def write_release_history(release_name=None, env_name=None,
     ReleaseHistory.objects.create(name=name,
                                   release=release,
                                   env=env,
-                                  deploy_status=deploy_status,
+                                  release_status=release_status,
                                   deploy_type=deploy_type,
                                   log_no=deploy_no,
                                   log=log,

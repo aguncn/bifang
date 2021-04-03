@@ -63,13 +63,13 @@ class ReleaseCreateView(CreateAPIView):
         data = dict()
         random_letter = ''.join(random.sample(string.ascii_letters, 2))
         name = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f") + random_letter.upper()
-        deploy_status_name = 'Create'
-        deploy_status = ReleaseStatus.objects.get(name=deploy_status_name)
+        release_status_name = 'Create'
+        release_status = ReleaseStatus.objects.get(name=release_status_name)
         data['name'] = name
         data['description'] = req_data['description']
         data['git_branch'] = req_data['git_branch']
         data['app'] = app_id
-        data['deploy_status'] = deploy_status.id
+        data['release_status'] = release_status.id
 
         # 从drf的request中获取用户(对django的request作了扩展的)
         data['create_user'] = user.id
@@ -81,7 +81,7 @@ class ReleaseCreateView(CreateAPIView):
         release = Release.objects.create(**data)
         write_release_history(release_name=release.name,
                               env_name=None,
-                              deploy_status_name=deploy_status_name,
+                              release_status_name=release_status_name,
                               deploy_type=None,
                               log='Create',
                               user_id=user.id)

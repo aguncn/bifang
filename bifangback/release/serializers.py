@@ -10,7 +10,7 @@ class ReleaseSerializer(serializers.ModelSerializer):
     service_port = serializers.CharField(source='app.service_port', default="None")
     env_name = serializers.CharField(source='env.name', default="None")
     create_user_name = serializers.CharField(source='create_user.username')
-    deploy_status_name = serializers.CharField(source='deploy_status.name')
+    release_status_name = serializers.CharField(source='release_status.name', default="None")
     git_url = serializers.CharField(source='app.git.git_url', default="None")
     git_app_id = serializers.CharField(source='app.git_app_id', default="None")
 
@@ -29,7 +29,7 @@ class ReleaseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Release
         # fields = '__all__'
-        fields = ['name', 'description', 'git_branch', 'app', 'deploy_status', 'create_user']
+        fields = ['name', 'description', 'git_branch', 'app', 'release_status', 'create_user']
 
 
 class ReleaseBuildSerializer(serializers.Serializer):

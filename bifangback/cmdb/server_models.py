@@ -76,9 +76,9 @@ class Server(BaseModel):
                                     verbose_name="部署次数")
     # 记录各种状态用于前端显示
     # 或发布进行中或完成的判断(主发布单和是否完成部署)
-    deploy_status = models.ForeignKey(ServerStatus,
+    server_status = models.ForeignKey(ServerStatus,
                                       related_name='ra_server',
-                                      default=get_server_status,
+                                      # default=get_server_status,
                                       blank=True,
                                       null=True,
                                       on_delete=models.SET_NULL,

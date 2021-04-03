@@ -7,7 +7,7 @@ class ReleaseHistorySerializer(serializers.ModelSerializer):
     env = serializers.CharField(source='env.name', default=None)
     release = serializers.CharField(source='release.name', default=None)
     create_user = serializers.CharField(source='create_user.username', default=None)
-    deploy_status_name = serializers.CharField(source='deploy_status.name', default=None)
+    release_status_name = serializers.CharField(source='release_status.name', default=None)
 
     class Meta:
         model = ReleaseHistory

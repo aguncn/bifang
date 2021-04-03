@@ -46,7 +46,7 @@ class ReleaseHistory(BaseModel):
                             null=True,
                             on_delete=models.SET_NULL,
                             verbose_name="环境")
-    deploy_status = models.ForeignKey(ReleaseStatus,
+    release_status = models.ForeignKey(ReleaseStatus,
                                       related_name='ra_release_history',
                                       blank=True,
                                       null=True,

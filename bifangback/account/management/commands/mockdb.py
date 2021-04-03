@@ -125,8 +125,8 @@ class Command(BaseCommand):
         App.objects.all().delete()
         print('delete all App data')
         create_user = User.objects.get(username=username)
-        app_name_list = ['User-Login', 'Service-724', 'Store-Address', 'Card-Adjust', 'Support-Admin', 'go-demo']
-        app_cn_name_list = ['用户登陆', '全天服务', '库存地址', '购物车调配', '客服后管', '毕方演示go示例']
+        app_name_list = ['User-Login', 'Service-724', 'Store-Address', 'Card-Adjust', 'Support-Admin']
+        app_cn_name_list = ['用户登陆', '全天服务', '库存地址', '购物车调配', '客服后管']
         for app_name, app_cn_name in zip(app_name_list, app_cn_name_list):
             git = GitTb.objects.order_by('?').first()
             project = Project.objects.order_by('?').first()
@@ -145,14 +145,15 @@ class Command(BaseCommand):
                                service_port=9090,
                                service_username='sky',
                                service_group='operate')
-        app_name_list = ['ProductPage', 'Details', 'Reviews', 'Ratings']
-        app_cn_name_list = ['产品页', '详情页', '评论页', '评级页']
-        git_app_list = [3, 4, 5, 6]
+        app_name_list = ['ProductPage', 'Details', 'Reviews', 'Ratings', 'go-demo']
+        app_cn_name_list = ['产品页', '详情页', '评论页', '评级页', 'golang演示组件应用']
+        git_app_list = [3, 4, 5, 6, 1]
         git_trigger_token_list = ['b843f743187a6632e0440a716cf038',
                                   '1b57c3f005caf21f90fb3cc833eeb6',
                                   '4abe06d297ded3da79ab0ff0c67f7e',
-                                  'c14b9eead3021965918e187eca16a0']
-        service_port_list = [8001, 8002, 8003, 8004]
+                                  'c14b9eead3021965918e187eca16a0',
+                                  '559fbd3381bc39100811bd00e499a7']
+        service_port_list = [8001, 8002, 8003, 8004, 9090]
         for app_name, app_cn_name, git_trigger_token, service_port, git_app_id in \
                 zip(app_name_list, app_cn_name_list, git_trigger_token_list, service_port_list, git_app_list):
             git = GitTb.objects.order_by('?').first()
@@ -193,7 +194,7 @@ class Command(BaseCommand):
         Server.objects.all().delete()
         print('delete all Server data')
         create_user = User.objects.get(username=username)
-        deploy_status = ServerStatus.objects.get(name="Ready")
+        server_status = ServerStatus.objects.get(name="Ready")
         for number in range(50):
             ip = '192.168.1.{}'.format(number)
             port = random.randint(10000, 100000)
@@ -206,7 +207,7 @@ class Command(BaseCommand):
                                   port=port,
                                   app=app,
                                   env=env,
-                                  deploy_status=deploy_status,
+                                  server_status=server_status,
                                   system_type=random.choice(['WINDOWS', 'LINUX']))
         app_name_list = ['ProductPage', 'Details', 'Reviews', 'Ratings']
         service_port_list = [8001, 8002, 8003, 8004]
@@ -222,7 +223,7 @@ class Command(BaseCommand):
                                       port=service_port,
                                       app=app,
                                       env=env,
-                                      deploy_status=deploy_status,
+                                      server_status=server_status,
                                       system_type='LINUX')
         app_name_list = ['go-demo']
         service_port_list = [9090]
@@ -238,7 +239,7 @@ class Command(BaseCommand):
                                       port=service_port,
                                       app=app,
                                       env=env,
-                                      deploy_status=deploy_status,
+                                      server_status=server_status,
                                       system_type='LINUX')
         self.stdout.write('Server重建完成。')
 
@@ -264,7 +265,7 @@ class Command(BaseCommand):
         for number in range(100):
             app = App.objects.order_by('?').first()
             env = Env.objects.order_by('?').first()
-            deploy_status = ReleaseStatus.objects.order_by('?').first()
+            release_status = ReleaseStatus.objects.order_by('?').first()
             random_letter = ''.join(random.sample(string.ascii_letters, 2))
 
             name = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f") + random_letter.upper()
@@ -278,7 +279,7 @@ class Command(BaseCommand):
                                    pipeline_url='http://www.demo.com',
                                    deploy_script_url='http://192.168.1.213:8080/a/b/bifang.sh',
                                    zip_package_url='http://192.168.1.213:8080/a/b/go-demo.zip',
-                                   deploy_status=deploy_status)
+                                   release_status=release_status)
         self.stdout.write('Release重建完成。')
 
     # 新建权限

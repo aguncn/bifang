@@ -57,7 +57,7 @@ class Release(BaseModel):
                                       null=True,
                                       verbose_name="压缩制品库路径")
     # 记录各种状态用于前端显示
-    deploy_status = models.ForeignKey(ReleaseStatus,
+    release_status = models.ForeignKey(ReleaseStatus,
                                       related_name='ra_release',
                                       blank=True,
                                       null=True,
