@@ -23,13 +23,14 @@ def deploy(request):
         """
         {
             "app_name": "go-demo",
+            "service_port":9090,
+            "user_id": 13,
             "env_name":"dev",
-            "user_id":111,
-            "release_name": "20210117132941344089GA",
-            "deploy_type": "deploy",
+            "release_name": "20210612182145308030BP",
             "deploy_no": 1,
+            "deploy_type": "deploy",
             "op_type": "deploy",
-            "target_list": ["192.168.1.211", "192.168.1.212"]
+            "target_list": "192.168.1.211,192.168.1.212"
         }
         """
         req_data = json.loads(request.body.decode('utf-8'))
