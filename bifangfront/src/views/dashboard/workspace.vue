@@ -158,7 +158,7 @@ export default {
                         avatar: avatars[Math.floor(Math.random()*10)%4],
                         user:item.create_user_name,
                         name:item.name,
-                        action:this.actionTranformer(item.create_user_name,item.deploy_status_name,item.name),
+                        action:this.actionTranformer(item.create_user_name,item.release_status_name,item.name),
                         time: this.formatTime(item.update_date)
                     })
                 })
